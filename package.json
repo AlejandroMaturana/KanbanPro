@@ -1,0 +1,36 @@
+{
+  "name": "M8-EF_KanbanPro3",
+  "version": "3.0.0",
+  "description": "Aplicación Kanban Versión 3.0 - Conexión a Base de Datos",
+  "main": "app.js",
+  "scripts": {
+    "start": "node app.js",
+    "dev": "nodemon app.js",
+    "seed": "node seed.js",
+    "test-crud": "node test-crud.js"
+  },
+  "keywords": [
+    "kanban",
+    "express",
+    "sequelize",
+    "postgres",
+    "hbs"
+  ],
+  "author": "Manuel González Lozano",
+  "license": "ISC",
+  "packageManager": "pnpm@10.28.2",
+  "dependencies": {
+    "bcryptjs": "^3.0.3",
+    "cookie-parser": "^1.4.7",
+    "dotenv": "^17.3.1",
+    "express": "^5.2.1",
+    "hbs": "^4.2.0",
+    "jsonwebtoken": "^9.0.3",
+    "pg": "^8.20.0",
+    "pg-hstore": "^2.3.4",
+    "sequelize": "^6.37.8"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.14"
+  }
+}

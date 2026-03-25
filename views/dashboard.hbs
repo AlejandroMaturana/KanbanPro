@@ -1,0 +1,143 @@
+<div class="dashboard-content">
+  <h1>Dashboard - KanbanPro</h1>
+
+  {{#each data.tableros}}
+    <div class="tablero" style="margin-top: 30px;">
+      <h2 style="color: #667eea; margin-bottom: 20px;">{{this.titulo}}</h2>
+
+      <div
+        class="kanban-board"
+        style="display: flex; gap: 20px; overflow-x: auto; padding-bottom: 20px;"
+      >
+        {{#each this.listas}}
+          <div
+            class="lista"
+            style="min-width: 300px; background: #f7fafc; border-radius: 8px; padding: 20px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);"
+          >
+            <h3
+              style="color: #333; margin-bottom: 15px; padding-bottom: 10px; border-bottom: 2px solid #667eea;"
+            >
+              {{this.titulo}}
+            </h3>
+
+            <div class="tarjetas" style="min-height: 200px;">
+              {{#each this.tarjetas}}
+                <div
+                  class="tarjeta"
+                  style="background: white; padding: 15px; margin-bottom: 10px; border-radius: 5px; box-shadow: 0 1px 3px rgba(0,0,0,0.1);"
+                >
+                  <h4
+                    style="color: #333; margin-bottom: 8px;"
+                  >{{this.titulo}}</h4>
+                  {{#if this.descripcion}}
+                    <p
+                      style="color: #666; font-size: 14px; margin: 0;"
+                    >{{this.descripcion}}</p>
+                  {{/if}}
+                </div>
+              {{/each}}
+            </div>
+          </div>
+        {{/each}}
+      </div>
+    </div>
+  {{/each}}
+
+  <!-- Formulario para añadir nueva tarjeta -->
+  <div
+    class="formulario-tarjeta"
+    style="margin-top: 40px; padding: 25px; background: #f7fafc; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);"
+  >
+    <h2 style="color: #667eea; margin-bottom: 20px;">➕ Añadir Nueva Tarea</h2>
+
+    <form method="POST" action="/nueva-tarjeta" style="max-width: 600px;">
+      <div style="margin-bottom: 15px;">
+        <label
+          for="titulo"
+          style="display: block; margin-bottom: 5px; font-weight: 500; color: #333;"
+        >
+          Título de la tarea *
+        </label>
+        <input
+          type="text"
+          id="titulo"
+          name="titulo"
+          required
+          style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 5px; font-size: 16px;"
+          placeholder="Ej: Auditoría interna de proceso en línea N°7"
+        />
+      </div>
+
+      <div style="margin-bottom: 15px;">
+        <label
+          for="descripcion"
+          style="display: block; margin-bottom: 5px; font-weight: 500; color: #333;"
+        >
+          Descripción
+        </label>
+        <textarea
+          id="descripcion"
+          name="descripcion"
+          rows="3"
+          style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 5px; font-size: 16px; resize: vertical;"
+          placeholder="Responsable, área involucrada, fecha estimada..."
+        ></textarea>
+      </div>
+
+      <div style="margin-bottom: 20px;">
+        <label
+          for="lista"
+          style="display: block; margin-bottom: 5px; font-weight: 500; color: #333;"
+        >
+          Lista de destino *
+        </label>
+        <select
+          id="lista"
+          name="lista"
+          required
+          style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 5px; font-size: 16px;"
+        >
+          <option value="todo">Por Hacer</option>
+          <option value="in-progress">En Progreso</option>
+          <option value="done">Completado</option>
+        </select>
+      </div>
+
+      <button
+        type="submit"
+        style="padding: 12px 30px; background: #667eea; color: white; border: none; border-radius: 5px; font-size: 16px; font-weight: 500; cursor: pointer; transition: background 0.3s;"
+        onmouseover="this.style.background='#5568d3'"
+        onmouseout="this.style.background='#667eea'"
+      >
+        Crear Tarea
+      </button>
+    </form>
+  </div>
+</div>
+
+<style>
+  .kanban-board {
+    scrollbar-width: thin;
+    scrollbar-color: #667eea #f7fafc;
+  }
+
+  .kanban-board::-webkit-scrollbar {
+    height: 8px;
+  }
+
+  .kanban-board::-webkit-scrollbar-track {
+    background: #f7fafc;
+    border-radius: 4px;
+  }
+
+  .kanban-board::-webkit-scrollbar-thumb {
+    background: #667eea;
+    border-radius: 4px;
+  }
+
+  .tarjeta:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 3px 6px rgba(0, 0, 0, 0.15) !important;
+    transition: all 0.2s;
+  }
+</style>

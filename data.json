@@ -1,0 +1,69 @@
+{
+  "tableros": [
+    {
+      "id": "1",
+      "nombre": "Optimización Línea de Producción N°3",
+      "listas": [
+        {
+          "nombre": "todo",
+          "titulo": "Por Hacer",
+          "tarjetas": [
+            {
+              "id": "1",
+              "titulo": "Relevamiento de tiempos de ciclo",
+              "descripcion": "Toma de tiempos en puestos P-07 al P-12 con cronómetro digital"
+            },
+            {
+              "id": "2",
+              "titulo": "Diagrama de flujo de valor (VSM)",
+              "descripcion": "Mapear el estado actual del proceso desde materia prima hasta despacho"
+            },
+            {
+              "id": "3",
+              "titulo": "Evaluación de capacidad de máquina CNC-4",
+              "descripcion": "Calcular Cp y Cpk del torno CNC 4 con muestras del último turno"
+            }
+          ]
+        },
+        {
+          "nombre": "in-progress",
+          "titulo": "En Progreso",
+          "tarjetas": [
+            {
+              "id": "4",
+              "titulo": "Implementación 5S en almacén intermedio",
+              "descripcion": "Fase 3/5: Seiso (limpieza) y señalética de zonas completadas al 60%"
+            },
+            {
+              "id": "5",
+              "titulo": "Análisis de causa raíz - rechazos lote 0412",
+              "descripcion": "Aplicando Ishikawa y 5 Porqués. Se identificaron 3 causas potenciales"
+            },
+            {
+              "id": "1773698972043",
+              "titulo": "Comprar automovil para terreno",
+              "descripcion": "Cotizar y adquirir vehiculo 4x4 del año, triple cabina y 16 ruedas",
+              "lista": "in-progress"
+            }
+          ]
+        },
+        {
+          "nombre": "done",
+          "titulo": "Completado",
+          "tarjetas": [
+            {
+              "id": "6",
+              "titulo": "Estudio de métodos puesto de ensamble P-04",
+              "descripcion": "Reducción de 18% en tiempo de ciclo mediante reordenamiento de herramientas"
+            },
+            {
+              "id": "7",
+              "titulo": "Capacitación operarios en FIFO",
+              "descripcion": "12 operarios certificados en gestión FIFO para el área de picking"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
