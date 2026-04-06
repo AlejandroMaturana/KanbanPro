@@ -1,20 +1,3 @@
 {
-<<<<<<< HEAD
   "rewrites": [{ "source": "/(.*)", "destination": "/server.js" }]
-=======
-  "version": 2,
-  "name": "kanban-pro-3",
-  "builds": [
-    {
-      "src": "app.js",
-      "use": "@vercel/node"
-    }
-  ],
-  "routes": [
-    {
-      "src": "/(.*)",
-      "dest": "app.js"
-    }
-  ]
->>>>>>> de121cd4c74e1e7399d7a516cd7661f43f5529ec
 }
