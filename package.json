@@ -2,10 +2,10 @@
   "name": "M8-EF_KanbanPro3",
   "version": "3.0.0",
   "description": "Aplicación Kanban Versión 3.0 - Conexión a Base de Datos",
-  "main": "app.js",
+  "main": "server.js",
   "scripts": {
-    "start": "node app.js",
-    "dev": "nodemon app.js",
+    "start": "node server.js",
+    "dev": "nodemon server.js",
     "seed": "node seed.js",
     "test-crud": "node test-crud.js"
   },

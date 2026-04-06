@@ -288,14 +288,6 @@ app.delete('/api/tarjetas/:id', verificarContexto, async (req, res) => {
 });
 
 // ==========================================
-// 🚀 ARRANQUE DEL SISTEMA
+// 🚀 EXPORTACIÓN PARA VERCEL / SERVERLESS
 // ==========================================
-sequelize.sync({ alter: true }).then(() => {
-  console.log('\n🗄️ --- Sistema Conectado a PostgreSQL ---');
-  app.listen(PORT, () => {
-    console.log(`🚀 KanbanPro 3.0 iniciado en: http://localhost:${PORT}`);
-    console.log(`- Cuentas Seed: c.vega@email.cl / r.fuentes@email.cl\n`);
-  });
-}).catch(err => {
-  console.error('❌ Error crítico al sincronizar con DB:', err);
-});
+module.exports = app;
