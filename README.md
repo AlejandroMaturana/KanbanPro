@@ -1,6 +1,6 @@
 # 📋 KanbanPro - Gestión de Proyectos de Alto Rendimiento
 
-> Una solución Full Stack robusta y escalable para la gestión de flujos de trabajo mediante tableros Kanban, diseñada para centralizar la productividad con seguridad de grado empresarial y una arquitectura RESTful impecable.
+> Una solución Full Stack robusta y avanzada para la gestión de flujos de trabajo mediante tableros Kanban interactivos. Diseñada para centralizar la productividad con seguridad de grado empresarial y una arquitectura RESTful moderna.
 
 <div align="center">
 
@@ -10,32 +10,35 @@
 ![PostgreSQL](https://img.shields.io/badge/PostgreSQL-Database-336791?logo=postgresql&logoColor=white)
 ![JWT](https://img.shields.io/badge/JWT-Security-000000?logo=json-web-tokens&logoColor=white)
 ![Handlebars](https://img.shields.io/badge/Handlebars-Templates-F0AD4E?logo=handlebars.js&logoColor=white)
+![SortableJS](https://img.shields.io/badge/SortableJS-Interactivity-indigo?logo=javascript&logoColor=white)
 
 </div>
 
 ---
 
-## 🌟 Características de la Misión
+## 🌟 Características Principales
 
-KanbanPro no es solo un tablero de tareas; es un ecosistema de **gestión de datos relacionales** diseñado para ofrecer una experiencia fluida y segura:
+KanbanPro ha evolucionado para ofrecer una experiencia fluida y profesional de gestión de tareas:
 
-- 🛡️ **Seguridad Blindada**: Implementación de **JWT (JSON Web Tokens)** para sesiones seguras y **bcryptjs** para el hasheo de credenciales, asegurando que los datos de los usuarios permanezcan privados.
-- 🏗️ **Arquitectura RESTful**: API diseñada bajo los estándares de la industria para una comunicación limpia y desacoplada entre el cliente y el servidor.
-- 📊 **Gestión de Datos Relacionales**: Modelado avanzado con **Sequelize**, permitiendo una estructura lógica de Tableros ➔ Listas ➔ Tarjetas con integridad referencial completa.
-- 🎨 **Interfaz Dinámica**: Renderizado del lado del servidor (SSR) mediante **Handlebars**, optimizado para mostrar datos reales en tiempo de ejecución.
-- 🧪 **Lógica de Negocio Centralizada**: Controladores robustos que gestionan toda la lógica CRUD, validando cada petición antes de interactuar con la base de datos PostgreSQL.
+- 🖱️ **Interactividad Drag & Drop**: Movimiento fluido de tareas entre columnas mediante **SortableJS**, sincronizando el estado con la base de datos en tiempo real sin recargar la página.
+- 🚦 **Gestión de Prioridades**: Sistema de etiquetas dinámicas (**Urgente, Alta, Media, Baja**) con códigos de colores para una jerarquización visual inmediata del trabajo.
+- 🗑️ **Control Total de Tareas**: Capacidad para crear, editar y eliminar tareas directamente desde el dashboard.
+- 🛡️ **Seguridad Blindada**: Autenticación persistente con **JWT (JSON Web Tokens)** en cookies y haseho de contraseñas con **bcryptjs**.
+- 🏗️ **Arquitectura RESTful & SSR**: API robusta combinada con renderizado dinámico (Server Side Rendering) mediante **Handlebars** para un rendimiento óptimo.
+- 📊 **Modelado Relacional de Datos**: Estructura íntegra de Usuarios ➔ Tableros ➔ Listas ➔ Tarjetas utilizando **Sequelize ORM**.
 
 ---
 
 ## 🛠️ Stack Tecnológico
 
-La infraestructura técnica ha sido seleccionada para garantizar escalabilidad y rendimiento:
+La infraestructura técnica garantiza escalabilidad, seguridad y una UX moderna:
 
-- **Backend**: **Node.js** & **Express** para un servidor ágil y modular.
-- **Base de Datos**: **PostgreSQL** gestionada a través de **Sequelize ORM**.
-- **Seguridad**: Autenticación asíncrona con **JWT** y almacenamiento de contraseñas seguro.
-- **Frontend**: **HBS (Handlebars)** para plantillas dinámicas y **CSS3** para una UI profesional.
-- **Entorno**: Gestión de variables de entorno mediante **dotenv**.
+- **Backend**: **Node.js** & **Express** con una arquitectura de rutas modular.
+- **Base de Datos**: **PostgreSQL** para persistencia de datos crítica.
+- **ORM**: **Sequelize** con migraciones automáticas mediante sincronización por alteración de esquema (`alter: true`).
+- **Seguridad**: Gestión de identidad con JWT y protección ante XSS mediante cookies `httpOnly`.
+- **Frontend**: **HBS (Handlebars)**, **Vanilla CSS** y **SortableJS** para la lógica de arrastre.
+- **Entorno**: Configuración centralizada mediante `dotenv`.
 
 ---
 
@@ -43,10 +46,11 @@ La infraestructura técnica ha sido seleccionada para garantizar escalabilidad y
 
 ### Prerrequisitos
 
-- Node.js (v18 o superior)
-- PostgreSQL (Instalado y en ejecución)
+- **Node.js** (v18 o superior)
+- **PostgreSQL** (Instalado y en ejecución)
+- **pnpm** (recomendado) o **npm**
 
-### Pasos
+### Pasos para el Despliegue Local
 
 1. **Clona el repositorio**:
    ```bash
@@ -54,16 +58,16 @@ La infraestructura técnica ha sido seleccionada para garantizar escalabilidad y
    ```
 2. **Instala las dependencias**:
    ```bash
-   pnpm install  # O npm install
+   pnpm install
    ```
 3. **Configura el entorno**:
-   Crea un archivo `.env` basado en `.env.example` con tus credenciales de base de datos y un secreto para JWT.
-4. **Prepara la Base de Datos**:
-   Ejecuta el script de "seeding" para llenar la base de datos con datos de prueba:
+   Crea un archivo `.env` en la raíz del proyecto. **Importante**: Define `DB_URL` o los parámetros de conexión individuales, y tu `JWT_SECRET`.
+4. **Inicializa la Base de Datos**:
+   Pobla el sistema con usuarios y tableros industriales de prueba:
    ```bash
    pnpm run seed
    ```
-5. **Inicia el Servidor**:
+5. **Inicia el Modo Desarrollo**:
    ```bash
    pnpm run dev
    ```
@@ -75,13 +79,15 @@ La infraestructura técnica ha sido seleccionada para garantizar escalabilidad y
 ```text
 KanbanPro/
 │
-├── app.js              # Punto de entrada / Configuración de Express y Rutas
-├── models/             # Definición de modelos Sequelize (User, Board, List, Card)
-├── config/             # Configuración de la conexión a la Base de Datos
-├── views/              # Plantillas Handlebars (.hbs) para la UI
-├── public/             # Assets estáticos (Estilos, Imágenes, Scripts Cliente)
-├── seed.js             # Script de inicialización de datos (Mock data)
-└── .env.example        # Plantilla de variables de entorno
+├── app.js              # Servidor Express, Middlewares y Endpoints API/Vistas
+├── models/             # Definición de Esquemas (Usuario, Tablero, Lista, Tarjeta)
+├── config/             # Configuración de base de datos (Sequelize instance)
+├── views/              # Plantillas Handlebars para renderizado SSR
+├── public/             
+│   ├── js/             # Lógica cliente (Interacción Drag & Drop, API Fetch)
+│   └── scripts/        # Otros scripts de utilidad
+├── seed.js             # Generador de datos industriales (Mock data)
+└── README.md           # Documentación técnica
 ```
 
 ---
@@ -92,8 +98,8 @@ KanbanPro/
 
 - **GitHub**: [Perfil Desarrollador](https://github.com/AlejandroMaturana)
 - **LinkedIn**: [Perfil Profesional](https://www.linkedin.com/in/manuel-a-gonzalez-lozano-bb23a5242)
-- **Status**: Disponible - Santiago / Biobío / Remoto 🇨🇱
+- **Focus**: Desarrollo de soluciones industriales y optimización de flujos con tecnología Full Stack.
 
 ---
 
-> 📡 **Estado del Tablero**: En línea. Si este proyecto te inspira o ayuda en tu flujo de trabajo, ¡no olvides darle una estrella ⭐ al repositorio!
+> 📡 **Estado del Tablero**: Operacional. Si encuentras útil este proyecto o mejora tu flujo de trabajo, ¡dale una estrella ⭐ al repositorio!
