@@ -48,7 +48,7 @@ La infraestructura técnica garantiza escalabilidad, seguridad y una UX moderna:
 
 - **Node.js** (v18 o superior)
 - **PostgreSQL** (Instalado y en ejecución)
-- **pnpm** (recomendado) o **npm**
+- **pnpm** (recomendado) o **npm** igual sirve
 
 ### Pasos para el Despliegue Local
 
@@ -83,7 +83,7 @@ KanbanPro/
 ├── models/             # Definición de Esquemas (Usuario, Tablero, Lista, Tarjeta)
 ├── config/             # Configuración de base de datos (Sequelize instance)
 ├── views/              # Plantillas Handlebars para renderizado SSR
-├── public/             
+├── public/
 │   ├── js/             # Lógica cliente (Interacción Drag & Drop, API Fetch)
 │   └── scripts/        # Otros scripts de utilidad
 ├── seed.js             # Generador de datos industriales (Mock data)
@@ -94,7 +94,7 @@ KanbanPro/
 
 ## 👤 Autor
 
-**Alejandro Maturana (ManuGL)** – *Industrial Engineer & Full Stack Developer*
+**Alejandro Maturana (ManuGL)** – _Industrial Engineer & Full Stack Developer_
 
 - **GitHub**: [Perfil Desarrollador](https://github.com/AlejandroMaturana)
 - **LinkedIn**: [Perfil Profesional](https://www.linkedin.com/in/manuel-a-gonzalez-lozano-bb23a5242)
