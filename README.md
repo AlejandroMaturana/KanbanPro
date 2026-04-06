@@ -1,109 +1,99 @@
-## 💼 EF-M8 Proyecto integrador Sprint 3
+# 📋 KanbanPro - Gestión de Proyectos de Alto Rendimiento
 
-### **Proyecto: "KanbanPro" - Kick-off del Sprint 3 (Fase Final)**
+> Una solución Full Stack robusta y escalable para la gestión de flujos de trabajo mediante tableros Kanban, diseñada para centralizar la productividad con seguridad de grado empresarial y una arquitectura RESTful impecable.
 
-**Asunto:** 📧 ¡Fase 3 iniciada! Es hora de darle vida a KanbanPro con la API
+<div align="center">
 
-**De:** David, Product Manager de KanbanPro **Para:** El Equipo de Desarrollo (Tú)
+![Node.js](https://img.shields.io/badge/Node.js-Backend-339933?logo=node.js&logoColor=white)
+![Express](https://img.shields.io/badge/Express-Framework-000000?logo=express&logoColor=white)
+![Sequelize](https://img.shields.io/badge/Sequelize-ORM-52B0E7?logo=sequelize&logoColor=white)
+![PostgreSQL](https://img.shields.io/badge/PostgreSQL-Database-336791?logo=postgresql&logoColor=white)
+![JWT](https://img.shields.io/badge/JWT-Security-000000?logo=json-web-tokens&logoColor=white)
+![Handlebars](https://img.shields.io/badge/Handlebars-Templates-F0AD4E?logo=handlebars.js&logoColor=white)
 
-¡Hola equipo!
-
-El trabajo realizado en la arquitectura de la base de datos durante el Sprint 2 ha sido impecable. Tenemos un modelo de datos sólido y bien probado, listo para ser el cerebro de nuestra aplicación.
-
-Llegamos a la fase final y más visible: la construcción de la **API RESTful** y la conexión de todas las piezas. En este sprint, transformaremos KanbanPro de un conjunto de componentes desacoplados a un **Producto Mínimo Viable (MVP)** completamente funcional. Implementaremos la seguridad para que nuestros usuarios puedan registrarse e iniciar sesión, construiremos los endpoints para que la aplicación sea interactiva y, finalmente, conectaremos nuestra interfaz visual para que muestre datos reales.
-
-Este es el sprint donde todo cobra sentido. Al finalizar, tendremos una aplicación funcional de la que estar orgullosos.
-
-¡Vamos a por el lanzamiento!
-
-Saludos, David
+</div>
 
 ---
 
----
+## 🌟 Características de la Misión
 
-### **Resumen del Sprint 3: API RESTful, Seguridad y Funcionalidad Completa**
+KanbanPro no es solo un tablero de tareas; es un ecosistema de **gestión de datos relacionales** diseñado para ofrecer una experiencia fluida y segura:
 
-**Objetivo del Sprint:** Desarrollar la API RESTful completa para gestionar todos los recursos de la aplicación, implementar un sistema de autenticación seguro con JWT y, finalmente, conectar las vistas de Handlebars a la base de datos a través de esta nueva capa de API para lograr una aplicación totalmente funcional.
-
----
-
-#### **Historias de Usuario y Técnicas a Implementar**
-
-##### **HU-04: Gestión de Cuentas de Usuario**
-
-- **Como** un nuevo usuario,
-- **Quiero** poder registrarme en la aplicación con un email y contraseña,
-- **Para** crear una cuenta personal y segura.
-- **Como** un usuario ya registrado,
-- **Quiero** poder iniciar sesión con mis credenciales,
-- **Para** acceder a mis tableros de proyectos.
-
-**Criterios de Aceptación:**
-
-- ✅ Se deben instalar las dependencias `jsonwebtoken` y `bcryptjs`.
-- ✅ Debe existir un endpoint `POST /api/auth/register` que cree un nuevo usuario y guarde su contraseña de forma segura (hasheada con `bcryptjs`).
-- ✅ Debe existir un endpoint `POST /api/auth/login` que verifique las credenciales del usuario y, si son correctas, genere y devuelva un JSON Web Token (JWT).
+- 🛡️ **Seguridad Blindada**: Implementación de **JWT (JSON Web Tokens)** para sesiones seguras y **bcryptjs** para el hasheo de credenciales, asegurando que los datos de los usuarios permanezcan privados.
+- 🏗️ **Arquitectura RESTful**: API diseñada bajo los estándares de la industria para una comunicación limpia y desacoplada entre el cliente y el servidor.
+- 📊 **Gestión de Datos Relacionales**: Modelado avanzado con **Sequelize**, permitiendo una estructura lógica de Tableros ➔ Listas ➔ Tarjetas con integridad referencial completa.
+- 🎨 **Interfaz Dinámica**: Renderizado del lado del servidor (SSR) mediante **Handlebars**, optimizado para mostrar datos reales en tiempo de ejecución.
+- 🧪 **Lógica de Negocio Centralizada**: Controladores robustos que gestionan toda la lógica CRUD, validando cada petición antes de interactuar con la base de datos PostgreSQL.
 
 ---
 
-##### **HT-05: Seguridad de la API**
+## 🛠️ Stack Tecnológico
 
-- **Como** desarrollador,
-- **Necesito** proteger los endpoints de la aplicación,
-- **Para** asegurar que solo los usuarios autenticados puedan acceder y modificar sus propios datos.
+La infraestructura técnica ha sido seleccionada para garantizar escalabilidad y rendimiento:
 
-**Criterios de Aceptación:**
-
-- ✅ Se debe crear un **middleware** de autenticación que intercepte las peticiones.
-- ✅ El middleware debe verificar la existencia y validez de un JWT en el header `Authorization: Bearer [token]`.
-- ✅ Si el token es inválido o no existe, la API debe devolver un error `401` o `403`.
-- ✅ Todas las rutas de gestión de datos (tableros, listas, tarjetas) deben estar protegidas por este middleware.
+- **Backend**: **Node.js** & **Express** para un servidor ágil y modular.
+- **Base de Datos**: **PostgreSQL** gestionada a través de **Sequelize ORM**.
+- **Seguridad**: Autenticación asíncrona con **JWT** y almacenamiento de contraseñas seguro.
+- **Frontend**: **HBS (Handlebars)** para plantillas dinámicas y **CSS3** para una UI profesional.
+- **Entorno**: Gestión de variables de entorno mediante **dotenv**.
 
 ---
 
-##### **HT-06: API RESTful para la Gestión de Proyectos**
+## 🚀 Instalación y Uso
 
-- **Como** desarrollador de frontend (simulado),
-- **Necesito** un conjunto de endpoints RESTful para gestionar los recursos de la aplicación,
-- **Para** poder construir una interfaz de usuario interactiva y desacoplada.
+### Prerrequisitos
 
-**Criterios de Aceptación:**
+- Node.js (v18 o superior)
+- PostgreSQL (Instalado y en ejecución)
 
-- ✅ Se debe crear un router de Express para agrupar todas las rutas de la API (ej: `/api`).
-- ✅ Se deben implementar todos los endpoints CRUD para los recursos principales:
-  - **Tableros:** `GET`, `POST`, `PUT`, `DELETE` en `/api/tableros`.
-  - **Listas:** `POST`, `PUT`, `DELETE` en `/api/tableros/:tableroId/listas`.
-  - **Tarjetas:** `POST`, `PUT`, `DELETE` en `/api/listas/:listaId/tarjetas`.
+### Pasos
 
-- ✅ Todos estos endpoints deben usar los métodos de Sequelize para interactuar con la base de datos.
-- ✅ La API debe ser probada exhaustivamente con un cliente como **Postman** o **Insomnia**.
-
----
-
-##### **HU-07: Conexión de la Interfaz con Datos Reales**
-
-- **Como** usuario con sesión iniciada,
-- **Quiero** que el dashboard me muestre mis tableros, listas y tarjetas reales guardados en la base de datos,
-- **Para** poder gestionar mi trabajo de forma efectiva.
-
-**Criterios de Aceptación:**
-
-- ✅ Las rutas de las vistas (ej: `GET /dashboard`) deben ser **modificadas**.
-- ✅ Dentro de estas rutas, se debe llamar a la nueva lógica de los controladores de la API para obtener los datos desde la base de datos usando Sequelize.
-- ✅ Los datos **reales** (ya no los simulados) deben ser pasados a las plantillas de Handlebars para su renderizado.
+1. **Clona el repositorio**:
+   ```bash
+   git clone https://github.com/AlejandroMaturana/KanbanPro.git
+   ```
+2. **Instala las dependencias**:
+   ```bash
+   pnpm install  # O npm install
+   ```
+3. **Configura el entorno**:
+   Crea un archivo `.env` basado en `.env.example` con tus credenciales de base de datos y un secreto para JWT.
+4. **Prepara la Base de Datos**:
+   Ejecuta el script de "seeding" para llenar la base de datos con datos de prueba:
+   ```bash
+   pnpm run seed
+   ```
+5. **Inicia el Servidor**:
+   ```bash
+   pnpm run dev
+   ```
 
 ---
 
-#### **Requisitos Técnicos**
+## 📂 Estructura del Proyecto
 
-- **Arquitectura:** API RESTful.
-- **Seguridad:** Autenticación basada en JWT, hasheo de contraseñas con `bcryptjs`.
-- **Herramientas:** Se requiere el uso de Postman, Insomnia o una herramienta similar para las pruebas de la API.
+```text
+KanbanPro/
+│
+├── app.js              # Punto de entrada / Configuración de Express y Rutas
+├── models/             # Definición de modelos Sequelize (User, Board, List, Card)
+├── config/             # Configuración de la conexión a la Base de Datos
+├── views/              # Plantillas Handlebars (.hbs) para la UI
+├── public/             # Assets estáticos (Estilos, Imágenes, Scripts Cliente)
+├── seed.js             # Script de inicialización de datos (Mock data)
+└── .env.example        # Plantilla de variables de entorno
+```
 
 ---
 
-#### **Entregable**
+## 👤 Autor
 
-- Un **repositorio público en GitHub** con el proyecto KanbanPro completamente funcional.
-- La aplicación debe renderizar datos reales desde la base de datos y tener una API RESTful documentada (en un `README.md`) y protegida.
+**Alejandro Maturana (ManuGL)** – *Industrial Engineer & Full Stack Developer*
+
+- **GitHub**: [Perfil Desarrollador](https://github.com/AlejandroMaturana)
+- **LinkedIn**: [Perfil Profesional](https://www.linkedin.com/in/manuel-a-gonzalez-lozano-bb23a5242)
+- **Status**: Disponible - Santiago / Biobío / Remoto 🇨🇱
+
+---
+
+> 📡 **Estado del Tablero**: En línea. Si este proyecto te inspira o ayuda en tu flujo de trabajo, ¡no olvides darle una estrella ⭐ al repositorio!
