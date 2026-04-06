@@ -12,6 +12,7 @@
         {{#each this.listas}}
           <div
             class="lista"
+            data-id="{{this.id}}"
             style="min-width: 300px; background: #f7fafc; border-radius: 8px; padding: 20px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);"
           >
             <h3
@@ -20,18 +21,31 @@
               {{this.titulo}}
             </h3>
 
-            <div class="tarjetas" style="min-height: 200px;">
+            <div class="tarjetas" id="lista-{{this.id}}" style="min-height: 200px;">
               {{#each this.tarjetas}}
                 <div
                   class="tarjeta"
-                  style="background: white; padding: 15px; margin-bottom: 10px; border-radius: 5px; box-shadow: 0 1px 3px rgba(0,0,0,0.1);"
+                  data-id="{{this.id}}"
+                  style="background: white; padding: 15px; margin-bottom: 10px; border-radius: 5px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); position: relative;"
                 >
-                  <h4
-                    style="color: #333; margin-bottom: 8px;"
-                  >{{this.titulo}}</h4>
+                  <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 8px;">
+                    <h4 style="color: #333; margin: 0; flex: 1;">{{this.titulo}}</h4>
+                    <button 
+                      onclick="eliminarTarjeta('{{this.id}}')"
+                      style="background: none; border: none; cursor: pointer; color: #ff4d4d; font-size: 16px; padding: 0 0 0 10px;"
+                      title="Eliminar tarea"
+                    >🗑️</button>
+                  </div>
+
+                  <div style="margin-bottom: 10px;">
+                    <span class="prioridad-tag prioridad-{{this.prioridad}}">
+                      {{this.prioridad}}
+                    </span>
+                  </div>
+
                   {{#if this.descripcion}}
                     <p
-                      style="color: #666; font-size: 14px; margin: 0;"
+                      style="color: #666; font-size: 13px; margin: 0; line-height: 1.4;"
                     >{{this.descripcion}}</p>
                   {{/if}}
                 </div>
@@ -51,21 +65,36 @@
     <h2 style="color: #667eea; margin-bottom: 20px;">➕ Añadir Nueva Tarea</h2>
 
     <form method="POST" action="/nueva-tarjeta" style="max-width: 600px;">
-      <div style="margin-bottom: 15px;">
-        <label
-          for="titulo"
-          style="display: block; margin-bottom: 5px; font-weight: 500; color: #333;"
-        >
-          Título de la tarea *
-        </label>
-        <input
-          type="text"
-          id="titulo"
-          name="titulo"
-          required
-          style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 5px; font-size: 16px;"
-          placeholder="Ej: Auditoría interna de proceso en línea N°7"
-        />
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+        <div style="margin-bottom: 15px;">
+          <label for="titulo" style="display: block; margin-bottom: 5px; font-weight: 500; color: #333;">
+            Título de la tarea *
+          </label>
+          <input
+            type="text"
+            id="titulo"
+            name="titulo"
+            required
+            style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 5px; font-size: 15px;"
+            placeholder="Ej: Auditoría interna..."
+          />
+        </div>
+
+        <div style="margin-bottom: 15px;">
+          <label for="prioridad" style="display: block; margin-bottom: 5px; font-weight: 500; color: #333;">
+            Prioridad
+          </label>
+          <select
+            id="prioridad"
+            name="prioridad"
+            style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 5px; font-size: 15px;"
+          >
+            <option value="Baja">Baja</option>
+            <option value="Media" selected>Media</option>
+            <option value="Alta">Alta</option>
+            <option value="Urgente">Urgente</option>
+          </select>
+        </div>
       </div>
 
       <div style="margin-bottom: 15px;">
@@ -79,8 +108,8 @@
           id="descripcion"
           name="descripcion"
           rows="3"
-          style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 5px; font-size: 16px; resize: vertical;"
-          placeholder="Responsable, área involucrada, fecha estimada..."
+          style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 5px; font-size: 15px; resize: vertical;"
+          placeholder="Detalles adicionales..."
         ></textarea>
       </div>
 
@@ -95,7 +124,7 @@
           id="lista"
           name="lista"
           required
-          style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 5px; font-size: 16px;"
+          style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 5px; font-size: 15px;"
         >
           <option value="todo">Por Hacer</option>
           <option value="in-progress">En Progreso</option>
@@ -106,8 +135,6 @@
       <button
         type="submit"
         style="padding: 12px 30px; background: #667eea; color: white; border: none; border-radius: 5px; font-size: 16px; font-weight: 500; cursor: pointer; transition: background 0.3s;"
-        onmouseover="this.style.background='#5568d3'"
-        onmouseout="this.style.background='#667eea'"
       >
         Crear Tarea
       </button>
@@ -121,23 +148,31 @@
     scrollbar-color: #667eea #f7fafc;
   }
 
-  .kanban-board::-webkit-scrollbar {
-    height: 8px;
-  }
-
-  .kanban-board::-webkit-scrollbar-track {
-    background: #f7fafc;
-    border-radius: 4px;
-  }
-
-  .kanban-board::-webkit-scrollbar-thumb {
-    background: #667eea;
-    border-radius: 4px;
-  }
+  .kanban-board::-webkit-scrollbar { height: 8px; }
+  .kanban-board::-webkit-scrollbar-track { background: #f7fafc; border-radius: 4px; }
+  .kanban-board::-webkit-scrollbar-thumb { background: #667eea; border-radius: 4px; }
 
   .tarjeta:hover {
     transform: translateY(-2px);
-    box-shadow: 0 3px 6px rgba(0, 0, 0, 0.15) !important;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.12) !important;
     transition: all 0.2s;
   }
+
+  .prioridad-tag {
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    padding: 3px 8px;
+    border-radius: 12px;
+    display: inline-block;
+  }
+
+  .prioridad-Baja { background: #e2e8f0; color: #475569; }
+  .prioridad-Media { background: #dbeefd; color: #0284c7; }
+  .prioridad-Alta { background: #fef3c7; color: #d97706; }
+  .prioridad-Urgente { background: #fee2e2; color: #dc2626; }
 </style>
+
+<!-- Scripts para Drag & Drop y Lógica Kanban -->
+<script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
+<script src="/js/kanban.js"></script>

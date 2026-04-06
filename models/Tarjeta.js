@@ -14,6 +14,15 @@ const Tarjeta = sequelize.define(
       type: DataTypes.TEXT,
       allowNull: true, // La descripción es opcional, puede quedar vacía
     },
+    prioridad: {
+      type: DataTypes.ENUM("Baja", "Media", "Alta", "Urgente"),
+      defaultValue: "Media",
+      allowNull: false,
+    },
+    fechaVencimiento: {
+      type: DataTypes.DATE,
+      allowNull: true,
+    },
   },
   {
     tableName: "tarjetas",

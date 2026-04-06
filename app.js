@@ -201,7 +201,7 @@ app.get('/dashboard', verificarContexto, async (req, res) => {
 // Crear nueva tarjeta (POST con contexto de usuario)
 app.post('/nueva-tarjeta', verificarContexto, async (req, res) => {
   try {
-    const { titulo, descripcion, lista } = req.body;
+    const { titulo, descripcion, lista, prioridad } = req.body;
     
     // Mapeamos los valores del select (.hbs) a los títulos del seed
     let nombreListaBuscada = "Por Hacer";
@@ -220,7 +220,12 @@ app.post('/nueva-tarjeta', verificarContexto, async (req, res) => {
     });
     
     if (listaEncontrada) {
-      await Tarjeta.create({ titulo, descripcion, listaId: listaEncontrada.id });
+      await Tarjeta.create({ 
+        titulo, 
+        descripcion, 
+        listaId: listaEncontrada.id,
+        prioridad: prioridad || "Media"
+      });
     }
     
     res.redirect('/dashboard');
@@ -230,10 +235,62 @@ app.post('/nueva-tarjeta', verificarContexto, async (req, res) => {
   }
 });
 
+// --- API PARA MANIPULACIÓN DINÁMICA (Drag & Drop / Eliminar) ---
+
+// Actualizar tarjeta (PATCH)
+app.patch('/api/tarjetas/:id', verificarContexto, async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { titulo, descripcion, listaId, prioridad, fechaVencimiento } = req.body;
+    
+    const tarjeta = await Tarjeta.findByPk(id, {
+      include: [{ 
+        model: Lista, 
+        as: 'lista', 
+        include: [{ model: Tablero, as: 'tablero' }] 
+      }]
+    });
+
+    if (!tarjeta || tarjeta.lista.tablero.usuarioId !== req.usuarioId) {
+      return res.status(403).json({ error: 'No tienes permiso para modificar esta tarjeta.' });
+    }
+
+    await tarjeta.update({ titulo, descripcion, listaId, prioridad, fechaVencimiento });
+    res.json({ mensaje: 'Tarjeta actualizada con éxito.', tarjeta });
+  } catch (error) {
+    console.error('Error al actualizar tarjeta:', error);
+    res.status(500).json({ error: 'Error al actualizar la tarjeta.' });
+  }
+});
+
+// Eliminar tarjeta (DELETE)
+app.delete('/api/tarjetas/:id', verificarContexto, async (req, res) => {
+  try {
+    const { id } = req.params;
+    const tarjeta = await Tarjeta.findByPk(id, {
+      include: [{ 
+        model: Lista, 
+        as: 'lista', 
+        include: [{ model: Tablero, as: 'tablero' }] 
+      }]
+    });
+
+    if (!tarjeta || tarjeta.lista.tablero.usuarioId !== req.usuarioId) {
+      return res.status(403).json({ error: 'No tienes permiso para eliminar esta tarjeta.' });
+    }
+
+    await tarjeta.destroy();
+    res.json({ mensaje: 'Tarjeta eliminada con éxito.' });
+  } catch (error) {
+    console.error('Error al eliminar tarjeta:', error);
+    res.status(500).json({ error: 'Error al eliminar la tarjeta.' });
+  }
+});
+
 // ==========================================
 // 🚀 ARRANQUE DEL SISTEMA
 // ==========================================
-sequelize.sync({ force: false }).then(() => {
+sequelize.sync({ alter: true }).then(() => {
   console.log('\n🗄️ --- Sistema Conectado a PostgreSQL ---');
   app.listen(PORT, () => {
     console.log(`🚀 KanbanPro 3.0 iniciado en: http://localhost:${PORT}`);

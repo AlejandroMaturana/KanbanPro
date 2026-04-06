@@ -89,6 +89,7 @@ const seed = async () => {
               descripcion:
                 "Calibrar los 3 sensores del tanque principal después del cambio de filtro.",
               listaId: listaNueva.id,
+              prioridad: "Urgente"
             });
             await Tarjeta.create({
               titulo: "Revisión Tasa Transpiración",
@@ -102,6 +103,7 @@ const seed = async () => {
               descripcion:
                 "Revisar presión de vapor y válvulas de seguridad presostáticas.",
               listaId: listaNueva.id,
+              prioridad: "Alta"
             });
           } else {
             await Tarjeta.create({
@@ -140,6 +142,7 @@ const seed = async () => {
             titulo: "Cierre Auditoría Interna",
             descripcion: "Informe final enviado a gerencia técnica.",
             listaId: listaNueva.id,
+            prioridad: "Baja"
           });
         }
       }
