@@ -1,33 +1,8 @@
 require("dotenv").config();
 const { Sequelize } = require("sequelize");
 
-<<<<<<< HEAD
-const sequelize = process.env.DB_URI 
-  ? new Sequelize(process.env.DB_URI, {
-      dialect: "postgres",
-      logging: false,
-      dialectOptions: {
-        ssl: {
-          require: true,
-          rejectUnauthorized: false
-        }
-      }
-    })
-  : new Sequelize(
-      process.env.DB_NAME,
-      process.env.DB_USER,
-      process.env.DB_PASSWORD,
-      {
-        host: process.env.DB_HOST,
-        port: process.env.DB_PORT || 5432,
-        dialect: "postgres",
-        logging: false,
-      }
-    );
-=======
-// Configuración para mayor resiliencia en Vercel (Serverless)
-// Si existe una URL de conexión completa, la usamos (Prioridad 1)
-const dbUrl = process.env.DATABASE_URL || process.env.POSTGRES_URL;
+// URL de conexión completa (Prioridad 1: Vercel / Supabase / Render)
+const dbUrl = process.env.DATABASE_URL || process.env.POSTGRES_URL || process.env.DB_URI;
 
 let sequelize;
 
@@ -38,7 +13,7 @@ if (dbUrl) {
     dialectOptions: {
       ssl: {
         require: true,
-        rejectUnauthorized: false // Común en DBs autogestionadas
+        rejectUnauthorized: false 
       }
     },
     pool: {
@@ -49,13 +24,13 @@ if (dbUrl) {
     }
   });
 } else {
-  // Configuración por parámetros individuales (Local / Prioridad 2)
+  // Configuración por parámetros individuales (Local / Desarrollo)
   sequelize = new Sequelize(
-    process.env.DB_NAME,
-    process.env.DB_USER,
+    process.env.DB_NAME || 'KanbanProyect',
+    process.env.DB_USER || 'postgres',
     process.env.DB_PASSWORD,
     {
-      host: process.env.DB_HOST,
+      host: process.env.DB_HOST || 'localhost',
       port: process.env.DB_PORT || 5432,
       dialect: "postgres",
       logging: false,
@@ -68,6 +43,5 @@ if (dbUrl) {
     }
   );
 }
->>>>>>> de121cd4c74e1e7399d7a516cd7661f43f5529ec
 
 module.exports = sequelize;
