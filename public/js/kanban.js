@@ -45,22 +45,94 @@ document.addEventListener('DOMContentLoaded', () => {
 
   const abrirModal = () => {
     modal.style.display = 'flex';
-    document.body.style.overflow = 'hidden'; // Evitar scroll al fondo
+    document.body.style.overflow = 'hidden';
   };
 
   const cerrarModal = () => {
     modal.style.display = 'none';
+    const modalEdit = document.getElementById('modalEditarTarea');
+    if (modalEdit) modalEdit.style.display = 'none';
     document.body.style.overflow = 'auto';
   };
 
   if (btnAbrir) btnAbrir.onclick = abrirModal;
   if (btnCerrar) btnCerrar.onclick = cerrarModal;
-  if (btnCancelar) btnCancelar.onclick = cerrarModal;
+
+  // Botones genéricos de cancelar
+  document.querySelectorAll('.btn-cancelar-modal, .btn-cerrar-editar').forEach(btn => {
+    btn.onclick = cerrarModal;
+  });
 
   // Cerrar al hacer clic fuera del contenido
   window.onclick = (e) => {
-    if (e.target === modal) cerrarModal();
+    if (e.target.classList.contains('modal-overlay')) cerrarModal();
   };
+
+  // --- Lógica de Edición ---
+  window.abrirModalEditar = (id, titulo, descripcion, prioridad) => {
+    const modalEdit = document.getElementById('modalEditarTarea');
+    document.getElementById('editTaskId').value = id;
+    document.getElementById('editTitulo').value = titulo;
+    document.getElementById('editDescripcion').value = descripcion;
+    document.getElementById('editPrioridad').value = prioridad;
+    
+    modalEdit.style.display = 'flex';
+    document.body.style.overflow = 'hidden';
+  };
+
+  const formEditar = document.getElementById('formEditarTarea');
+  if (formEditar) {
+    formEditar.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const id = document.getElementById('editTaskId').value;
+      const payload = {
+        titulo: document.getElementById('editTitulo').value,
+        descripcion: document.getElementById('editDescripcion').value,
+        prioridad: document.getElementById('editPrioridad').value
+      };
+
+      try {
+        const response = await fetch(`/api/tarjetas/${id}`, {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        });
+
+        if (!response.ok) throw new Error('Error al actualizar');
+
+        // Actualizar el DOM
+        const tarjeta = document.querySelector(`.tarjeta[data-id="${id}"]`);
+        if (tarjeta) {
+          tarjeta.querySelector('h4').textContent = payload.titulo;
+          const p = tarjeta.querySelector('p');
+          if (p) p.textContent = payload.descripcion;
+          else if (payload.descripcion) {
+            const newP = document.createElement('p');
+            newP.style = "color: #666; font-size: 13px; margin: 0; line-height: 1.4;";
+            newP.textContent = payload.descripcion;
+            tarjeta.appendChild(newP);
+          }
+          
+          const badge = tarjeta.querySelector('.prioridad-tag');
+          if (badge) {
+            badge.className = `prioridad-tag prioridad-${payload.prioridad}`;
+            badge.textContent = payload.prioridad;
+          }
+
+          // Actualizar el botón de editar con los nuevos valores para la siguiente edición
+          const btnEditar = tarjeta.querySelector('button[title="Editar tarea"]');
+          if (btnEditar) {
+            btnEditar.setAttribute('onclick', `abrirModalEditar('${id}', '${payload.titulo.replace(/'/g, "\\'")}', '${payload.descripcion.replace(/'/g, "\\'")}', '${payload.prioridad}')`);
+          }
+        }
+
+        cerrarModal();
+      } catch (error) {
+        console.error(error);
+        alert('No se pudo actualizar la tarea');
+      }
+    });
+  }
 
   // --- Manejo de nueva tarjeta vía AJAX ---
   const nuevoForm = document.querySelector('#modalTarea form');

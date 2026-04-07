@@ -49,11 +49,18 @@
                     <h4
                       style="color: #333; margin: 0; flex: 1;"
                     >{{this.titulo}}</h4>
-                    <button
-                      onclick="eliminarTarjeta('{{this.id}}')"
-                      style="background: none; border: none; cursor: pointer; color: #ff4d4d; font-size: 16px; padding: 0 0 0 10px;"
-                      title="Eliminar tarea"
-                    >🗑️</button>
+                    <div style="display: flex; align-items: center; gap: 5px;">
+                      <button
+                        onclick="abrirModalEditar('{{this.id}}', '{{this.titulo}}', '{{this.descripcion}}', '{{this.prioridad}}')"
+                        style="background: none; border: none; cursor: pointer; color: #667eea; font-size: 16px; padding: 5px;"
+                        title="Editar tarea"
+                      >✏️</button>
+                      <button
+                        onclick="eliminarTarjeta('{{this.id}}')"
+                        style="background: none; border: none; cursor: pointer; color: #ff4d4d; font-size: 16px; padding: 5px;"
+                        title="Eliminar tarea"
+                      >🗑️</button>
+                    </div>
                   </div>
 
                   <div style="margin-bottom: 10px;">
@@ -165,6 +172,7 @@
         <button
           type="button"
           id="btnCancelar"
+          class="btn-cancelar-modal"
           style="padding: 10px 20px; background: #e2e8f0; color: #475569; border: none; border-radius: 5px; cursor: pointer; font-weight: 500;"
         >
           Cancelar
@@ -175,6 +183,43 @@
         >
           Crear Tarea
         </button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- Modal para editar tarjeta -->
+<div id="modalEditarTarea" class="modal-overlay">
+  <div class="modal-content">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; border-bottom: 2px solid #f0f0f0; padding-bottom: 15px;">
+      <h2 style="color: #667eea; margin: 0;">✏️ Editar Tarea</h2>
+      <button type="button" class="close-modal btn-cerrar-editar">&times;</button>
+    </div>
+
+    <form id="formEditarTarea">
+      <input type="hidden" id="editTaskId" name="id">
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+        <div style="margin-bottom: 15px;">
+          <label for="editTitulo" style="display: block; margin-bottom: 5px; font-weight: 500; color: #333;">Título *</label>
+          <input type="text" id="editTitulo" name="titulo" required style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 5px; font-size: 15px;" />
+        </div>
+        <div style="margin-bottom: 15px;">
+          <label for="editPrioridad" style="display: block; margin-bottom: 5px; font-weight: 500; color: #333;">Prioridad</label>
+          <select id="editPrioridad" name="prioridad" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 5px; font-size: 15px;">
+            <option value="Baja">Baja</option>
+            <option value="Media">Media</option>
+            <option value="Alta">Alta</option>
+            <option value="Urgente">Urgente</option>
+          </select>
+        </div>
+      </div>
+      <div style="margin-bottom: 20px;">
+        <label for="editDescripcion" style="display: block; margin-bottom: 5px; font-weight: 500; color: #333;">Descripción</label>
+        <textarea id="editDescripcion" name="descripcion" rows="3" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 5px; font-size: 15px; resize: none;"></textarea>
+      </div>
+      <div style="display: flex; gap: 10px; justify-content: flex-end;">
+        <button type="button" class="btn-cancelar-modal" style="padding: 10px 20px; background: #e2e8f0; color: #475569; border: none; border-radius: 5px; cursor: pointer; font-weight: 500;">Cancelar</button>
+        <button type="submit" style="padding: 10px 30px; background: #667eea; color: white; border: none; border-radius: 5px; font-weight: 500; cursor: pointer; transition: background 0.3s;">Guardar Cambios</button>
       </div>
     </form>
   </div>
