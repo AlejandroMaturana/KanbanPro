@@ -1,5 +1,16 @@
 <div class="dashboard-content">
-  <h1>Dashboard - KanbanPro</h1>
+  <div
+    style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; border-bottom: 1px solid #ddd; padding-bottom: 15px;"
+  >
+    <h1 style="margin: 0; color: #333;">Dashboard - KanbanPro</h1>
+    <button
+      id="btnAbrirModal"
+      style="padding: 10px 20px; background: #667eea; color: white; border: none; border-radius: 6px; font-size: 15px; font-weight: 600; cursor: pointer; transition: all 0.3s; box-shadow: 0 4px 6px rgba(102, 126, 234, 0.25); display: flex; align-items: center; gap: 8px;"
+    >
+      <span style="font-size: 20px;">+</span>
+      Nueva Tarea
+    </button>
+  </div>
 
   {{#each data.tableros}}
     <div class="tablero" style="margin-top: 30px;">
@@ -21,16 +32,24 @@
               {{this.titulo}}
             </h3>
 
-            <div class="tarjetas" id="lista-{{this.id}}" style="min-height: 200px;">
+            <div
+              class="tarjetas"
+              id="lista-{{this.id}}"
+              style="min-height: 200px;"
+            >
               {{#each this.tarjetas}}
                 <div
                   class="tarjeta"
                   data-id="{{this.id}}"
                   style="background: white; padding: 15px; margin-bottom: 10px; border-radius: 5px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); position: relative;"
                 >
-                  <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 8px;">
-                    <h4 style="color: #333; margin: 0; flex: 1;">{{this.titulo}}</h4>
-                    <button 
+                  <div
+                    style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 8px;"
+                  >
+                    <h4
+                      style="color: #333; margin: 0; flex: 1;"
+                    >{{this.titulo}}</h4>
+                    <button
                       onclick="eliminarTarjeta('{{this.id}}')"
                       style="background: none; border: none; cursor: pointer; color: #ff4d4d; font-size: 16px; padding: 0 0 0 10px;"
                       title="Eliminar tarea"
@@ -56,19 +75,26 @@
       </div>
     </div>
   {{/each}}
+</div>
 
-  <!-- Formulario para añadir nueva tarjeta -->
-  <div
-    class="formulario-tarjeta"
-    style="margin-top: 40px; padding: 25px; background: #f7fafc; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);"
-  >
-    <h2 style="color: #667eea; margin-bottom: 20px;">➕ Añadir Nueva Tarea</h2>
+<!-- Modal para añadir nueva tarjeta -->
+<div id="modalTarea" class="modal-overlay">
+  <div class="modal-content">
+    <div
+      style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; border-bottom: 2px solid #f0f0f0; padding-bottom: 15px;"
+    >
+      <h2 style="color: #667eea; margin: 0;">➕ Crear Nueva Tarea</h2>
+      <button id="btnCerrarModal" class="close-modal">&times;</button>
+    </div>
 
-    <form method="POST" action="/nueva-tarjeta" style="max-width: 600px;">
+    <form method="POST" action="/nueva-tarjeta">
       <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
         <div style="margin-bottom: 15px;">
-          <label for="titulo" style="display: block; margin-bottom: 5px; font-weight: 500; color: #333;">
-            Título de la tarea *
+          <label
+            for="titulo"
+            style="display: block; margin-bottom: 5px; font-weight: 500; color: #333;"
+          >
+            Título *
           </label>
           <input
             type="text"
@@ -76,12 +102,15 @@
             name="titulo"
             required
             style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 5px; font-size: 15px;"
-            placeholder="Ej: Auditoría interna..."
+            placeholder="Título de la tarea"
           />
         </div>
 
         <div style="margin-bottom: 15px;">
-          <label for="prioridad" style="display: block; margin-bottom: 5px; font-weight: 500; color: #333;">
+          <label
+            for="prioridad"
+            style="display: block; margin-bottom: 5px; font-weight: 500; color: #333;"
+          >
             Prioridad
           </label>
           <select
@@ -108,8 +137,8 @@
           id="descripcion"
           name="descripcion"
           rows="3"
-          style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 5px; font-size: 15px; resize: vertical;"
-          placeholder="Detalles adicionales..."
+          style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 5px; font-size: 15px; resize: none;"
+          placeholder="Más detalles..."
         ></textarea>
       </div>
 
@@ -118,7 +147,7 @@
           for="lista"
           style="display: block; margin-bottom: 5px; font-weight: 500; color: #333;"
         >
-          Lista de destino *
+          Lista Destino *
         </label>
         <select
           id="lista"
@@ -132,29 +161,95 @@
         </select>
       </div>
 
-      <button
-        type="submit"
-        style="padding: 12px 30px; background: #667eea; color: white; border: none; border-radius: 5px; font-size: 16px; font-weight: 500; cursor: pointer; transition: background 0.3s;"
-      >
-        Crear Tarea
-      </button>
+      <div style="display: flex; gap: 10px; justify-content: flex-end;">
+        <button
+          type="button"
+          id="btnCancelar"
+          style="padding: 10px 20px; background: #e2e8f0; color: #475569; border: none; border-radius: 5px; cursor: pointer; font-weight: 500;"
+        >
+          Cancelar
+        </button>
+        <button
+          type="submit"
+          style="padding: 10px 30px; background: #667eea; color: white; border: none; border-radius: 5px; font-weight: 500; cursor: pointer; transition: background 0.3s;"
+        >
+          Crear Tarea
+        </button>
+      </div>
     </form>
   </div>
 </div>
 
 <style>
+  .modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.6);
+    display: none; /* Se activa con JS */
+    justify-content: center;
+    align-items: center;
+    z-index: 9999;
+    backdrop-filter: blur(4px);
+  }
+
+  .modal-content {
+    background: white;
+    width: 90%;
+    max-width: 550px;
+    padding: 35px;
+    border-radius: 15px;
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+    animation: modalAppear 0.3s ease-out;
+  }
+
+  @keyframes modalAppear {
+    from {
+      transform: translateY(-30px);
+      opacity: 0;
+    }
+    to {
+      transform: translateY(0);
+      opacity: 1;
+    }
+  }
+
+  .close-modal {
+    background: none;
+    border: none;
+    font-size: 32px;
+    color: #a0aec0;
+    cursor: pointer;
+    line-height: 1;
+    transition: color 0.2s;
+  }
+
+  .close-modal:hover {
+    color: #4a5568;
+  }
+
   .kanban-board {
     scrollbar-width: thin;
     scrollbar-color: #667eea #f7fafc;
   }
 
-  .kanban-board::-webkit-scrollbar { height: 8px; }
-  .kanban-board::-webkit-scrollbar-track { background: #f7fafc; border-radius: 4px; }
-  .kanban-board::-webkit-scrollbar-thumb { background: #667eea; border-radius: 4px; }
+  .kanban-board::-webkit-scrollbar {
+    height: 8px;
+  }
+  .kanban-board::-webkit-scrollbar-track {
+    background: #f7fafc;
+    border-radius: 4px;
+  }
+  .kanban-board::-webkit-scrollbar-thumb {
+    background: #667eea;
+    border-radius: 4px;
+  }
 
   .tarjeta:hover {
     transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(0,0,0,0.12) !important;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12) !important;
     transition: all 0.2s;
   }
 
@@ -167,12 +262,32 @@
     display: inline-block;
   }
 
-  .prioridad-Baja { background: #e2e8f0; color: #475569; }
-  .prioridad-Media { background: #dbeefd; color: #0284c7; }
-  .prioridad-Alta { background: #fef3c7; color: #d97706; }
-  .prioridad-Urgente { background: #fee2e2; color: #dc2626; }
+  .prioridad-Baja {
+    background: #e2e8f0;
+    color: #475569;
+  }
+  .prioridad-Media {
+    background: #dbeefd;
+    color: #0284c7;
+  }
+  .prioridad-Alta {
+    background: #fef3c7;
+    color: #d97706;
+  }
+  .prioridad-Urgente {
+    background: #fee2e2;
+    color: #dc2626;
+  }
+
+  #btnAbrirModal:hover {
+    background: #5a67d8 !important;
+    transform: translateY(-2px);
+    box-shadow: 0 6px 12px rgba(102, 126, 234, 0.35) !important;
+  }
 </style>
 
 <!-- Scripts para Drag & Drop y Lógica Kanban -->
-<script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
+<script
+  src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"
+></script>
 <script src="/js/kanban.js"></script>

@@ -37,8 +37,33 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   });
 
+  // --- Lógica del Modal ---
+  const modal = document.getElementById('modalTarea');
+  const btnAbrir = document.getElementById('btnAbrirModal');
+  const btnCerrar = document.getElementById('btnCerrarModal');
+  const btnCancelar = document.getElementById('btnCancelar');
+
+  const abrirModal = () => {
+    modal.style.display = 'flex';
+    document.body.style.overflow = 'hidden'; // Evitar scroll al fondo
+  };
+
+  const cerrarModal = () => {
+    modal.style.display = 'none';
+    document.body.style.overflow = 'auto';
+  };
+
+  if (btnAbrir) btnAbrir.onclick = abrirModal;
+  if (btnCerrar) btnCerrar.onclick = cerrarModal;
+  if (btnCancelar) btnCancelar.onclick = cerrarModal;
+
+  // Cerrar al hacer clic fuera del contenido
+  window.onclick = (e) => {
+    if (e.target === modal) cerrarModal();
+  };
+
   // --- Manejo de nueva tarjeta vía AJAX ---
-  const nuevoForm = document.querySelector('.formulario-tarjeta form');
+  const nuevoForm = document.querySelector('#modalTarea form');
   if (nuevoForm) {
     nuevoForm.addEventListener('submit', async (e) => {
       e.preventDefault();
@@ -95,10 +120,10 @@ document.addEventListener('DOMContentLoaded', () => {
             nuevaTarjeta.style.transform = 'translateY(0)';
           }, 10);
 
-          // Limpiar formulario
+          // Limpiar formulario y cerrar modal
           nuevoForm.reset();
+          cerrarModal();
         } else {
-          // Fallback por si el container no existe o el dashboard es complejo
           window.location.reload();
         }
 
