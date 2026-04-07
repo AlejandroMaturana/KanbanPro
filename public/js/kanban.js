@@ -1,3 +1,66 @@
+/**
+ * Utilidades UI para Notificaciones (Toast) y Confirmaciones
+ */
+window.showToast = (message, type = 'info') => {
+  const container = document.getElementById('toast-container');
+  if (!container) return;
+
+  const toast = document.createElement('div');
+  toast.className = `toast toast-${type}`;
+  
+  // Icon based on type
+  let icon = 'ℹ️';
+  if (type === 'success') icon = '✅';
+  if (type === 'error') icon = '❌';
+
+  toast.innerHTML = `<span>${icon}</span> <span>${message}</span>`;
+  container.appendChild(toast);
+
+  // Trigger relayout
+  toast.offsetHeight;
+  toast.classList.add('show');
+
+  setTimeout(() => {
+    toast.classList.remove('show');
+    setTimeout(() => toast.remove(), 300);
+  }, 3000);
+};
+
+window.customConfirm = (message, title = 'Confirmar Acción') => {
+  return new Promise((resolve) => {
+    const overlay = document.getElementById('custom-confirm');
+    const titleEl = document.getElementById('confirm-header');
+    const bodyEl = document.getElementById('confirm-body');
+    const btnCancel = document.getElementById('confirm-cancel');
+    const btnOk = document.getElementById('confirm-ok');
+
+    if (!overlay) {
+      // Fallback a nativo si no existe en HTML
+      resolve(confirm(message));
+      return;
+    }
+
+    titleEl.textContent = title;
+    bodyEl.textContent = message;
+    
+    overlay.classList.add('show');
+    document.body.style.overflow = 'hidden';
+
+    const cleanup = () => {
+      overlay.classList.remove('show');
+      document.body.style.overflow = 'auto';
+      btnCancel.removeEventListener('click', onCancel);
+      btnOk.removeEventListener('click', onOk);
+    };
+
+    const onCancel = () => { cleanup(); resolve(false); };
+    const onOk = () => { cleanup(); resolve(true); };
+
+    btnCancel.addEventListener('click', onCancel);
+    btnOk.addEventListener('click', onOk);
+  });
+};
+
 document.addEventListener('DOMContentLoaded', () => {
   const containers = document.querySelectorAll('.tarjetas');
 
@@ -26,12 +89,12 @@ document.addEventListener('DOMContentLoaded', () => {
           }
 
           const data = await response.json();
-          console.log('Actualizado:', data.mensaje);
+          // window.showToast(data.mensaje || 'Posición actualizada', 'success'); // Opcional, podría ser ruidoso
         } catch (error) {
           console.error('Error:', error);
-          alert('No se pudo guardar el cambio de posición. Por favor, intenta de nuevo.');
-          // Opcional: Revertir el cambio en el DOM si es crítico
-          window.location.reload(); 
+          window.showToast('No se pudo guardar el cambio de posición. La página se recargará.', 'error');
+          // Revertir el cambio en el DOM si es crítico
+          setTimeout(() => window.location.reload(), 2000); 
         }
       }
     });
@@ -104,11 +167,11 @@ document.addEventListener('DOMContentLoaded', () => {
         const tarjeta = document.querySelector(`.tarjeta[data-id="${id}"]`);
         if (tarjeta) {
           tarjeta.querySelector('h4').textContent = payload.titulo;
-          const p = tarjeta.querySelector('p');
+          const p = tarjeta.querySelector('p, .tarjeta-desc');
           if (p) p.textContent = payload.descripcion;
           else if (payload.descripcion) {
             const newP = document.createElement('p');
-            newP.style = "color: #666; font-size: 13px; margin: 0; line-height: 1.4;";
+            newP.className = "tarjeta-desc";
             newP.textContent = payload.descripcion;
             tarjeta.appendChild(newP);
           }
@@ -121,15 +184,17 @@ document.addEventListener('DOMContentLoaded', () => {
 
           // Actualizar el botón de editar con los nuevos valores para la siguiente edición
           const btnEditar = tarjeta.querySelector('button[title="Editar tarea"]');
+          console.log('Botón Editar encontrado:', btnEditar);
           if (btnEditar) {
             btnEditar.setAttribute('onclick', `abrirModalEditar('${id}', '${payload.titulo.replace(/'/g, "\\'")}', '${payload.descripcion.replace(/'/g, "\\'")}', '${payload.prioridad}')`);
           }
         }
 
         cerrarModal();
+        window.showToast('Tarea editada existosamente', 'success');
       } catch (error) {
         console.error(error);
-        alert('No se pudo actualizar la tarea');
+        window.showToast('No se pudo actualizar la tarea', 'error');
       }
     });
   }
@@ -164,22 +229,28 @@ document.addEventListener('DOMContentLoaded', () => {
             <div
               class="tarjeta"
               data-id="${tarjeta.id}"
-              style="background: white; padding: 15px; margin-bottom: 10px; border-radius: 5px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); position: relative; opacity: 0; transform: translateY(10px); transition: all 0.3s ease;"
+              style="opacity: 0; transform: translateY(10px);"
             >
-              <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 8px;">
-                <h4 style="color: #333; margin: 0; flex: 1;">${tarjeta.titulo}</h4>
-                <button 
-                  onclick="eliminarTarjeta('${tarjeta.id}')"
-                  style="background: none; border: none; cursor: pointer; color: #ff4d4d; font-size: 16px; padding: 0 0 0 10px;"
-                  title="Eliminar tarea"
-                >🗑️</button>
+              <div class="tarjeta-header">
+                <h4>${tarjeta.titulo}</h4>
+                <div class="tarjeta-actions">
+                  <button 
+                  onclick="abrirModalEditar('${tarjeta.id}', '${tarjeta.titulo.replace(/'/g, "\\'")}', '${tarjeta.descripcion ? tarjeta.descripcion.replace(/'/g, "\\'") : ''}', '${tarjeta.prioridad}')"
+                  class="btn-edit"
+                  title="Editar tarea">✏️</button>
+                  <button 
+                    onclick="eliminarTarjeta('${tarjeta.id}')"
+                    class="btn-delete"
+                    title="Eliminar tarea"
+                  >🗑️</button>
+                </div>
               </div>
-              <div style="margin-bottom: 10px;">
+              <div class="prioridad-wrapper">
                 <span class="prioridad-tag prioridad-${tarjeta.prioridad}">
                   ${tarjeta.prioridad}
                 </span>
               </div>
-              ${tarjeta.descripcion ? `<p style="color: #666; font-size: 13px; margin: 0; line-height: 1.4;">${tarjeta.descripcion}</p>` : ''}
+              ${tarjeta.descripcion ? `<p class="tarjeta-desc">${tarjeta.descripcion}</p>` : ''}
             </div>
           `;
           
@@ -195,13 +266,14 @@ document.addEventListener('DOMContentLoaded', () => {
           // Limpiar formulario y cerrar modal
           nuevoForm.reset();
           cerrarModal();
+          window.showToast('Tarea creada con éxito', 'success');
         } else {
           window.location.reload();
         }
 
       } catch (error) {
         console.error('Error:', error);
-        alert('Ocurrió un error al crear la tarea. Revisa tu conexión.');
+        window.showToast('Ocurrió un error al crear la tarea. Revisa tu conexión.', 'error');
       }
     });
   }
@@ -211,8 +283,10 @@ document.addEventListener('DOMContentLoaded', () => {
  * Elimina una tarjeta tras confirmación del usuario
  * @param {string} taskId 
  */
-async function eliminarTarjeta(taskId) {
-  if (!confirm('¿Estás seguro de que deseas eliminar esta tarea? Esta acción no se puede deshacer.')) {
+window.eliminarTarjeta = async (taskId) => {
+  const isConfirmed = await window.customConfirm('¿Estás seguro de que deseas eliminar esta tarea? Esta acción no se puede deshacer.', 'Eliminar Tarea');
+  
+  if (!isConfirmed) {
     return;
   }
 
@@ -225,15 +299,17 @@ async function eliminarTarjeta(taskId) {
       // Eliminar el elemento del DOM directamente para una respuesta rápida
       const tarjetaElement = document.querySelector(`.tarjeta[data-id="${taskId}"]`);
       if (tarjetaElement) {
+        tarjetaElement.style.transform = 'scale(0.9)';
         tarjetaElement.style.opacity = '0';
         setTimeout(() => tarjetaElement.remove(), 300);
       }
+      window.showToast('Tarea eliminada correctamente', 'success');
     } else {
       const error = await response.json();
-      alert(error.error || 'No se pudo eliminar la tarea.');
+      window.showToast(error.error || 'No se pudo eliminar la tarea.', 'error');
     }
   } catch (error) {
     console.error('Error al eliminar:', error);
-    alert('Ocurrió un error al intentar eliminar la tarea.');
+    window.showToast('Ocurrió un error al intentar eliminar la tarea.', 'error');
   }
-}
+};

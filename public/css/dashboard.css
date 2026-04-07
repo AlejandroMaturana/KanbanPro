@@ -1,0 +1,325 @@
+.dashboard-content {
+  animation: fadeIn 0.4s ease-out;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.dashboard-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 30px;
+  border-bottom: 2px solid #ebecf0;
+  padding-bottom: 15px;
+}
+
+.dashboard-header h1 {
+  margin: 0;
+  color: #172b4d;
+  font-size: 24px;
+}
+
+#btnAbrirModal {
+  padding: 10px 20px;
+  background: #0052cc;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+  box-shadow: 0 4px 6px rgba(0, 82, 204, 0.2);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+#btnAbrirModal:hover {
+  background: #0065ff;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 12px rgba(0, 82, 204, 0.3);
+}
+
+.tablero-title {
+  color: #0052cc;
+  margin-bottom: 20px;
+  font-size: 20px;
+}
+
+.kanban-board {
+  display: flex;
+  gap: 24px;
+  overflow-x: auto;
+  padding-bottom: 20px;
+  scrollbar-width: thin;
+  scrollbar-color: #b3bac5 #ebecf0;
+}
+
+.kanban-board::-webkit-scrollbar {
+  height: 8px;
+}
+.kanban-board::-webkit-scrollbar-track {
+  background: #ebecf0;
+  border-radius: 4px;
+}
+.kanban-board::-webkit-scrollbar-thumb {
+  background: #b3bac5;
+  border-radius: 4px;
+}
+
+.lista {
+  min-width: 320px;
+  width: 320px;
+  background: #f4f5f7;
+  border-radius: 8px;
+  padding: 16px;
+  box-shadow: 0 1px 2px rgba(9, 30, 66, 0.1);
+  display: flex;
+  flex-direction: column;
+}
+
+.lista-header {
+  color: #172b4d;
+  margin-bottom: 16px;
+  padding-bottom: 12px;
+  border-bottom: 2px solid #dfe1e6;
+  font-size: 16px;
+  font-weight: 600;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.tarjetas {
+  min-height: 200px;
+  flex: 1;
+}
+
+.tarjeta {
+  background: white;
+  padding: 16px;
+  margin-bottom: 12px;
+  border-radius: 6px;
+  box-shadow: 0 1px 2px rgba(9, 30, 66, 0.15);
+  position: relative;
+  transition: transform 0.2s, box-shadow 0.2s;
+  cursor: grab;
+  border-left: 3px solid transparent;
+}
+
+.tarjeta:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(9, 30, 66, 0.15);
+}
+
+.tarjeta:active {
+  cursor: grabbing;
+}
+
+.sortable-ghost {
+  opacity: 0.4;
+  background-color: #ebecf0;
+}
+
+.tarjeta-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 10px;
+}
+
+.tarjeta-header h4 {
+  color: #172b4d;
+  margin: 0;
+  flex: 1;
+  font-size: 15px;
+  font-weight: 600;
+  line-height: 1.4;
+  word-break: break-word;
+}
+
+.tarjeta-actions button {
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 14px;
+  padding: 4px;
+  border-radius: 4px;
+  transition: background 0.2s;
+  opacity: 0.6;
+}
+
+.tarjeta:hover .tarjeta-actions button {
+  opacity: 1;
+}
+
+.tarjeta-actions button:hover {
+  background: #ebecf0;
+}
+
+.btn-edit { color: #0052cc; }
+.btn-delete { color: #ff5630; }
+
+.tarjeta-desc {
+  color: #5e6c84;
+  font-size: 13px;
+  margin: 10px 0 0;
+  line-height: 1.5;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.prioridad-wrapper {
+  margin-bottom: 8px;
+}
+
+.prioridad-tag {
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  padding: 4px 8px;
+  border-radius: 4px;
+  display: inline-block;
+  letter-spacing: 0.3px;
+}
+
+.prioridad-Baja { background: #e3fcef; color: #006644; }
+.prioridad-Media { background: #deebff; color: #0747a6; }
+.prioridad-Alta { background: #fffae6; color: #b36200; }
+.prioridad-Urgente { background: #ffebe6; color: #bf2600; }
+
+/* Modals */
+.modal-overlay {
+  position: fixed;
+  top: 0; left: 0; width: 100%; height: 100%;
+  background: rgba(9, 30, 66, 0.54);
+  display: none;
+  justify-content: center;
+  align-items: center;
+  z-index: 9999;
+  backdrop-filter: blur(4px);
+}
+
+.modal-content {
+  background: white;
+  width: 90%;
+  max-width: 550px;
+  padding: 32px;
+  border-radius: 8px;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
+  animation: modalAppear 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+@keyframes modalAppear {
+  from { transform: translateY(-30px) scale(0.95); opacity: 0; }
+  to { transform: translateY(0) scale(1); opacity: 1; }
+}
+
+.modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24px;
+  border-bottom: 2px solid #ebecf0;
+  padding-bottom: 16px;
+}
+
+.modal-header h2 {
+  color: #172b4d;
+  margin: 0;
+  font-size: 20px;
+}
+
+.close-modal {
+  background: none;
+  border: none;
+  font-size: 28px;
+  color: #7a869a;
+  cursor: pointer;
+  line-height: 1;
+  transition: color 0.2s;
+}
+
+.close-modal:hover {
+  color: #172b4d;
+}
+
+.form-group {
+  margin-bottom: 16px;
+}
+
+.form-group label {
+  display: block;
+  margin-bottom: 6px;
+  font-weight: 600;
+  color: #42526e;
+  font-size: 13px;
+}
+
+.form-control {
+  width: 100%;
+  padding: 10px 12px;
+  border: 2px solid #dfe1e6;
+  border-radius: 4px;
+  font-size: 14px;
+  color: #172b4d;
+  transition: border-color 0.2s, background 0.2s;
+  background: #fafbfc;
+  font-family: inherit;
+}
+
+.form-control:focus {
+  outline: none;
+  border-color: #4c9aff;
+  background: white;
+}
+
+textarea.form-control {
+  resize: vertical;
+  min-height: 80px;
+}
+
+.modal-actions {
+  display: flex;
+  gap: 12px;
+  justify-content: flex-end;
+  margin-top: 24px;
+}
+
+.btn-primary {
+  padding: 10px 24px;
+  background: #0052cc;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  font-weight: 600;
+  font-size: 14px;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.btn-primary:hover {
+  background: #0065ff;
+}
+
+.btn-cancel {
+  padding: 10px 24px;
+  background: rgba(9, 30, 66, 0.04);
+  color: #42526e;
+  border: none;
+  border-radius: 4px;
+  font-weight: 600;
+  font-size: 14px;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.btn-cancel:hover {
+  background: rgba(9, 30, 66, 0.08);
+}

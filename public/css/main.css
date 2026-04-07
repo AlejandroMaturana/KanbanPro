@@ -1,0 +1,205 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+  background: #f4f5f7; /* Un gris app más sutil */
+  min-height: 100vh;
+  color: #172b4d;
+}
+
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 12px;
+}
+
+header {
+  background: #ffffff;
+  padding: 15px 0;
+  border-bottom: 1px solid #dfe1e6;
+  margin-bottom: 20px;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+}
+
+nav {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.logo {
+  font-size: 22px;
+  font-weight: 700;
+  color: #0052cc;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.nav-links {
+  display: flex;
+  gap: 15px;
+  list-style: none;
+}
+
+.nav-links a {
+  text-decoration: none;
+  color: #42526e;
+  padding: 8px 16px;
+  border-radius: 6px;
+  font-weight: 500;
+  transition: all 0.2s ease;
+  background: transparent;
+}
+
+.nav-links a:hover {
+  background: #ebecf0;
+  color: #0052cc;
+}
+
+main {
+  background: transparent;
+  padding: 0 16px 16px;
+  min-height: 65vh;
+}
+
+footer {
+  text-align: center;
+  padding: 40px 0;
+  background: #172b4d;
+  color: #ebecf0;
+  margin-top: 50px;
+  border-top: 4px solid #0052cc;
+}
+
+footer a {
+  color: #4c9aff;
+  text-decoration: none;
+  font-size: 14px;
+  transition: color 0.2s;
+}
+
+footer a:hover {
+  color: #b3d4ff;
+}
+
+/* Toast Notification Styles */
+.toast-container {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  z-index: 10000;
+}
+
+.toast {
+  min-width: 280px;
+  padding: 16px 24px;
+  border-radius: 8px;
+  background: white;
+  color: #172b4d;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-weight: 500;
+  transform: translateX(120%);
+  opacity: 0;
+  transition: all 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+}
+
+.toast.show {
+  transform: translateX(0);
+  opacity: 1;
+}
+
+.toast-success { border-left: 5px solid #36b37e; }
+.toast-error { border-left: 5px solid #ff5630; }
+.toast-info { border-left: 5px solid #0052cc; }
+
+/* Custom Confirm Modal */
+.custom-confirm-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(9, 30, 66, 0.54);
+  backdrop-filter: blur(4px);
+  display: none;
+  justify-content: center;
+  align-items: center;
+  z-index: 10001;
+  opacity: 0;
+  transition: opacity 0.2s;
+}
+
+.custom-confirm-overlay.show {
+  display: flex;
+  opacity: 1;
+}
+
+.custom-confirm-modal {
+  background: white;
+  padding: 24px;
+  border-radius: 12px;
+  width: 90%;
+  max-width: 400px;
+  box-shadow: 0 20px 40px rgba(0,0,0,0.2);
+  transform: scale(0.95);
+  transition: transform 0.2s;
+}
+
+.custom-confirm-overlay.show .custom-confirm-modal {
+  transform: scale(1);
+}
+
+.custom-confirm-header {
+  font-size: 18px;
+  font-weight: 600;
+  color: #172b4d;
+  margin-bottom: 12px;
+}
+
+.custom-confirm-body {
+  color: #5e6c84;
+  margin-bottom: 24px;
+  line-height: 1.5;
+}
+
+.custom-confirm-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+}
+
+.custom-confirm-btn {
+  padding: 8px 16px;
+  border-radius: 6px;
+  font-weight: 500;
+  cursor: pointer;
+  border: none;
+  transition: background 0.2s;
+}
+
+.btn-secondary {
+  background: #f4f5f7;
+  color: #42526e;
+}
+
+.btn-secondary:hover { background: #ebecf0; }
+
+.btn-danger {
+  background: #ff5630;
+  color: white;
+}
+
+.btn-danger:hover { background: #de350b; }
