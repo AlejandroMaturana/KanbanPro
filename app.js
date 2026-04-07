@@ -148,6 +148,8 @@ app.get('/logout', (req, res) => {
 app.get('/', (req, res) => res.render('home'));
 app.get('/register', (req, res) => res.render('register'));
 app.get('/login', (req, res) => res.render('login'));
+app.get('/cookie-policy', (req, res) => res.render('cookie-policy', { title: 'Política de Cookies' }));
+app.get('/privacy-policy', (req, res) => res.render('privacy-policy', { title: 'Política de Privacidad' }));
 
 app.get('/dashboard', verificarContexto, async (req, res) => {
   try {
