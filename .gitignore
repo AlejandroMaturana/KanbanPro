@@ -1,4 +1,7 @@
 .example/
 node_modules/
+public/views/cookie-policy.html
+public/views/privacy-policy.html
+public/views/terms-of-service.html
 .env
 *.txt
