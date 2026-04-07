@@ -36,6 +36,78 @@ document.addEventListener('DOMContentLoaded', () => {
       }
     });
   });
+
+  // --- Manejo de nueva tarjeta vía AJAX ---
+  const nuevoForm = document.querySelector('.formulario-tarjeta form');
+  if (nuevoForm) {
+    nuevoForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      
+      const formData = new FormData(nuevoForm);
+      const payload = Object.fromEntries(formData);
+      
+      try {
+        const response = await fetch('/nueva-tarjeta', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Accept': 'application/json'
+          },
+          body: JSON.stringify(payload)
+        });
+
+        if (!response.ok) throw new Error('No se pudo crear la tarea');
+
+        const { tarjeta } = await response.json();
+        
+        // Determinar en qué lista añadirla
+        const container = document.getElementById(`lista-${tarjeta.listaId}`);
+        if (container) {
+          const tarjetaHtml = `
+            <div
+              class="tarjeta"
+              data-id="${tarjeta.id}"
+              style="background: white; padding: 15px; margin-bottom: 10px; border-radius: 5px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); position: relative; opacity: 0; transform: translateY(10px); transition: all 0.3s ease;"
+            >
+              <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 8px;">
+                <h4 style="color: #333; margin: 0; flex: 1;">${tarjeta.titulo}</h4>
+                <button 
+                  onclick="eliminarTarjeta('${tarjeta.id}')"
+                  style="background: none; border: none; cursor: pointer; color: #ff4d4d; font-size: 16px; padding: 0 0 0 10px;"
+                  title="Eliminar tarea"
+                >🗑️</button>
+              </div>
+              <div style="margin-bottom: 10px;">
+                <span class="prioridad-tag prioridad-${tarjeta.prioridad}">
+                  ${tarjeta.prioridad}
+                </span>
+              </div>
+              ${tarjeta.descripcion ? `<p style="color: #666; font-size: 13px; margin: 0; line-height: 1.4;">${tarjeta.descripcion}</p>` : ''}
+            </div>
+          `;
+          
+          container.insertAdjacentHTML('beforeend', tarjetaHtml);
+          
+          // Animación de entrada
+          const nuevaTarjeta = container.lastElementChild;
+          setTimeout(() => {
+            nuevaTarjeta.style.opacity = '1';
+            nuevaTarjeta.style.transform = 'translateY(0)';
+          }, 10);
+
+          // Limpiar formulario
+          nuevoForm.reset();
+        } else {
+          // Fallback por si el container no existe o el dashboard es complejo
+          window.location.reload();
+        }
+
+      } catch (error) {
+        console.error('Error:', error);
+        alert('Ocurrió un error al crear la tarea. Revisa tu conexión.');
+      }
+    });
+  }
 });
 
 /**
