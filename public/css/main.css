@@ -1,3 +1,38 @@
+:root {
+  /* Common Palette */
+  --color-primary: #0052cc;
+  --color-primary-hover: #0065ff;
+  --color-success: #36b37e;
+  --color-danger: #ff5630;
+  --color-danger-hover: #de350b;
+  --color-info: #0052cc;
+  
+  /* Light Theme (Default) */
+  --bg-body: #f4f5f7;
+  --bg-surface: #ffffff;
+  --bg-surface-hover: #ebecf0;
+  --border-color: #dfe1e6;
+  --text-primary: #172b4d;
+  --text-secondary: #42526e;
+  --text-inverse: #ffffff;
+  --shadow-sm: 0 1px 3px rgba(9, 30, 66, 0.05);
+  --shadow-md: 0 4px 8px rgba(9, 30, 66, 0.1);
+  --shadow-lg: 0 10px 30px rgba(9, 30, 66, 0.15);
+}
+
+/* Dark Theme */
+body.dark-theme {
+  --bg-body: #101214;
+  --bg-surface: #1d2125;
+  --bg-surface-hover: #282e33;
+  --border-color: #22272b;
+  --text-primary: #9fadbc;
+  --text-secondary: #738496;
+  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.2);
+  --shadow-md: 0 4px 8px rgba(0, 0, 0, 0.3);
+  --shadow-lg: 0 10px 30px rgba(0, 0, 0, 0.4);
+}
+
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
 
 * {
@@ -8,9 +43,10 @@
 
 body {
   font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
-  background: #f4f5f7; /* Un gris app más sutil */
+  background: var(--bg-body);
   min-height: 100vh;
-  color: #172b4d;
+  color: var(--text-primary);
+  transition: background-color 0.3s ease, color 0.3s ease;
 }
 
 .container {
@@ -20,11 +56,12 @@ body {
 }
 
 header {
-  background: #ffffff;
+  background: var(--bg-surface);
   padding: 15px 0;
-  border-bottom: 1px solid #dfe1e6;
+  border-bottom: 1px solid var(--border-color);
   margin-bottom: 20px;
-  box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+  box-shadow: var(--shadow-sm);
+  transition: background-color 0.3s ease, border-color 0.3s ease;
 }
 
 nav {
@@ -36,7 +73,7 @@ nav {
 .logo {
   font-size: 22px;
   font-weight: 700;
-  color: #0052cc;
+  color: var(--color-primary);
   display: flex;
   align-items: center;
   gap: 8px;
@@ -46,11 +83,12 @@ nav {
   display: flex;
   gap: 15px;
   list-style: none;
+  align-items: center;
 }
 
 .nav-links a {
   text-decoration: none;
-  color: #42526e;
+  color: var(--text-secondary);
   padding: 8px 16px;
   border-radius: 6px;
   font-weight: 500;
@@ -59,8 +97,27 @@ nav {
 }
 
 .nav-links a:hover {
-  background: #ebecf0;
-  color: #0052cc;
+  background: var(--bg-surface-hover);
+  color: var(--color-primary);
+}
+
+/* Theme Toggle Button */
+.theme-toggle-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 8px;
+  border-radius: 50%;
+  color: var(--text-secondary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s;
+  font-size: 20px;
+}
+.theme-toggle-btn:hover {
+  background: var(--bg-surface-hover);
+  color: var(--color-primary);
 }
 
 main {
@@ -72,10 +129,10 @@ main {
 footer {
   text-align: center;
   padding: 40px 0;
-  background: #172b4d;
-  color: #ebecf0;
+  background: var(--bg-surface);
+  color: var(--text-secondary);
   margin-top: 50px;
-  border-top: 4px solid #0052cc;
+  border-top: 4px solid var(--color-primary);
 }
 
 footer a {
@@ -104,9 +161,9 @@ footer a:hover {
   min-width: 280px;
   padding: 16px 24px;
   border-radius: 8px;
-  background: white;
-  color: #172b4d;
-  box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+  background: var(--bg-surface);
+  color: var(--text-primary);
+  box-shadow: var(--shadow-md);
   display: flex;
   align-items: center;
   gap: 12px;
@@ -121,9 +178,9 @@ footer a:hover {
   opacity: 1;
 }
 
-.toast-success { border-left: 5px solid #36b37e; }
-.toast-error { border-left: 5px solid #ff5630; }
-.toast-info { border-left: 5px solid #0052cc; }
+.toast-success { border-left: 5px solid var(--color-success); }
+.toast-error { border-left: 5px solid var(--color-danger); }
+.toast-info { border-left: 5px solid var(--color-info); }
 
 /* Custom Confirm Modal */
 .custom-confirm-overlay {
@@ -148,12 +205,12 @@ footer a:hover {
 }
 
 .custom-confirm-modal {
-  background: white;
+  background: var(--bg-surface);
   padding: 24px;
   border-radius: 12px;
   width: 90%;
   max-width: 400px;
-  box-shadow: 0 20px 40px rgba(0,0,0,0.2);
+  box-shadow: var(--shadow-lg);
   transform: scale(0.95);
   transition: transform 0.2s;
 }
@@ -165,12 +222,12 @@ footer a:hover {
 .custom-confirm-header {
   font-size: 18px;
   font-weight: 600;
-  color: #172b4d;
+  color: var(--text-primary);
   margin-bottom: 12px;
 }
 
 .custom-confirm-body {
-  color: #5e6c84;
+  color: var(--text-secondary);
   margin-bottom: 24px;
   line-height: 1.5;
 }
@@ -191,15 +248,15 @@ footer a:hover {
 }
 
 .btn-secondary {
-  background: #f4f5f7;
-  color: #42526e;
+  background: var(--bg-body);
+  color: var(--text-secondary);
 }
 
-.btn-secondary:hover { background: #ebecf0; }
+.btn-secondary:hover { background: var(--bg-surface-hover); }
 
 .btn-danger {
-  background: #ff5630;
-  color: white;
+  background: var(--color-danger);
+  color: white; /* Contraste siempre en blanco para los warnings fuertes */
 }
 
-.btn-danger:hover { background: #de350b; }
+.btn-danger:hover { background: var(--color-danger-hover); }

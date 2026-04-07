@@ -24,7 +24,7 @@
           {{#if isAutenticado}}
             <div
               class="user-welcome"
-              style="flex-grow: 1; margin-left: 20px; font-size: 14px; color: #444;"
+              style="flex-grow: 1; margin-left: 20px; font-size: 14px; color: var(--text-secondary);"
             >
               Bienvenido,
               <strong>{{nombreUsuario}}</strong>
@@ -40,6 +40,11 @@
               <li><a href="/register">Registro</a></li>
               <li><a href="/login">Iniciar Sesión</a></li>
             {{/if}}
+            <li>
+              <button id="theme-toggle" class="theme-toggle-btn" title="Alternar tema">
+                🌙
+              </button>
+            </li>
           </ul>
         </nav>
       </div>

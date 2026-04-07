@@ -12,19 +12,19 @@
   justify-content: space-between;
   align-items: center;
   margin-bottom: 30px;
-  border-bottom: 2px solid #ebecf0;
+  border-bottom: 2px solid var(--border-color);
   padding-bottom: 15px;
 }
 
 .dashboard-header h1 {
   margin: 0;
-  color: #172b4d;
+  color: var(--text-primary);
   font-size: 24px;
 }
 
 #btnAbrirModal {
   padding: 10px 20px;
-  background: #0052cc;
+  background: var(--color-primary);
   color: white;
   border: none;
   border-radius: 6px;
@@ -39,13 +39,13 @@
 }
 
 #btnAbrirModal:hover {
-  background: #0065ff;
+  background: var(--color-primary-hover);
   transform: translateY(-2px);
-  box-shadow: 0 6px 12px rgba(0, 82, 204, 0.3);
+  box-shadow: var(--shadow-md);
 }
 
 .tablero-title {
-  color: #0052cc;
+  color: var(--color-primary);
   margin-bottom: 20px;
   font-size: 20px;
 }
@@ -56,7 +56,7 @@
   overflow-x: auto;
   padding-bottom: 20px;
   scrollbar-width: thin;
-  scrollbar-color: #b3bac5 #ebecf0;
+  scrollbar-color: var(--text-secondary) var(--bg-surface-hover);
 }
 
 .kanban-board::-webkit-scrollbar {
@@ -74,19 +74,19 @@
 .lista {
   min-width: 320px;
   width: 320px;
-  background: #f4f5f7;
+  background: var(--bg-surface-hover);
   border-radius: 8px;
   padding: 16px;
-  box-shadow: 0 1px 2px rgba(9, 30, 66, 0.1);
+  box-shadow: var(--shadow-sm);
   display: flex;
   flex-direction: column;
 }
 
 .lista-header {
-  color: #172b4d;
+  color: var(--text-primary);
   margin-bottom: 16px;
   padding-bottom: 12px;
-  border-bottom: 2px solid #dfe1e6;
+  border-bottom: 2px solid var(--border-color);
   font-size: 16px;
   font-weight: 600;
   display: flex;
@@ -97,14 +97,36 @@
 .tarjetas {
   min-height: 200px;
   flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.tarjetas:empty {
+  border: 2px dashed var(--border-color);
+  border-radius: 6px;
+  position: relative;
+  min-height: 100px;
+}
+
+.tarjetas:empty::after {
+  content: 'Arrastra tareas aquí';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  color: var(--text-secondary);
+  font-size: 14px;
+  font-weight: 500;
+  text-align: center;
+  pointer-events: none;
 }
 
 .tarjeta {
-  background: white;
+  background: var(--bg-surface);
   padding: 16px;
   margin-bottom: 12px;
   border-radius: 6px;
-  box-shadow: 0 1px 2px rgba(9, 30, 66, 0.15);
+  box-shadow: var(--shadow-sm);
   position: relative;
   transition: transform 0.2s, box-shadow 0.2s;
   cursor: grab;
@@ -113,7 +135,7 @@
 
 .tarjeta:hover {
   transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(9, 30, 66, 0.15);
+  box-shadow: var(--shadow-md);
 }
 
 .tarjeta:active {
@@ -122,7 +144,7 @@
 
 .sortable-ghost {
   opacity: 0.4;
-  background-color: #ebecf0;
+  background-color: var(--bg-surface-hover);
 }
 
 .tarjeta-header {
@@ -133,7 +155,7 @@
 }
 
 .tarjeta-header h4 {
-  color: #172b4d;
+  color: var(--text-primary);
   margin: 0;
   flex: 1;
   font-size: 15px;
@@ -158,19 +180,20 @@
 }
 
 .tarjeta-actions button:hover {
-  background: #ebecf0;
+  background: var(--bg-surface-hover);
 }
 
-.btn-edit { color: #0052cc; }
-.btn-delete { color: #ff5630; }
+.btn-edit { color: var(--color-primary); }
+.btn-delete { color: var(--color-danger); }
 
 .tarjeta-desc {
-  color: #5e6c84;
+  color: var(--text-secondary);
   font-size: 13px;
   margin: 10px 0 0;
   line-height: 1.5;
   display: -webkit-box;
   -webkit-line-clamp: 3;
+  line-clamp: 3;
   -webkit-box-orient: vertical;
   overflow: hidden;
 }
@@ -207,12 +230,12 @@
 }
 
 .modal-content {
-  background: white;
+  background: var(--bg-surface);
   width: 90%;
   max-width: 550px;
   padding: 32px;
   border-radius: 8px;
-  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
+  box-shadow: var(--shadow-lg);
   animation: modalAppear 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
 }
 
@@ -226,12 +249,12 @@
   justify-content: space-between;
   align-items: center;
   margin-bottom: 24px;
-  border-bottom: 2px solid #ebecf0;
+  border-bottom: 2px solid var(--border-color);
   padding-bottom: 16px;
 }
 
 .modal-header h2 {
-  color: #172b4d;
+  color: var(--text-primary);
   margin: 0;
   font-size: 20px;
 }
@@ -240,14 +263,14 @@
   background: none;
   border: none;
   font-size: 28px;
-  color: #7a869a;
+  color: var(--text-secondary);
   cursor: pointer;
   line-height: 1;
   transition: color 0.2s;
 }
 
 .close-modal:hover {
-  color: #172b4d;
+  color: var(--text-primary);
 }
 
 .form-group {
@@ -258,26 +281,26 @@
   display: block;
   margin-bottom: 6px;
   font-weight: 600;
-  color: #42526e;
+  color: var(--text-secondary);
   font-size: 13px;
 }
 
 .form-control {
   width: 100%;
   padding: 10px 12px;
-  border: 2px solid #dfe1e6;
+  border: 2px solid var(--border-color);
   border-radius: 4px;
   font-size: 14px;
-  color: #172b4d;
+  color: var(--text-primary);
   transition: border-color 0.2s, background 0.2s;
-  background: #fafbfc;
+  background: var(--bg-body);
   font-family: inherit;
 }
 
 .form-control:focus {
   outline: none;
-  border-color: #4c9aff;
-  background: white;
+  border-color: var(--color-primary);
+  background: var(--bg-surface);
 }
 
 textarea.form-control {
@@ -294,7 +317,7 @@ textarea.form-control {
 
 .btn-primary {
   padding: 10px 24px;
-  background: #0052cc;
+  background: var(--color-primary);
   color: white;
   border: none;
   border-radius: 4px;
@@ -305,13 +328,13 @@ textarea.form-control {
 }
 
 .btn-primary:hover {
-  background: #0065ff;
+  background: var(--color-primary-hover);
 }
 
 .btn-cancel {
   padding: 10px 24px;
-  background: rgba(9, 30, 66, 0.04);
-  color: #42526e;
+  background: var(--bg-surface-hover);
+  color: var(--text-secondary);
   border: none;
   border-radius: 4px;
   font-weight: 600;
@@ -321,5 +344,55 @@ textarea.form-control {
 }
 
 .btn-cancel:hover {
-  background: rgba(9, 30, 66, 0.08);
+  background: var(--border-color);
 }
+
+/* Spinner for buttons Loading State */
+.btn-loading {
+  position: relative;
+  pointer-events: none;
+  color: transparent !important;
+}
+
+.btn-loading::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 16px;
+  height: 16px;
+  margin-top: -8px;
+  margin-left: -8px;
+  border: 2px solid rgba(255, 255, 255, 0.4);
+  border-top-color: white;
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+/* Responsive Media Queries (Mobile-First approach overrides) */
+@media (max-width: 768px) {
+  .dashboard-header {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 15px;
+  }
+  
+  #btnAbrirModal {
+    justify-content: center;
+  }
+  
+  .kanban-board {
+    scroll-snap-type: x mandatory;
+  }
+  
+  .lista {
+    scroll-snap-align: start;
+    min-width: 85vw;
+    width: 85vw;
+  }
+}
+

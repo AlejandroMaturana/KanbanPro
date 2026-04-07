@@ -62,6 +62,31 @@ window.customConfirm = (message, title = 'Confirmar Acción') => {
 };
 
 document.addEventListener('DOMContentLoaded', () => {
+  // --- Lógica del Tema Oscuro ---
+  const themeToggleLabel = document.getElementById('theme-toggle');
+  const body = document.body;
+  const savedTheme = localStorage.getItem('theme');
+
+  if (savedTheme === 'dark') {
+    body.classList.add('dark-theme');
+    if (themeToggleLabel) themeToggleLabel.textContent = '☀️';
+  } else if (savedTheme === 'light') {
+    body.classList.remove('dark-theme');
+  } else if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+    // Si no hay preferencia, usar el del sistema
+    body.classList.add('dark-theme');
+    if (themeToggleLabel) themeToggleLabel.textContent = '☀️';
+  }
+
+  if (themeToggleLabel) {
+    themeToggleLabel.addEventListener('click', () => {
+      body.classList.toggle('dark-theme');
+      const isDark = body.classList.contains('dark-theme');
+      localStorage.setItem('theme', isDark ? 'dark' : 'light');
+      themeToggleLabel.textContent = isDark ? '☀️' : '🌙';
+    });
+  }
+
   const containers = document.querySelectorAll('.tarjetas');
 
   containers.forEach(container => {
@@ -147,6 +172,10 @@ document.addEventListener('DOMContentLoaded', () => {
   if (formEditar) {
     formEditar.addEventListener('submit', async (e) => {
       e.preventDefault();
+      
+      const submitBtn = formEditar.querySelector('button[type="submit"]');
+      if (submitBtn) submitBtn.classList.add('btn-loading');
+
       const id = document.getElementById('editTaskId').value;
       const payload = {
         titulo: document.getElementById('editTitulo').value,
@@ -195,6 +224,8 @@ document.addEventListener('DOMContentLoaded', () => {
       } catch (error) {
         console.error(error);
         window.showToast('No se pudo actualizar la tarea', 'error');
+      } finally {
+        if (submitBtn) submitBtn.classList.remove('btn-loading');
       }
     });
   }
@@ -204,6 +235,9 @@ document.addEventListener('DOMContentLoaded', () => {
   if (nuevoForm) {
     nuevoForm.addEventListener('submit', async (e) => {
       e.preventDefault();
+      
+      const submitBtn = nuevoForm.querySelector('button[type="submit"]');
+      if (submitBtn) submitBtn.classList.add('btn-loading');
       
       const formData = new FormData(nuevoForm);
       const payload = Object.fromEntries(formData);
@@ -274,6 +308,8 @@ document.addEventListener('DOMContentLoaded', () => {
       } catch (error) {
         console.error('Error:', error);
         window.showToast('Ocurrió un error al crear la tarea. Revisa tu conexión.', 'error');
+      } finally {
+        if (submitBtn) submitBtn.classList.remove('btn-loading');
       }
     });
   }
