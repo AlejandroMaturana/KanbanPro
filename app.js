@@ -181,6 +181,22 @@ app.get('/dashboard', verificarContexto, async (req, res) => {
       });
     }
 
+    // --- REORDENAMIENTO DE LISTAS (Prioridad UI) ---
+    const orderMap = { 
+      "por hacer": 1, "hacer": 1, "todo": 1,
+      "en progreso": 2, "en proceso": 2, "in-progress": 2, 
+      "terminado": 3, "completado": 3, "done": 3 
+    };
+    tableros.forEach(t => {
+      if (t.listas) {
+        t.listas.sort((a, b) => {
+          const titA = a.titulo.toLowerCase().trim();
+          const titB = b.titulo.toLowerCase().trim();
+          return (orderMap[titA] || 99) - (orderMap[titB] || 99);
+        });
+      }
+    });
+
     res.render('dashboard', { data: { tableros } });
   } catch (error) {
     console.error("Error dashboard:", error);
