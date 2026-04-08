@@ -1,78 +1,49 @@
 <div class="dashboard-content">
-  <div
-    style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; border-bottom: 1px solid #ddd; padding-bottom: 15px;"
-  >
-    <h1 style="margin: 0; color: #333;">Dashboard - KanbanPro</h1>
-    <button
-      id="btnAbrirModal"
-      style="padding: 10px 20px; background: #667eea; color: white; border: none; border-radius: 6px; font-size: 15px; font-weight: 600; cursor: pointer; transition: all 0.3s; box-shadow: 0 4px 6px rgba(102, 126, 234, 0.25); display: flex; align-items: center; gap: 8px;"
-    >
-      <span style="font-size: 20px;">+</span>
-      Nueva Tarea
+  <div class="dashboard-header">
+    <h1>Dashboard - KanbanPro</h1>
+    <button id="btnAbrirModal" aria-label="Abrir modal para nueva tarea">
+      <span aria-hidden="true">+</span> Nueva Tarea
     </button>
   </div>
 
   {{#each data.tableros}}
-    <div class="tablero" style="margin-top: 30px;">
-      <h2 style="color: #667eea; margin-bottom: 20px;">{{this.titulo}}</h2>
+    <div class="tablero">
+      <h2 class="tablero-title">{{this.titulo}}</h2>
 
-      <div
-        class="kanban-board"
-        style="display: flex; gap: 20px; overflow-x: auto; padding-bottom: 20px;"
-      >
+      <div class="kanban-board">
         {{#each this.listas}}
-          <div
-            class="lista"
-            data-id="{{this.id}}"
-            style="min-width: 300px; background: #f7fafc; border-radius: 8px; padding: 20px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);"
-          >
-            <h3
-              style="color: #333; margin-bottom: 15px; padding-bottom: 10px; border-bottom: 2px solid #667eea;"
-            >
-              {{this.titulo}}
-            </h3>
+          <div class="lista" data-id="{{this.id}}" role="region" aria-label="Lista de tareas: {{this.titulo}}">
+            <h3 class="lista-header">{{this.titulo}}</h3>
 
-            <div
-              class="tarjetas"
-              id="lista-{{this.id}}"
-              style="min-height: 200px;"
-            >
+            <div class="tarjetas" id="lista-{{this.id}}">
               {{#each this.tarjetas}}
-                <div
-                  class="tarjeta"
-                  data-id="{{this.id}}"
-                  style="background: white; padding: 15px; margin-bottom: 10px; border-radius: 5px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); position: relative;"
-                >
-                  <div
-                    style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 8px;"
-                  >
-                    <h4
-                      style="color: #333; margin: 0; flex: 1;"
-                    >{{this.titulo}}</h4>
-                    <div style="display: flex; align-items: center; gap: 5px;">
+                <div class="tarjeta" data-id="{{this.id}}" tabindex="0" role="article" aria-label="Tarea: {{this.titulo}}">
+                  <div class="tarjeta-header">
+                    <h4>{{this.titulo}}</h4>
+                    <div class="tarjeta-actions">
                       <button
                         onclick="abrirModalEditar('{{this.id}}', '{{this.titulo}}', '{{this.descripcion}}', '{{this.prioridad}}')"
-                        style="background: none; border: none; cursor: pointer; color: #667eea; font-size: 16px; padding: 5px;"
+                        class="btn-edit"
                         title="Editar tarea"
+                        aria-label="Editar la tarea {{this.titulo}}"
                       >✏️</button>
                       <button
                         onclick="eliminarTarjeta('{{this.id}}')"
-                        style="background: none; border: none; cursor: pointer; color: #ff4d4d; font-size: 16px; padding: 5px;"
+                        class="btn-delete"
                         title="Eliminar tarea"
+                        aria-label="Eliminar la tarea {{this.titulo}}"
                       >🗑️</button>
                     </div>
                   </div>
 
-                  <div style="margin-bottom: 10px;">
+                  <div class="prioridad-wrapper">
                     <span class="prioridad-tag prioridad-{{this.prioridad}}">
                       {{this.prioridad}}
                     </span>
                   </div>
 
                   {{#if this.descripcion}}
-                    <p
-                      style="color: #666; font-size: 13px; margin: 0; line-height: 1.4;"
-                    >{{this.descripcion}}</p>
+                    <p class="tarjeta-desc">{{this.descripcion}}</p>
                   {{/if}}
                 </div>
               {{/each}}
@@ -85,46 +56,30 @@
 </div>
 
 <!-- Modal para añadir nueva tarjeta -->
-<div id="modalTarea" class="modal-overlay">
+<div id="modalTarea" class="modal-overlay" role="dialog" aria-labelledby="modal-nueva-tarea-title" aria-modal="true">
   <div class="modal-content">
-    <div
-      style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; border-bottom: 2px solid #f0f0f0; padding-bottom: 15px;"
-    >
-      <h2 style="color: #667eea; margin: 0;">➕ Crear Nueva Tarea</h2>
-      <button id="btnCerrarModal" class="close-modal">&times;</button>
+    <div class="modal-header">
+      <h2 id="modal-nueva-tarea-title">➕ Crear Nueva Tarea</h2>
+      <button id="btnCerrarModal" class="close-modal" aria-label="Cerrar modal">&times;</button>
     </div>
 
     <form method="POST" action="/nueva-tarjeta">
       <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
-        <div style="margin-bottom: 15px;">
-          <label
-            for="titulo"
-            style="display: block; margin-bottom: 5px; font-weight: 500; color: #333;"
-          >
-            Título *
-          </label>
+        <div class="form-group">
+          <label for="titulo">Título *</label>
           <input
             type="text"
             id="titulo"
             name="titulo"
+            class="form-control"
             required
-            style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 5px; font-size: 15px;"
             placeholder="Título de la tarea"
           />
         </div>
 
-        <div style="margin-bottom: 15px;">
-          <label
-            for="prioridad"
-            style="display: block; margin-bottom: 5px; font-weight: 500; color: #333;"
-          >
-            Prioridad
-          </label>
-          <select
-            id="prioridad"
-            name="prioridad"
-            style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 5px; font-size: 15px;"
-          >
+        <div class="form-group">
+          <label for="prioridad">Prioridad</label>
+          <select id="prioridad" name="prioridad" class="form-control">
             <option value="Baja">Baja</option>
             <option value="Media" selected>Media</option>
             <option value="Alta">Alta</option>
@@ -133,79 +88,52 @@
         </div>
       </div>
 
-      <div style="margin-bottom: 15px;">
-        <label
-          for="descripcion"
-          style="display: block; margin-bottom: 5px; font-weight: 500; color: #333;"
-        >
-          Descripción
-        </label>
+      <div class="form-group">
+        <label for="descripcion">Descripción</label>
         <textarea
           id="descripcion"
           name="descripcion"
+          class="form-control"
           rows="3"
-          style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 5px; font-size: 15px; resize: none;"
           placeholder="Más detalles..."
         ></textarea>
       </div>
 
-      <div style="margin-bottom: 20px;">
-        <label
-          for="lista"
-          style="display: block; margin-bottom: 5px; font-weight: 500; color: #333;"
-        >
-          Lista Destino *
-        </label>
-        <select
-          id="lista"
-          name="lista"
-          required
-          style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 5px; font-size: 15px;"
-        >
+      <div class="form-group">
+        <label for="lista">Lista Destino *</label>
+        <select id="lista" name="lista" required class="form-control">
           <option value="todo">Por Hacer</option>
           <option value="in-progress">En Progreso</option>
           <option value="done">Completado</option>
         </select>
       </div>
 
-      <div style="display: flex; gap: 10px; justify-content: flex-end;">
-        <button
-          type="button"
-          id="btnCancelar"
-          class="btn-cancelar-modal"
-          style="padding: 10px 20px; background: #e2e8f0; color: #475569; border: none; border-radius: 5px; cursor: pointer; font-weight: 500;"
-        >
-          Cancelar
-        </button>
-        <button
-          type="submit"
-          style="padding: 10px 30px; background: #667eea; color: white; border: none; border-radius: 5px; font-weight: 500; cursor: pointer; transition: background 0.3s;"
-        >
-          Crear Tarea
-        </button>
+      <div class="modal-actions">
+        <button type="button" id="btnCancelar" class="btn-cancel btn-cancelar-modal" aria-label="Cancelar creación">Cancelar</button>
+        <button type="submit" class="btn-primary" aria-label="Confirmar crear tarea">Crear Tarea</button>
       </div>
     </form>
   </div>
 </div>
 
 <!-- Modal para editar tarjeta -->
-<div id="modalEditarTarea" class="modal-overlay">
+<div id="modalEditarTarea" class="modal-overlay" role="dialog" aria-labelledby="modal-editar-tarea-title" aria-modal="true">
   <div class="modal-content">
-    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; border-bottom: 2px solid #f0f0f0; padding-bottom: 15px;">
-      <h2 style="color: #667eea; margin: 0;">✏️ Editar Tarea</h2>
-      <button type="button" class="close-modal btn-cerrar-editar">&times;</button>
+    <div class="modal-header">
+      <h2 id="modal-editar-tarea-title">✏️ Editar Tarea</h2>
+      <button type="button" class="close-modal btn-cerrar-editar" aria-label="Cerrar modal">&times;</button>
     </div>
 
     <form id="formEditarTarea">
       <input type="hidden" id="editTaskId" name="id">
       <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
-        <div style="margin-bottom: 15px;">
-          <label for="editTitulo" style="display: block; margin-bottom: 5px; font-weight: 500; color: #333;">Título *</label>
-          <input type="text" id="editTitulo" name="titulo" required style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 5px; font-size: 15px;" />
+        <div class="form-group">
+          <label for="editTitulo">Título *</label>
+          <input type="text" id="editTitulo" name="titulo" class="form-control" required />
         </div>
-        <div style="margin-bottom: 15px;">
-          <label for="editPrioridad" style="display: block; margin-bottom: 5px; font-weight: 500; color: #333;">Prioridad</label>
-          <select id="editPrioridad" name="prioridad" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 5px; font-size: 15px;">
+        <div class="form-group">
+          <label for="editPrioridad">Prioridad</label>
+          <select id="editPrioridad" name="prioridad" class="form-control">
             <option value="Baja">Baja</option>
             <option value="Media">Media</option>
             <option value="Alta">Alta</option>
@@ -213,13 +141,13 @@
           </select>
         </div>
       </div>
-      <div style="margin-bottom: 20px;">
-        <label for="editDescripcion" style="display: block; margin-bottom: 5px; font-weight: 500; color: #333;">Descripción</label>
-        <textarea id="editDescripcion" name="descripcion" rows="3" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 5px; font-size: 15px; resize: none;"></textarea>
+      <div class="form-group">
+        <label for="editDescripcion">Descripción</label>
+        <textarea id="editDescripcion" name="descripcion" class="form-control" rows="3"></textarea>
       </div>
-      <div style="display: flex; gap: 10px; justify-content: flex-end;">
-        <button type="button" class="btn-cancelar-modal" style="padding: 10px 20px; background: #e2e8f0; color: #475569; border: none; border-radius: 5px; cursor: pointer; font-weight: 500;">Cancelar</button>
-        <button type="submit" style="padding: 10px 30px; background: #667eea; color: white; border: none; border-radius: 5px; font-weight: 500; cursor: pointer; transition: background 0.3s;">Guardar Cambios</button>
+      <div class="modal-actions">
+        <button type="button" class="btn-cancel btn-cancelar-modal" aria-label="Cancelar edición">Cancelar</button>
+        <button type="submit" class="btn-primary" aria-label="Guardar cambios de la tarea">Guardar Cambios</button>
       </div>
     </form>
   </div>

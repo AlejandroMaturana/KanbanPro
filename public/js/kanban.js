@@ -261,9 +261,11 @@ document.addEventListener('DOMContentLoaded', () => {
         if (container) {
           const tarjetaHtml = `
             <div
-              class="tarjeta"
+              class="tarjeta tarjeta-anim-enter"
               data-id="${tarjeta.id}"
-              style="opacity: 0; transform: translateY(10px);"
+              tabindex="0"
+              role="article"
+              aria-label="Tarea: ${tarjeta.titulo}"
             >
               <div class="tarjeta-header">
                 <h4>${tarjeta.titulo}</h4>
@@ -290,13 +292,6 @@ document.addEventListener('DOMContentLoaded', () => {
           
           container.insertAdjacentHTML('beforeend', tarjetaHtml);
           
-          // Animación de entrada
-          const nuevaTarjeta = container.lastElementChild;
-          setTimeout(() => {
-            nuevaTarjeta.style.opacity = '1';
-            nuevaTarjeta.style.transform = 'translateY(0)';
-          }, 10);
-
           // Limpiar formulario y cerrar modal
           nuevoForm.reset();
           cerrarModal();

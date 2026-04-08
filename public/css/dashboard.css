@@ -143,8 +143,31 @@
 }
 
 .sortable-ghost {
-  opacity: 0.4;
-  background-color: var(--bg-surface-hover);
+  opacity: 0.2;
+  background-color: var(--color-primary);
+  border: 2px dashed var(--color-primary);
+}
+
+.sortable-drag {
+  cursor: grabbing !important;
+  opacity: 1 !important;
+  transform: rotate(3deg) scale(1.02) !important;
+  box-shadow: var(--shadow-lg) !important;
+}
+
+@keyframes scaleIn {
+  from {
+    opacity: 0;
+    transform: scale(0.9) translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+.tarjeta-anim-enter {
+  animation: scaleIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
 }
 
 .tarjeta-header {
