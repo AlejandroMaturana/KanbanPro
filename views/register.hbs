@@ -44,13 +44,18 @@
       >
         Contraseña
       </label>
-      <input
-        type="password"
-        id="password"
-        name="contrasena"
-        style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 5px; font-size: 16px;"
-        required
-      />
+      <div style="position: relative;">
+        <input
+          type="password"
+          id="password"
+          name="contrasena"
+          style="width: 100%; padding: 10px; padding-right: 40px; border: 1px solid #ddd; border-radius: 5px; font-size: 16px;"
+          required
+        />
+        <button type="button" class="toggle-password" style="position: absolute; right: 10px; top: 50%; transform: translateY(-50%); background: none; border: none; cursor: pointer; font-size: 18px; color: #666;" aria-label="Mostrar contraseña">
+           👁️
+        </button>
+      </div>
     </div>
 
     <button

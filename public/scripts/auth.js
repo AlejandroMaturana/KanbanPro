@@ -5,6 +5,23 @@ document.addEventListener('DOMContentLoaded', () => {
     console.log('KanbanPro Auth Script Cargado');
     const form = document.querySelector('form');
     
+    // --- Lógica del botón de Mostrar/Ocultar Contraseña ---
+    const togglePasswordBtns = document.querySelectorAll('.toggle-password');
+    togglePasswordBtns.forEach(btn => {
+        btn.addEventListener('click', () => {
+            // El input asume estar como hermano anterior al botón, o podemos buscarlo en el mismo contenedor
+            const input = btn.previousElementSibling;
+            if (input && input.tagName === 'INPUT') {
+                const type = input.getAttribute('type') === 'password' ? 'text' : 'password';
+                input.setAttribute('type', type);
+                
+                // Cambiar ícono/estado visual
+                btn.textContent = type === 'password' ? '👁️' : '🙈';
+                btn.setAttribute('aria-label', type === 'password' ? 'Mostrar contraseña' : 'Ocultar contraseña');
+            }
+        });
+    });
+    
     if (form) {
         form.addEventListener('submit', async (e) => {
             e.preventDefault();
