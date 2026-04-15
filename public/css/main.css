@@ -89,6 +89,60 @@ nav {
   gap: 15px;
   list-style: none;
   align-items: center;
+  transition: max-height 0.3s ease-out, opacity 0.3s ease;
+}
+
+.mobile-menu-btn {
+  display: none;
+  background: none;
+  border: none;
+  font-size: 24px;
+  cursor: pointer;
+  padding: 8px;
+  border-radius: 6px;
+  color: var(--text-primary);
+  transition: background 0.2s;
+}
+
+.mobile-menu-btn:hover {
+  background: var(--bg-surface-hover);
+}
+
+@media (max-width: 768px) {
+  nav {
+    flex-wrap: wrap;
+  }
+  
+  .mobile-menu-btn {
+    display: block;
+  }
+  
+  .nav-links {
+    flex-direction: column;
+    width: 100%;
+    max-height: 0;
+    opacity: 0;
+    overflow: hidden;
+    gap: 10px;
+    align-items: stretch;
+    margin-top: 10px;
+  }
+  
+  .nav-links.active {
+    max-height: 400px;
+    opacity: 1;
+    padding: 15px 0;
+    border-top: 1px solid var(--border-color);
+  }
+
+  .nav-links a {
+    text-align: center;
+    padding: 12px;
+  }
+  
+  .theme-toggle-btn {
+    margin: 10px auto 0;
+  }
 }
 
 .nav-links a {
@@ -101,7 +155,7 @@ nav {
   background: transparent;
 }
 
-.nav-links a:hover {
+.nav-links a:hover, .nav-links a:focus-visible {
   background: var(--bg-surface-hover);
   color: var(--color-primary);
 }
@@ -265,3 +319,116 @@ footer a:hover {
 }
 
 .btn-danger:hover { background: var(--color-danger-hover); }
+
+/* --- Global Utilities & Forms --- */
+.text-center { text-align: center; }
+.mt-4 { margin-top: 20px; }
+.mb-4 { margin-bottom: 20px; }
+.text-muted { color: var(--text-secondary); }
+.text-primary-link { color: var(--color-primary); text-decoration: none; font-weight: 500; transition: color 0.2s; }
+.text-primary-link:hover, .text-primary-link:focus-visible { color: var(--color-primary-hover); text-decoration: underline; }
+
+.form-group {
+  margin-bottom: 20px;
+}
+.form-label {
+  display: block;
+  margin-bottom: 6px;
+  font-weight: 500;
+  color: var(--text-primary);
+  font-size: 14px;
+}
+.form-input {
+  width: 100%;
+  padding: 12px;
+  border: 2px solid var(--border-color);
+  border-radius: 6px;
+  font-size: 15px;
+  background: var(--bg-body);
+  color: var(--text-primary);
+  transition: all 0.2s;
+  font-family: inherit;
+}
+.form-input:focus {
+  border-color: var(--color-primary);
+  background: var(--bg-surface);
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(0, 82, 204, 0.1);
+}
+
+.btn-primary-large {
+  display: inline-block;
+  width: 100%;
+  padding: 14px;
+  background: var(--color-primary);
+  color: white;
+  border: none;
+  border-radius: 6px;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+  text-align: center;
+  box-shadow: 0 4px 6px rgba(0, 82, 204, 0.1);
+}
+.btn-primary-large:hover, .btn-primary-large:focus-visible {
+  background: var(--color-primary-hover);
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-md);
+}
+
+.auth-card {
+  max-width: 440px;
+  margin: 40px auto;
+  background: var(--bg-surface);
+  padding: 40px 30px;
+  border-radius: 12px;
+  box-shadow: var(--shadow-lg);
+}
+.auth-card h1 {
+  font-size: 26px;
+  margin-bottom: 10px;
+  color: var(--text-primary);
+}
+.auth-card p {
+  color: var(--text-secondary);
+  margin-bottom: 30px;
+}
+
+.home-card {
+  background: var(--bg-surface);
+  padding: 40px;
+  border-radius: 12px;
+  box-shadow: var(--shadow-md);
+  margin-bottom: 30px;
+}
+.home-card h1 { margin-bottom: 15px; color: var(--color-primary); }
+.home-card h2 { margin-bottom: 15px; color: var(--text-primary); font-size: 22px; }
+.home-card p { font-size: 16px; line-height: 1.6; color: var(--text-secondary); margin-bottom: 20px; }
+
+.btn-group {
+  display: flex;
+  gap: 15px;
+  flex-wrap: wrap;
+}
+.btn-secondary-large {
+  display: inline-block;
+  padding: 12px 24px;
+  background: var(--bg-surface-hover);
+  color: var(--text-primary);
+  text-decoration: none;
+  border-radius: 6px;
+  font-weight: 500;
+  transition: all 0.2s ease;
+  border: 1px solid var(--border-color);
+  text-align: center;
+}
+.btn-secondary-large:hover, .btn-secondary-large:focus-visible {
+  background: var(--border-color);
+  color: var(--text-primary);
+}
+.btn-accent {
+  background: #36b37e; /* Success */
+  color: white;
+}
+.btn-accent:hover, .btn-accent:focus-visible { background: #2b9366; color: white;}

@@ -1,45 +1,37 @@
-<div class="auth-content">
-  <h1>Iniciar Sesión</h1>
-  <p style="color: #666; margin-bottom: 30px;">
+<div class="auth-card">
+  <h1 class="text-center">Iniciar Sesión</h1>
+  <p class="text-center text-muted">
     Ingresa tus credenciales para acceder a KanbanPro
   </p>
 
-  <form style="max-width: 400px; margin: 0 auto;">
-    <div style="margin-bottom: 20px;">
-      <label
-        for="email"
-        style="display: block; margin-bottom: 5px; font-weight: 500;"
-      >
-        Email
-      </label>
+  <form>
+    <div class="form-group">
+      <label for="email" class="form-label">Email</label>
       <input
         type="email"
         id="email"
         name="email"
-        style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 5px; font-size: 16px;"
+        class="form-input"
+        placeholder="ejemplo@correo.com"
         required
       />
     </div>
 
-    <div style="margin-bottom: 20px;">
-      <label
-        for="password"
-        style="display: block; margin-bottom: 5px; font-weight: 500;"
-      >
-        Contraseña
-      </label>
+    <div class="form-group">
+      <label for="password" class="form-label">Contraseña</label>
       <div style="position: relative;">
         <input
           type="password"
           id="password"
           name="contrasena"
-          style="width: 100%; padding: 10px; padding-right: 40px; border: 1px solid #ddd; border-radius: 5px; font-size: 16px;"
+          class="form-input"
+          placeholder="Tu contraseña"
           required
         />
         <button
           type="button"
           class="toggle-password"
-          style="position: absolute; right: 10px; top: 50%; transform: translateY(-50%); background: none; border: none; cursor: pointer; font-size: 18px; color: #666;"
+          style="position: absolute; right: 10px; top: 50%; transform: translateY(-50%); background: none; border: none; cursor: pointer; font-size: 18px; color: var(--text-secondary);"
           aria-label="Mostrar contraseña"
         >
           👁️
@@ -47,17 +39,14 @@
       </div>
     </div>
 
-    <button
-      type="submit"
-      style="width: 100%; padding: 12px; background: #667eea; color: white; border: none; border-radius: 5px; font-size: 16px; font-weight: 500; cursor: pointer;"
-    >
+    <button type="submit" class="btn-primary-large mt-4">
       Iniciar Sesión
     </button>
   </form>
 
-  <p style="text-align: center; margin-top: 20px; color: #666;">
+  <p class="text-center mt-4 text-muted">
     ¿No tienes una cuenta?
-    <a href="/register" style="color: #667eea;">Regístrate aquí</a>
+    <a href="/register" class="text-primary-link">Regístrate aquí</a>
   </p>
 </div>
 

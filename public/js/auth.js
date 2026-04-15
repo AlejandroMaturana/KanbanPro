@@ -27,6 +27,12 @@ document.addEventListener('DOMContentLoaded', () => {
             e.preventDefault();
             console.log('Intentando enviar formulario...');
 
+            const submitBtn = form.querySelector('button[type="submit"]');
+            if (submitBtn) {
+                submitBtn.classList.add('btn-loading');
+                submitBtn.disabled = true;
+            }
+
             const formData = new FormData(form);
             const data = Object.fromEntries(formData.entries());
             console.log('Payload:', { ...data, contrasena: '********' });
@@ -51,26 +57,31 @@ document.addEventListener('DOMContentLoaded', () => {
                         if (isLogin) {
                             localStorage.setItem('token', result.token);
                             console.log('✅ Login exitoso');
-                            alert('¡Bienvenido! Redirigiendo al Dashboard...');
-                            window.location.href = '/dashboard';
+                            if (window.showToast) window.showToast('¡Bienvenido! Redirigiendo al Dashboard...', 'success');
+                            setTimeout(() => { window.location.href = '/dashboard'; }, 1000);
                         } else {
                             console.log('✅ Registro exitoso');
-                            alert('¡Registro completado! Ahora puedes iniciar sesión.');
-                            window.location.href = '/login';
+                            if (window.showToast) window.showToast('¡Registro completado! Ahora puedes iniciar sesión.', 'success');
+                            setTimeout(() => { window.location.href = '/login'; }, 1000);
                         }
                     } else {
                         console.warn('⚠️ Error del servidor:', result.error);
-                        alert('Error: ' + (result.error || 'Ocurrió un problema inesperado.'));
+                        if (window.showToast) window.showToast(result.error || 'Ocurrió un problema inesperado.', 'error');
                     }
                 } else {
                     const text = await response.text();
                     console.error('❌ El servidor no devolvió JSON:', text);
-                    alert('Error en el servidor. Por favor revisa la consola.');
+                    if (window.showToast) window.showToast('Error en el servidor. Por favor revisa la consola.', 'error');
                 }
 
             } catch (error) {
                 console.error('🚨 Falla crítica:', error);
-                alert('No se pudo establecer conexión con el servidor.');
+                if (window.showToast) window.showToast('No se pudo establecer conexión con el servidor.', 'error');
+            } finally {
+                if (submitBtn) {
+                    submitBtn.classList.remove('btn-loading');
+                    submitBtn.disabled = false;
+                }
             }
         });
     } else {
