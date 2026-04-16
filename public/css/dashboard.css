@@ -408,14 +408,34 @@ textarea.form-control {
     justify-content: center;
   }
   
+  /* Kanban Mobile - Focus Layout 15/70/15 */
   .kanban-board {
     scroll-snap-type: x mandatory;
+    padding: 0 15vw; /* Mantiene 15vw a cada lado */
+    gap: 12px; /* Espacio mínimo para dejarlas 'más pegadas' */
+    scroll-behavior: smooth;
+    scrollbar-width: none; /* Firefox */
+  }
+
+  .kanban-board::-webkit-scrollbar {
+    display: none; /* Chrome/Safari */
   }
   
   .lista {
-    scroll-snap-align: start;
-    min-width: 85vw;
-    width: 85vw;
+    scroll-snap-align: center;
+    min-width: 70vw;
+    width: 70vw;
+    flex-shrink: 0;
+    transition: transform 0.3s ease, opacity 0.3s ease;
+    /* Inactivo por defecto: Menos encogimiento para evidenciarlo más */
+    transform: scale(0.96);
+    opacity: 0.5;
+  }
+
+  /* Estado activo vía Intersection Observer */
+  .lista.active {
+    transform: scale(1);
+    opacity: 1;
   }
 }
 

@@ -31,7 +31,12 @@
             </div>
           {{/if}}
 
-          <button id="mobile-menu-btn" class="mobile-menu-btn" aria-label="Abrir menú" aria-expanded="false">
+          <button
+            id="mobile-menu-btn"
+            class="mobile-menu-btn"
+            aria-label="Abrir menú"
+            aria-expanded="false"
+          >
             🍔
           </button>
 
@@ -45,7 +50,12 @@
               <li><a href="/login">Iniciar Sesión</a></li>
             {{/if}}
             <li>
-              <button id="theme-toggle" class="theme-toggle-btn" title="Alternar tema" aria-label="Alternar tema oscuro/claro">
+              <button
+                id="theme-toggle"
+                class="theme-toggle-btn"
+                title="Alternar tema"
+                aria-label="Alternar tema oscuro/claro"
+              >
                 🌙
               </button>
             </li>
@@ -61,8 +71,11 @@
     </div>
 
     <footer>
-      <div class="container" style="display: flex; flex-direction: column; align-items: center; gap: 15px;">
-        <p>&copy; 2026 KanbanPro - Otra idea de Alejandro Maturana.</p>
+      <div
+        class="container"
+        style="display: flex; flex-direction: column; align-items: center; gap: 15px;"
+      >
+        <p>&copy; 2026 KanbanPro</p>
         <div style="display: flex; gap: 20px; margin-top: 10px;">
           <a href="/cookie-policy">Términos</a>
           <a href="/privacy-policy">Privacidad</a>
@@ -80,45 +93,36 @@
         <div class="custom-confirm-header" id="confirm-header">Confirmar Acción</div>
         <div class="custom-confirm-body" id="confirm-body">¿Estás seguro?</div>
         <div class="custom-confirm-actions">
-          <button class="custom-confirm-btn btn-secondary" id="confirm-cancel">Cancelar</button>
-          <button class="custom-confirm-btn btn-danger" id="confirm-ok">Aceptar</button>
+          <button
+            class="custom-confirm-btn btn-secondary"
+            id="confirm-cancel"
+          >Cancelar</button>
+          <button
+            class="custom-confirm-btn btn-danger"
+            id="confirm-ok"
+          >Aceptar</button>
         </div>
       </div>
     </div>
 
     <!-- Global UI Scripts -->
     <script>
-      // Toast and UI utilities
-      window.showToast = (message, type = 'info') => {
-        const container = document.getElementById('toast-container');
-        if (!container) return;
-        const toast = document.createElement('div');
-        toast.className = `toast toast-${type}`;
-        let icon = 'ℹ️';
-        if (type === 'success') icon = '✅';
-        if (type === 'error') icon = '❌';
-        toast.innerHTML = `<span>${icon}</span> <span>${message}</span>`;
-        container.appendChild(toast);
-        toast.offsetHeight; // trigger reflow
-        toast.classList.add('show');
-        setTimeout(() => {
-          toast.classList.remove('show');
-          setTimeout(() => toast.remove(), 300);
-        }, 3000);
-      };
-
-      document.addEventListener('DOMContentLoaded', () => {
-        const mobileMenuBtn = document.getElementById('mobile-menu-btn');
-        const navLinks = document.getElementById('main-nav-links');
-        
-        if (mobileMenuBtn && navLinks) {
-          mobileMenuBtn.addEventListener('click', () => {
-            const isExpanded = mobileMenuBtn.getAttribute('aria-expanded') === 'true';
-            mobileMenuBtn.setAttribute('aria-expanded', !isExpanded);
-            navLinks.classList.toggle('active');
-          });
-        }
-      });
+      // Toast and UI utilities window.showToast = (message, type = 'info') => {
+      const container = document.getElementById('toast-container'); if
+      (!container) return; const toast = document.createElement('div');
+      toast.className = `toast toast-${type}`; let icon = 'ℹ️'; if (type ===
+      'success') icon = '✅'; if (type === 'error') icon = '❌'; toast.innerHTML
+      = `<span>${icon}</span> <span>${message}</span>`;
+      container.appendChild(toast); toast.offsetHeight; // trigger reflow
+      toast.classList.add('show'); setTimeout(() => {
+      toast.classList.remove('show'); setTimeout(() => toast.remove(), 300); },
+      3000); }; document.addEventListener('DOMContentLoaded', () => { const
+      mobileMenuBtn = document.getElementById('mobile-menu-btn'); const navLinks
+      = document.getElementById('main-nav-links'); if (mobileMenuBtn &&
+      navLinks) { mobileMenuBtn.addEventListener('click', () => { const
+      isExpanded = mobileMenuBtn.getAttribute('aria-expanded') === 'true';
+      mobileMenuBtn.setAttribute('aria-expanded', !isExpanded);
+      navLinks.classList.toggle('active'); }); } });
     </script>
     {{{_scripts}}}
   </body>

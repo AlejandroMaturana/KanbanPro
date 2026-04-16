@@ -94,6 +94,9 @@ document.addEventListener('DOMContentLoaded', () => {
       group: 'kanban', // Permite mover entre listas
       animation: 150,
       ghostClass: 'sortable-ghost',
+      delay: 150, // Retraso para drag en touch
+      delayOnTouchOnly: true, // Aplicar delay solo en táctil
+      fallbackTolerance: 5, // Evita conflictos con el scroll de navegación (15/70/15)
       onEnd: async (evt) => {
         const taskId = evt.item.getAttribute('data-id');
         const newListId = evt.to.closest('.lista').getAttribute('data-id');
@@ -124,6 +127,38 @@ document.addEventListener('DOMContentLoaded', () => {
       }
     });
   });
+
+  // --- Lógica del Scroll-Snap 15/70/15 para Mobile ---
+  const listas = document.querySelectorAll('.lista');
+  const kanbanBoard = document.querySelector('.kanban-board');
+
+  if (listas.length > 0 && kanbanBoard) {
+    const savedListIndex = localStorage.getItem('kanbanFocusIndex') || 0;
+    
+    // Observer para la clase .active y 15/70/15 scale focus
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          listas.forEach(l => l.classList.remove('active'));
+          entry.target.classList.add('active');
+          const index = Array.from(listas).indexOf(entry.target);
+          localStorage.setItem('kanbanFocusIndex', index);
+        }
+      });
+    }, {
+      root: kanbanBoard,
+      threshold: 0.55 // Activa cuando pasa del centro visual
+    });
+
+    listas.forEach(lista => observer.observe(lista));
+
+    // Scroll inicial a la columna guardada
+    if (savedListIndex > 0 && listas[savedListIndex]) {
+      setTimeout(() => {
+        listas[savedListIndex].scrollIntoView({ behavior: 'auto', inline: 'center', block: 'nearest' });
+      }, 50);
+    }
+  }
 
   // --- Lógica del Modal ---
   const modal = document.getElementById('modalTarea');
