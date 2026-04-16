@@ -62,6 +62,77 @@ window.customConfirm = (message, title = 'Confirmar Acción') => {
 };
 
 document.addEventListener('DOMContentLoaded', () => {
+  // --- Lógica Modo Demo ---
+  window.guardarEstadoDemo = () => {
+    if (!window.IS_DEMO) return;
+    const listas = document.querySelectorAll('.lista');
+    const estado = {};
+    listas.forEach(l => {
+       const listaId = l.getAttribute('data-id');
+       const tarjetas = [];
+       l.querySelectorAll('.tarjeta').forEach(t => {
+          tarjetas.push({
+             id: t.getAttribute('data-id'),
+             titulo: t.querySelector('h4').textContent,
+             descripcion: t.querySelector('.tarjeta-desc') ? t.querySelector('.tarjeta-desc').textContent : '',
+             prioridad: t.querySelector('.prioridad-tag').textContent.trim()
+          });
+       });
+       estado[listaId] = tarjetas;
+    });
+    localStorage.setItem('demoBoardData', JSON.stringify(estado));
+  };
+
+  window.restaurarEstadoDemo = () => {
+    if (!window.IS_DEMO) return;
+    const localData = localStorage.getItem('demoBoardData');
+    if (localData) {
+       const estado = JSON.parse(localData);
+       Object.keys(estado).forEach(listaId => {
+          const container = document.getElementById(`lista-${listaId}`);
+          if (!container) return;
+          container.innerHTML = '';
+          estado[listaId].forEach(tarjeta => {
+             const tarjetaHtml = `
+              <div
+                class="tarjeta"
+                data-id="${tarjeta.id}"
+                tabindex="0"
+                role="article"
+                aria-label="Tarea: ${tarjeta.titulo}"
+              >
+                <div class="tarjeta-header">
+                  <h4>${tarjeta.titulo}</h4>
+                  <div class="tarjeta-actions">
+                    <button 
+                    onclick="abrirModalEditar('${tarjeta.id}', '${tarjeta.titulo.replace(/'/g, "\\'")}', '${tarjeta.descripcion ? tarjeta.descripcion.replace(/'/g, "\\'") : ''}', '${tarjeta.prioridad}')"
+                    class="btn-edit"
+                    title="Editar tarea">✏️</button>
+                    <button 
+                      onclick="eliminarTarjeta('${tarjeta.id}')"
+                      class="btn-delete"
+                      title="Eliminar tarea"
+                    >🗑️</button>
+                  </div>
+                </div>
+                <div class="prioridad-wrapper">
+                  <span class="prioridad-tag prioridad-${tarjeta.prioridad}">
+                    ${tarjeta.prioridad}
+                  </span>
+                </div>
+                ${tarjeta.descripcion ? `<p class="tarjeta-desc">${tarjeta.descripcion}</p>` : ''}
+              </div>
+            `;
+            container.insertAdjacentHTML('beforeend', tarjetaHtml);
+          });
+       });
+    }
+  };
+
+  if (window.IS_DEMO) {
+    restaurarEstadoDemo();
+  }
+
   // --- Lógica del Tema Oscuro ---
   const themeToggleLabel = document.getElementById('theme-toggle');
   const body = document.body;
@@ -101,6 +172,11 @@ document.addEventListener('DOMContentLoaded', () => {
         const taskId = evt.item.getAttribute('data-id');
         const newListId = evt.to.closest('.lista').getAttribute('data-id');
         
+        if (window.IS_DEMO) {
+          window.guardarEstadoDemo();
+          return;
+        }
+
         console.log(`Moviendo tarea ${taskId} a lista ${newListId}`);
 
         try {
@@ -218,6 +294,35 @@ document.addEventListener('DOMContentLoaded', () => {
         prioridad: document.getElementById('editPrioridad').value
       };
 
+      if (window.IS_DEMO) {
+        const tarjeta = document.querySelector(`.tarjeta[data-id="${id}"]`);
+        if (tarjeta) {
+          tarjeta.querySelector('h4').textContent = payload.titulo;
+          const p = tarjeta.querySelector('p, .tarjeta-desc');
+          if (p) p.textContent = payload.descripcion;
+          else if (payload.descripcion) {
+            const newP = document.createElement('p');
+            newP.className = "tarjeta-desc";
+            newP.textContent = payload.descripcion;
+            tarjeta.appendChild(newP);
+          }
+          const badge = tarjeta.querySelector('.prioridad-tag');
+          if (badge) {
+            badge.className = `prioridad-tag prioridad-${payload.prioridad}`;
+            badge.textContent = payload.prioridad;
+          }
+          const btnEditar = tarjeta.querySelector('button[title="Editar tarea"]');
+          if (btnEditar) {
+            btnEditar.setAttribute('onclick', `abrirModalEditar('${id}', '${payload.titulo.replace(/'/g, "\\'")}', '${payload.descripcion.replace(/'/g, "\\'")}', '${payload.prioridad}')`);
+          }
+        }
+        window.guardarEstadoDemo();
+        cerrarModal();
+        window.showToast('Tarea editada localmente', 'success');
+        if (submitBtn) submitBtn.classList.remove('btn-loading');
+        return;
+      }
+
       try {
         const response = await fetch(`/api/tarjetas/${id}`, {
           method: 'PATCH',
@@ -277,6 +382,56 @@ document.addEventListener('DOMContentLoaded', () => {
       const formData = new FormData(nuevoForm);
       const payload = Object.fromEntries(formData);
       
+      if (window.IS_DEMO) {
+        const tarjeta = {
+          id: 'demo-' + Date.now(),
+          titulo: payload.titulo,
+          descripcion: payload.descripcion,
+          prioridad: payload.prioridad || "Media",
+          listaId: payload.lista === 'todo' ? 'todo' : payload.lista === 'in-progress' ? 'in-progress' : 'done'
+        };
+        const container = document.getElementById(`lista-${tarjeta.listaId}`);
+        if (container) {
+          const tarjetaHtml = `
+            <div
+              class="tarjeta tarjeta-anim-enter"
+              data-id="${tarjeta.id}"
+              tabindex="0"
+              role="article"
+              aria-label="Tarea: ${tarjeta.titulo}"
+            >
+              <div class="tarjeta-header">
+                <h4>${tarjeta.titulo}</h4>
+                <div class="tarjeta-actions">
+                  <button 
+                  onclick="abrirModalEditar('${tarjeta.id}', '${tarjeta.titulo.replace(/'/g, "\\'")}', '${tarjeta.descripcion ? tarjeta.descripcion.replace(/'/g, "\\'") : ''}', '${tarjeta.prioridad}')"
+                  class="btn-edit"
+                  title="Editar tarea">✏️</button>
+                  <button 
+                    onclick="eliminarTarjeta('${tarjeta.id}')"
+                    class="btn-delete"
+                    title="Eliminar tarea"
+                  >🗑️</button>
+                </div>
+              </div>
+              <div class="prioridad-wrapper">
+                <span class="prioridad-tag prioridad-${tarjeta.prioridad}">
+                  ${tarjeta.prioridad}
+                </span>
+              </div>
+              ${tarjeta.descripcion ? `<p class="tarjeta-desc">${tarjeta.descripcion}</p>` : ''}
+            </div>
+          `;
+          container.insertAdjacentHTML('beforeend', tarjetaHtml);
+          nuevoForm.reset();
+          cerrarModal();
+          window.guardarEstadoDemo();
+          window.showToast('Tarea creada localmente', 'success');
+        }
+        if (submitBtn) submitBtn.classList.remove('btn-loading');
+        return;
+      }
+
       try {
         const response = await fetch('/nueva-tarjeta', {
           method: 'POST',
@@ -353,6 +508,17 @@ window.eliminarTarjeta = async (taskId) => {
   const isConfirmed = await window.customConfirm('¿Estás seguro de que deseas eliminar esta tarea? Esta acción no se puede deshacer.', 'Eliminar Tarea');
   
   if (!isConfirmed) {
+    return;
+  }
+
+  if (window.IS_DEMO) {
+    const tarjetaElement = document.querySelector(`.tarjeta[data-id="${taskId}"]`);
+    if (tarjetaElement) {
+      tarjetaElement.style.transform = 'scale(0.9)';
+      tarjetaElement.style.opacity = '0';
+      setTimeout(() => { tarjetaElement.remove(); window.guardarEstadoDemo(); }, 300);
+    }
+    window.showToast('Tarea eliminada localmente', 'success');
     return;
   }
 

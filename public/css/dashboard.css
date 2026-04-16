@@ -1,3 +1,22 @@
+.demo-banner {
+  background-color: #fffae6;
+  color: #b36200;
+  padding: 12px 20px;
+  border-radius: 6px;
+  margin-bottom: 20px;
+  border-left: 4px solid #ffab00;
+  font-size: 14px;
+}
+.dark-theme .demo-banner {
+  background-color: rgba(255, 171, 0, 0.1);
+  color: #ffab00;
+}
+.demo-banner a {
+  color: inherit;
+  font-weight: bold;
+  text-decoration: underline;
+}
+
 .dashboard-content {
   animation: fadeIn 0.4s ease-out;
 }

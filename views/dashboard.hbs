@@ -1,4 +1,11 @@
 <div class="dashboard-content">
+  {{#if isDemo}}
+  <div class="demo-banner">
+    ⚠️ <strong>Modo Demo:</strong> Todo sucede en tu navegador. Si deseas guardar tus cambios en la nube, <a href="/register">regístrate gratis</a>.
+  </div>
+  <script>window.IS_DEMO = true;</script>
+  {{/if}}
+
   <div class="dashboard-header">
     <h1>Dashboard - KanbanPro</h1>
     <button id="btnAbrirModal" aria-label="Abrir modal para nueva tarea">
