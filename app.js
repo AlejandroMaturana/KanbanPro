@@ -7,7 +7,7 @@ const bcrypt = require("bcryptjs");
 const cookieParser = require("cookie-parser");
 
 const sequelize = require("./config/db");
-const { Usuario, Tablero, Lista, Tarjeta } = require("./models");
+const { Usuario, Tablero, Lista, Tarjeta, BoardMember } = require("./models");
 
 const app = express();
 const JWT_SECRET = process.env.JWT_SECRET || "TuClaveSecretaParaKanban2026!";
@@ -206,8 +206,14 @@ app.get("/dashboard", async (req, res) => {
       return res.render("dashboard", { data: { tableros }, isDemo: true });
     }
 
-    let tableros = await Tablero.findAll({
-      where: { usuarioId: req.usuarioId },
+    // Obtener usuario autenticado
+    const usuario = await Usuario.findByPk(req.usuarioId);
+    if (!usuario) {
+      return res.status(401).send("Usuario no autenticado");
+    }
+
+    // Obtener tableros donde el usuario es miembro (vía many-to-many)
+    let tableros = await usuario.getMiembro_tableros({
       include: [
         {
           model: Lista,
@@ -217,19 +223,28 @@ app.get("/dashboard", async (req, res) => {
       ],
     });
 
-    // Fallback para usuarios que no tengan tableros (por si falló el registro o son antiguos)
+    // Fallback: si no tiene tableros, crear uno nuevo
     if (tableros.length === 0) {
       const tablero = await Tablero.create({
         titulo: "Mi Primer Tablero",
-        usuarioId: req.usuarioId,
+        owner_id: req.usuarioId,
       });
+      
+      // Agregar usuario como miembro owner
+      await BoardMember.create({
+        usuarioId: req.usuarioId,
+        tableroId: tablero.id,
+        role: "owner",
+      });
+      
+      // Crear listas por defecto
       const listas = ["Por Hacer", "En Progreso", "Terminado"];
       for (const l of listas) {
         await Lista.create({ titulo: l, tableroId: tablero.id });
       }
+      
       // Recargar tableros
-      tableros = await Tablero.findAll({
-        where: { usuarioId: req.usuarioId },
+      tableros = await usuario.getMiembro_tableros({
         include: [
           {
             model: Lista,
@@ -276,10 +291,11 @@ app.post("/nueva-tarjeta", verificarContexto, async (req, res) => {
     if (lista === "in-progress") nombreListaBuscada = "En Progreso";
     if (lista === "done") nombreListaBuscada = "Terminado";
 
-    // Buscar todas las listas del usuario que coincidan con el nombre
-    const tablerosUsuario = await Tablero.findAll({
-      where: { usuarioId: req.usuarioId },
-    });
+    // Obtener tableros del usuario vía many-to-many
+    const usuario = await Usuario.findByPk(req.usuarioId);
+    if (!usuario) return res.status(401).send("Usuario no autenticado");
+    
+    const tablerosUsuario = await usuario.getMiembro_tableros();
     const tableroIds = tablerosUsuario.map((t) => t.id);
 
     const listaEncontrada = await Lista.findOne({
@@ -348,7 +364,16 @@ app.patch("/api/tarjetas/:id", verificarContexto, async (req, res) => {
       ],
     });
 
-    if (!tarjeta || tarjeta.lista.tablero.usuarioId !== req.usuarioId) {
+    if (!tarjeta) {
+      return res.status(404).json({ error: "Tarjeta no encontrada." });
+    }
+
+    // Verificar que el usuario es miembro del tablero
+    const usuario = await Usuario.findByPk(req.usuarioId);
+    const tablerosMiembro = await usuario.getMiembro_tableros();
+    const tieneAcceso = tablerosMiembro.some(t => t.id === tarjeta.lista.tablero.id);
+    
+    if (!tieneAcceso) {
       return res.status(403).json({ error: "Sin permiso." });
     }
 
@@ -372,7 +397,16 @@ app.delete("/api/tarjetas/:id", verificarContexto, async (req, res) => {
       ],
     });
 
-    if (!tarjeta || tarjeta.lista.tablero.usuarioId !== req.usuarioId) {
+    if (!tarjeta) {
+      return res.status(404).json({ error: "Tarjeta no encontrada." });
+    }
+
+    // Verificar que el usuario es miembro del tablero
+    const usuario = await Usuario.findByPk(req.usuarioId);
+    const tablerosMiembro = await usuario.getMiembro_tableros();
+    const tieneAcceso = tablerosMiembro.some(t => t.id === tarjeta.lista.tablero.id);
+    
+    if (!tieneAcceso) {
       return res.status(403).json({ error: "Sin permiso." });
     }
 
