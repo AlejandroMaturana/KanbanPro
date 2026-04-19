@@ -29,16 +29,76 @@
 .dashboard-header {
   display: flex;
   justify-content: space-between;
-  align-items: center;
+  align-items: flex-start;
   margin-bottom: 30px;
   border-bottom: 2px solid var(--border-color);
   padding-bottom: 15px;
+  flex-wrap: wrap;
+  gap: 15px;
+}
+
+.dashboard-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+  gap: 15px;
+  flex-wrap: wrap;
 }
 
 .dashboard-header h1 {
   margin: 0;
   color: var(--text-primary);
   font-size: 24px;
+}
+
+.tablero-controls {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+
+#selectTablero {
+  padding: 10px 15px;
+  background: var(--bg-secondary);
+  color: var(--text-primary);
+  border: 1px solid var(--border-color);
+  border-radius: 6px;
+  font-size: 14px;
+  cursor: pointer;
+  transition: all 0.2s;
+  min-width: 250px;
+}
+
+#selectTablero:hover,
+#selectTablero:focus {
+  border-color: var(--color-primary);
+  background: var(--bg-primary);
+  outline: none;
+}
+
+.btn-nuevo-tablero {
+  padding: 10px 16px;
+  background: #10b981;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+  box-shadow: 0 4px 6px rgba(16, 185, 129, 0.2);
+  white-space: nowrap;
+}
+
+.btn-nuevo-tablero:hover {
+  background: #059669;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 12px rgba(16, 185, 129, 0.3);
+}
+
+.btn-nuevo-tablero:active {
+  transform: translateY(0);
 }
 
 #btnAbrirModal {

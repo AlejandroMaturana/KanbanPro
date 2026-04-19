@@ -7,14 +7,27 @@
   {{/if}}
 
   <div class="dashboard-header">
-    <h1>Dashboard - KanbanPro</h1>
+    <div class="dashboard-top">
+      <h1>Dashboard - KanbanPro</h1>
+      <div class="tablero-controls">
+        <select id="selectTablero" aria-label="Seleccionar tablero">
+          <option value="">-- Selecciona un tablero --</option>
+          {{#each data.tableros}}
+            <option value="{{this.id}}">{{this.titulo}}</option>
+          {{/each}}
+        </select>
+        <button id="btnNuevoTablero" class="btn-nuevo-tablero" title="Crear nuevo tablero">
+          ➕ Nuevo Tablero
+        </button>
+      </div>
+    </div>
     <button id="btnAbrirModal" aria-label="Abrir modal para nueva tarea">
       <span aria-hidden="true">+</span> Nueva Tarea
     </button>
   </div>
 
   {{#each data.tableros}}
-    <div class="tablero">
+    <div class="tablero" data-tablero-id="{{this.id}}">
       <h2 class="tablero-title">{{this.titulo}}</h2>
 
       <div class="kanban-board">
