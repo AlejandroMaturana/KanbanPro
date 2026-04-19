@@ -498,6 +498,72 @@ document.addEventListener('DOMContentLoaded', () => {
       }
     });
   }
+
+  // ==========================================
+  // 🎯 MANEJO DE TABLEROS
+  // ==========================================
+
+  // Selector de tableros
+  const selectTablero = document.getElementById('selectTablero');
+  if (selectTablero) {
+    selectTablero.addEventListener('change', (e) => {
+      const tableroId = e.target.value;
+      if (!tableroId) return;
+
+      // Ocultar todos los tableros
+      document.querySelectorAll('.tablero').forEach(t => {
+        t.style.display = 'none';
+      });
+
+      // Mostrar tablero seleccionado
+      const tableroSeleccionado = document.querySelector(`.tablero[data-tablero-id="${tableroId}"]`);
+      if (tableroSeleccionado) {
+        tableroSeleccionado.style.display = 'block';
+      }
+    });
+
+    // Seleccionar el primer tablero por defecto
+    if (selectTablero.options.length > 1) {
+      selectTablero.selectedIndex = 1;
+      selectTablero.dispatchEvent(new Event('change'));
+    }
+  }
+
+  // Botón para crear nuevo tablero
+  const btnNuevoTablero = document.getElementById('btnNuevoTablero');
+  if (btnNuevoTablero) {
+    btnNuevoTablero.addEventListener('click', async () => {
+      const titulo = prompt('¿Cuál es el nombre del nuevo tablero?', 'Personal');
+      if (!titulo || titulo.trim() === '') return;
+
+      const descripcion = prompt('Descripción (opcional):', '');
+
+      try {
+        const response = await fetch('/api/tableros', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          credentials: 'include',
+          body: JSON.stringify({
+            titulo: titulo.trim(),
+            descripcion: descripcion?.trim() || ''
+          })
+        });
+
+        if (!response.ok) {
+          const error = await response.json();
+          throw new Error(error.error || 'Error al crear tablero');
+        }
+
+        window.showToast('✅ Tablero creado exitosamente. La página se recargará...', 'success');
+        setTimeout(() => window.location.reload(), 1500);
+      } catch (error) {
+        console.error('Error:', error);
+        window.showToast(`❌ Error: ${error.message}`, 'error');
+      }
+    });
+  }
 });
 
 /**
