@@ -2,7 +2,7 @@ const { DataTypes } = require("sequelize");
 const sequelize = require("../config/db");
 
 // Definición del modelo "Tablero"
-// Un usuario puede tener muchos tableros (relación 1:N con Usuario)
+// Cada usuario puede crear muchos tableros (relación many-to-many con Usuario a través de BoardMember)
 const Tablero = sequelize.define(
   "Tablero",
   {
@@ -13,6 +13,10 @@ const Tablero = sequelize.define(
     descripcion: {
       type: DataTypes.TEXT,
       allowNull: true, // La descripción es opcional
+    },
+    owner_id: {
+      type: DataTypes.UUID,
+      allowNull: true,
     },
   },
   {
