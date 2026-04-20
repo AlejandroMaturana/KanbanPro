@@ -16,10 +16,9 @@
             <option value="{{this.id}}">{{this.titulo}}</option>
           {{/each}}
         </select>
-        <button id="btnNuevoTablero" class="btn-nuevo-tablero" title="Crear nuevo tablero">
-          ➕ Nuevo Tablero
-        </button>
-      </div>
+        <a href="/tableros" class="btn-secondary" title="Administrar Tableros" style="text-decoration: none; display: inline-flex; align-items: center; justify-content: center; padding: 8px 16px;">
+          ⚙️ Administrar Tableros
+        </a>
     </div>
     <button id="btnAbrirModal" aria-label="Abrir modal para nueva tarea">
       <span aria-hidden="true">+</span> Nueva Tarea
@@ -84,6 +83,8 @@
     </div>
 
     <form method="POST" action="/nueva-tarjeta">
+      <!-- Se rellena por JS con el tablero activo en selectTablero -->
+      <input type="hidden" id="formTableroId" name="tableroId" value="" />
       <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
         <div class="form-group">
           <label for="titulo">Título *</label>
@@ -135,6 +136,8 @@
     </form>
   </div>
 </div>
+
+
 
 <!-- Modal para editar tarjeta -->
 <div id="modalEditarTarea" class="modal-overlay" role="dialog" aria-labelledby="modal-editar-tarea-title" aria-modal="true">

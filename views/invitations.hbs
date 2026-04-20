@@ -1,0 +1,421 @@
+<div class="invitations-content">
+  <div class="invitations-header">
+    <h1>📨 Invitaciones</h1>
+    <button id="btn-enviar-invitacion" class="btn-primary" title="Enviar nueva invitación">
+      ➕ Nueva Invitación
+    </button>
+  </div>
+
+  <div class="invitations-tabs">
+    <button id="tab-enviadas" class="tab-btn active" aria-selected="true">
+      📤 Enviadas <span id="badge-enviadas" class="tab-badge"></span>
+    </button>
+    <button id="tab-recibidas" class="tab-btn" aria-selected="false">
+      📥 Recibidas <span id="badge-recibidas" class="tab-badge"></span>
+    </button>
+  </div>
+
+  <div id="enviadas-section" class="invitations-section active">
+    <div id="enviadas-list" class="invitations-list">
+      <div class="loading-state">Cargando invitaciones...</div>
+    </div>
+  </div>
+
+  <div id="recibidas-section" class="invitations-section">
+    <div id="recibidas-list" class="invitations-list">
+      <div class="loading-state">Cargando invitaciones...</div>
+    </div>
+  </div>
+</div>
+
+<!-- Modal para enviar invitación -->
+<div id="modal-enviar-invitacion" class="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="modal-inv-title" style="display:none;">
+  <div class="modal-content">
+    <div class="modal-header">
+      <h2 id="modal-inv-title">➕ Enviar Invitación</h2>
+      <button class="close-modal" id="close-modal" aria-label="Cerrar">&times;</button>
+    </div>
+
+    <form id="form-enviar-invitacion" autocomplete="off">
+      <div class="form-group">
+        <label for="board-select">Tablero *</label>
+        <select id="board-select" class="form-control" required>
+          <option value="">-- Selecciona un tablero --</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label for="user-search">Buscar usuario *</label>
+        <div class="search-wrapper">
+          <input
+            type="text"
+            id="user-search"
+            class="form-control"
+            placeholder="Nombre de usuario o correo electrónico..."
+            autocomplete="off"
+          />
+          <div id="user-suggestions" class="suggestions-dropdown" style="display:none;"></div>
+        </div>
+        <input type="hidden" id="invitee-email" />
+        <p id="user-selected-info" class="user-selected-info" style="display:none;"></p>
+      </div>
+
+      <div class="form-group">
+        <label for="invitee-role">Rol *</label>
+        <select id="invitee-role" class="form-control" required>
+          <option value="viewer">👁️ Viewer — solo lectura</option>
+          <option value="editor" selected>✏️ Editor — puede editar tareas</option>
+          <option value="owner">👑 Owner — control total</option>
+        </select>
+      </div>
+
+      <div class="modal-actions">
+        <button type="button" class="btn-cancel" id="cancel-modal">Cancelar</button>
+        <button type="submit" class="btn-primary" id="submit-invitation">Enviar Invitación</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<script>
+(function () {
+  'use strict';
+
+  let invitacionesEnviadas = [];
+  let invitacionesRecibidas = [];
+  let searchTimeout = null;
+  let usuarioSeleccionado = null;
+
+  // =========================================
+  // INICIALIZACIÓN
+  // =========================================
+  document.addEventListener('DOMContentLoaded', () => {
+    cargarInvitaciones();
+    cargarTableros();
+    initTabs();
+    initModal();
+    initBuscadorUsuarios();
+  });
+
+  // =========================================
+  // TABS
+  // =========================================
+  function initTabs() {
+    document.getElementById('tab-enviadas').addEventListener('click', () => mostrarSeccion('enviadas'));
+    document.getElementById('tab-recibidas').addEventListener('click', () => mostrarSeccion('recibidas'));
+  }
+
+  function mostrarSeccion(seccion) {
+    document.querySelectorAll('.tab-btn').forEach(btn => {
+      btn.classList.remove('active');
+      btn.setAttribute('aria-selected', 'false');
+    });
+    document.querySelectorAll('.invitations-section').forEach(sec => sec.classList.remove('active'));
+    document.getElementById(`tab-${seccion}`).classList.add('active');
+    document.getElementById(`tab-${seccion}`).setAttribute('aria-selected', 'true');
+    document.getElementById(`${seccion}-section`).classList.add('active');
+  }
+
+  // =========================================
+  // MODAL
+  // =========================================
+  function initModal() {
+    const modal = document.getElementById('modal-enviar-invitacion');
+    const btnAbrir = document.getElementById('btn-enviar-invitacion');
+    const btnCerrar = document.getElementById('close-modal');
+    const btnCancelar = document.getElementById('cancel-modal');
+
+    btnAbrir.addEventListener('click', () => abrirModal());
+    btnCerrar.addEventListener('click', () => cerrarModal());
+    btnCancelar.addEventListener('click', () => cerrarModal());
+    modal.addEventListener('click', (e) => { if (e.target === modal) cerrarModal(); });
+
+    document.getElementById('form-enviar-invitacion').addEventListener('submit', enviarInvitacion);
+  }
+
+  function abrirModal() {
+    document.getElementById('modal-enviar-invitacion').style.display = 'flex';
+    document.body.style.overflow = 'hidden';
+  }
+
+  function cerrarModal() {
+    document.getElementById('modal-enviar-invitacion').style.display = 'none';
+    document.body.style.overflow = 'auto';
+    resetFormulario();
+  }
+
+  function resetFormulario() {
+    document.getElementById('form-enviar-invitacion').reset();
+    document.getElementById('user-search').value = '';
+    document.getElementById('invitee-email').value = '';
+    document.getElementById('user-suggestions').style.display = 'none';
+    document.getElementById('user-selected-info').style.display = 'none';
+    usuarioSeleccionado = null;
+  }
+
+  // =========================================
+  // BUSCADOR DE USUARIOS (nombre o email)
+  // =========================================
+  function initBuscadorUsuarios() {
+    const input = document.getElementById('user-search');
+    const dropdown = document.getElementById('user-suggestions');
+
+    input.addEventListener('input', () => {
+      const q = input.value.trim();
+
+      // Si borra la selección previa, resetear
+      if (usuarioSeleccionado && input.value !== `${usuarioSeleccionado.nombre} (${usuarioSeleccionado.email})`) {
+        usuarioSeleccionado = null;
+        document.getElementById('invitee-email').value = '';
+        document.getElementById('user-selected-info').style.display = 'none';
+      }
+
+      clearTimeout(searchTimeout);
+      if (q.length < 2) {
+        dropdown.style.display = 'none';
+        return;
+      }
+
+      searchTimeout = setTimeout(() => buscarUsuarios(q), 300);
+    });
+
+    // Cerrar dropdown al hacer clic afuera
+    document.addEventListener('click', (e) => {
+      if (!e.target.closest('.search-wrapper')) {
+        dropdown.style.display = 'none';
+      }
+    });
+  }
+
+  async function buscarUsuarios(q) {
+    const dropdown = document.getElementById('user-suggestions');
+    try {
+      const res = await fetch(`/api/usuarios/buscar?q=${encodeURIComponent(q)}`);
+      const data = await res.json();
+
+      if (!data.usuarios || data.usuarios.length === 0) {
+        dropdown.innerHTML = '<div class="suggestion-empty">No se encontraron usuarios</div>';
+        dropdown.style.display = 'block';
+        return;
+      }
+
+      dropdown.innerHTML = data.usuarios.map(u => `
+        <div class="suggestion-item" data-id="${u.id}" data-nombre="${u.nombre}" data-email="${u.email}">
+          <span class="suggestion-nombre">👤 ${u.nombre}</span>
+          <span class="suggestion-email">${u.email}</span>
+        </div>
+      `).join('');
+
+      dropdown.querySelectorAll('.suggestion-item').forEach(item => {
+        item.addEventListener('click', () => seleccionarUsuario({
+          id: item.dataset.id,
+          nombre: item.dataset.nombre,
+          email: item.dataset.email,
+        }));
+      });
+
+      dropdown.style.display = 'block';
+    } catch (err) {
+      console.error('Error buscando usuarios:', err);
+    }
+  }
+
+  function seleccionarUsuario(usuario) {
+    usuarioSeleccionado = usuario;
+    document.getElementById('user-search').value = `${usuario.nombre}`;
+    document.getElementById('invitee-email').value = usuario.email;
+    document.getElementById('user-suggestions').style.display = 'none';
+
+    const info = document.getElementById('user-selected-info');
+    info.innerHTML = `✅ <strong>${usuario.nombre}</strong> &mdash; ${usuario.email}`;
+    info.style.display = 'block';
+  }
+
+  // =========================================
+  // CARGA DE TABLEROS
+  // =========================================
+  async function cargarTableros() {
+    try {
+      const res = await fetch('/api/tableros');
+      const data = await res.json();
+      if (!res.ok) return;
+      const select = document.getElementById('board-select');
+      data.tableros.forEach(t => {
+        const opt = document.createElement('option');
+        opt.value = t.id;
+        opt.textContent = t.titulo;
+        select.appendChild(opt);
+      });
+    } catch (err) {
+      console.error('Error cargando tableros:', err);
+    }
+  }
+
+  // =========================================
+  // CARGAR & RENDERIZAR INVITACIONES
+  // =========================================
+  async function cargarInvitaciones() {
+    try {
+      const res = await fetch('/api/invitations');
+      const data = await res.json();
+      if (res.ok) {
+        invitacionesEnviadas = data.enviadas || [];
+        invitacionesRecibidas = data.recibidas || [];
+        renderizarEnviadas();
+        renderizarRecibidas();
+        actualizarBadges();
+      }
+    } catch (err) {
+      console.error('Error cargando invitaciones:', err);
+    }
+  }
+
+  function actualizarBadges() {
+    const pendEnviadas = invitacionesEnviadas.filter(i => i.status === 'pending').length;
+    const pendRecibidas = invitacionesRecibidas.filter(i => i.status === 'pending').length;
+    const badgeE = document.getElementById('badge-enviadas');
+    const badgeR = document.getElementById('badge-recibidas');
+    badgeE.textContent = pendEnviadas || '';
+    badgeR.textContent = pendRecibidas || '';
+    badgeE.style.display = pendEnviadas ? 'inline-flex' : 'none';
+    badgeR.style.display = pendRecibidas ? 'inline-flex' : 'none';
+  }
+
+  function renderizarEnviadas() {
+    const container = document.getElementById('enviadas-list');
+    if (invitacionesEnviadas.length === 0) {
+      container.innerHTML = `<div class="empty-state"><span>📭</span><p>No has enviado invitaciones aún.</p><button onclick="document.getElementById('btn-enviar-invitacion').click()" class="btn-primary">Enviar primera invitación</button></div>`;
+      return;
+    }
+    container.innerHTML = invitacionesEnviadas.map(inv => `
+      <div class="invitation-card" data-id="${inv.id}">
+        <div class="invitation-card-top">
+          <div class="inv-board-name">📋 ${inv.board.titulo}</div>
+          <span class="inv-status status-${inv.status}">${getStatusLabel(inv.status)}</span>
+        </div>
+        <div class="invitation-card-body">
+          <div class="inv-detail"><span class="inv-label">Destinatario</span><span class="inv-value">✉️ ${inv.inviteeEmail}</span></div>
+          <div class="inv-detail"><span class="inv-label">Rol</span><span class="inv-value inv-role role-${inv.role}">${getRoleLabel(inv.role)}</span></div>
+          <div class="inv-detail"><span class="inv-label">Enviada</span><span class="inv-value">${formatDate(inv.createdAt)}</span></div>
+          ${inv.status === 'pending' ? `<div class="inv-detail"><span class="inv-label">Expira</span><span class="inv-value">${formatDate(inv.expiresAt)}</span></div>` : ''}
+        </div>
+        ${inv.status === 'pending' ? `
+        <div class="invitation-card-actions">
+          <button onclick="cancelarInvitacion(${inv.id})" class="btn-danger-sm">🗑️ Cancelar</button>
+        </div>` : ''}
+      </div>
+    `).join('');
+  }
+
+  function renderizarRecibidas() {
+    const container = document.getElementById('recibidas-list');
+    if (invitacionesRecibidas.length === 0) {
+      container.innerHTML = `<div class="empty-state"><span>📬</span><p>No tienes invitaciones pendientes.</p></div>`;
+      return;
+    }
+    container.innerHTML = invitacionesRecibidas.map(inv => `
+      <div class="invitation-card" data-id="${inv.id}">
+        <div class="invitation-card-top">
+          <div class="inv-board-name">📋 ${inv.board.titulo}</div>
+          <span class="inv-status status-${inv.status}">${getStatusLabel(inv.status)}</span>
+        </div>
+        <div class="invitation-card-body">
+          <div class="inv-detail"><span class="inv-label">Invitado por</span><span class="inv-value">👤 ${inv.inviter.nombre}</span></div>
+          <div class="inv-detail"><span class="inv-label">Rol asignado</span><span class="inv-value inv-role role-${inv.role}">${getRoleLabel(inv.role)}</span></div>
+          <div class="inv-detail"><span class="inv-label">Recibida</span><span class="inv-value">${formatDate(inv.createdAt)}</span></div>
+          ${inv.status === 'pending' ? `<div class="inv-detail"><span class="inv-label">Expira</span><span class="inv-value">${formatDate(inv.expiresAt)}</span></div>` : ''}
+        </div>
+        ${inv.status === 'pending' ? `
+        <div class="invitation-card-actions">
+          <button onclick="aceptarInvitacion(${inv.id})" class="btn-success-sm">✅ Aceptar</button>
+          <button onclick="rechazarInvitacion(${inv.id})" class="btn-danger-sm">❌ Rechazar</button>
+        </div>` : ''}
+      </div>
+    `).join('');
+  }
+
+  // =========================================
+  // HELPERS
+  // =========================================
+  function getRoleLabel(role) {
+    return { owner: '👑 Propietario', editor: '✏️ Editor', viewer: '👁️ Viewer' }[role] || role;
+  }
+  function getStatusLabel(status) {
+    return { pending: 'Pendiente', accepted: 'Aceptada', rejected: 'Rechazada', expired: 'Expirada' }[status] || status;
+  }
+  function formatDate(dateStr) {
+    if (!dateStr) return '—';
+    return new Date(dateStr).toLocaleDateString('es-ES', { day: '2-digit', month: 'short', year: 'numeric' });
+  }
+
+  // =========================================
+  // ACCIONES
+  // =========================================
+  async function enviarInvitacion(e) {
+    e.preventDefault();
+    const boardId = document.getElementById('board-select').value;
+    const inviteeEmail = document.getElementById('invitee-email').value;
+    const role = document.getElementById('invitee-role').value;
+
+    if (!boardId) { window.showToast('❌ Selecciona un tablero', 'error'); return; }
+    if (!inviteeEmail) { window.showToast('❌ Selecciona un usuario de la lista', 'error'); return; }
+
+    const btn = document.getElementById('submit-invitation');
+    btn.classList.add('btn-loading');
+
+    try {
+      const res = await fetch('/api/invitations', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ boardId, inviteeEmail, role }),
+      });
+      const data = await res.json();
+      if (res.ok) {
+        window.showToast('✅ Invitación enviada exitosamente', 'success');
+        cerrarModal();
+        cargarInvitaciones();
+      } else {
+        window.showToast(`❌ ${data.error}`, 'error');
+      }
+    } catch (err) {
+      window.showToast('❌ Error de red al enviar la invitación', 'error');
+    } finally {
+      btn.classList.remove('btn-loading');
+    }
+  }
+
+  window.aceptarInvitacion = async (id) => {
+    const ok = await window.customConfirm('¿Aceptar esta invitación y unirte al tablero?', 'Aceptar Invitación');
+    if (!ok) return;
+    try {
+      const res = await fetch(`/api/invitations/${id}/accept`, { method: 'PATCH' });
+      const data = await res.json();
+      if (res.ok) { window.showToast('✅ Invitación aceptada. ¡Ya eres miembro!', 'success'); cargarInvitaciones(); }
+      else window.showToast(`❌ ${data.error}`, 'error');
+    } catch (err) { window.showToast('❌ Error de red', 'error'); }
+  };
+
+  window.rechazarInvitacion = async (id) => {
+    const ok = await window.customConfirm('¿Rechazar esta invitación?', 'Rechazar Invitación');
+    if (!ok) return;
+    try {
+      const res = await fetch(`/api/invitations/${id}/reject`, { method: 'PATCH' });
+      const data = await res.json();
+      if (res.ok) { window.showToast('Invitación rechazada.', 'info'); cargarInvitaciones(); }
+      else window.showToast(`❌ ${data.error}`, 'error');
+    } catch (err) { window.showToast('❌ Error de red', 'error'); }
+  };
+
+  window.cancelarInvitacion = async (id) => {
+    const ok = await window.customConfirm('¿Cancelar esta invitación pendiente?', 'Cancelar Invitación');
+    if (!ok) return;
+    try {
+      const res = await fetch(`/api/invitations/${id}`, { method: 'DELETE' });
+      const data = await res.json();
+      if (res.ok) { window.showToast('Invitación cancelada.', 'info'); cargarInvitaciones(); }
+      else window.showToast(`❌ ${data.error}`, 'error');
+    } catch (err) { window.showToast('❌ Error de red', 'error'); }
+  };
+
+})();
+</script>

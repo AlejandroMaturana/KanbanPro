@@ -243,6 +243,11 @@ document.addEventListener('DOMContentLoaded', () => {
   const btnCancelar = document.getElementById('btnCancelar');
 
   const abrirModal = () => {
+    // Sincronizar el tableroId activo en el campo oculto del formulario
+    const tableroActivo = document.getElementById('selectTablero')?.value || '';
+    const campoTableroId = document.getElementById('formTableroId');
+    if (campoTableroId) campoTableroId.value = tableroActivo;
+
     modal.style.display = 'flex';
     document.body.style.overflow = 'hidden';
   };
@@ -381,6 +386,11 @@ document.addEventListener('DOMContentLoaded', () => {
       
       const formData = new FormData(nuevoForm);
       const payload = Object.fromEntries(formData);
+
+      // Garantizar que tableroId esté siempre presente (por si el campo hidden no se llenó)
+      if (!payload.tableroId) {
+        payload.tableroId = document.getElementById('selectTablero')?.value || '';
+      }
       
       if (window.IS_DEMO) {
         const tarjeta = {
@@ -527,42 +537,6 @@ document.addEventListener('DOMContentLoaded', () => {
       selectTablero.selectedIndex = 1;
       selectTablero.dispatchEvent(new Event('change'));
     }
-  }
-
-  // Botón para crear nuevo tablero
-  const btnNuevoTablero = document.getElementById('btnNuevoTablero');
-  if (btnNuevoTablero) {
-    btnNuevoTablero.addEventListener('click', async () => {
-      const titulo = prompt('¿Cuál es el nombre del nuevo tablero?', 'Personal');
-      if (!titulo || titulo.trim() === '') return;
-
-      const descripcion = prompt('Descripción (opcional):', '');
-
-      try {
-        const response = await fetch('/api/tableros', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          credentials: 'include',
-          body: JSON.stringify({
-            titulo: titulo.trim(),
-            descripcion: descripcion?.trim() || ''
-          })
-        });
-
-        if (!response.ok) {
-          const error = await response.json();
-          throw new Error(error.error || 'Error al crear tablero');
-        }
-
-        window.showToast('✅ Tablero creado exitosamente. La página se recargará...', 'success');
-        setTimeout(() => window.location.reload(), 1500);
-      } catch (error) {
-        console.error('Error:', error);
-        window.showToast(`❌ Error: ${error.message}`, 'error');
-      }
-    });
   }
 });
 

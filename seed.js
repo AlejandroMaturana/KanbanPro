@@ -1,6 +1,6 @@
 require("dotenv").config();
 const sequelize = require("./config/db");
-const { Usuario, Tablero, Lista, Tarjeta } = require("./models");
+const { Usuario, Tablero, Lista, Tarjeta, BoardMember } = require("./models");
 const bcrypt = require("bcryptjs");
 
 const seed = async () => {
@@ -33,120 +33,155 @@ const seed = async () => {
       },
     ];
 
+    const usuarios = [];
     for (const p of personas) {
       const usuario = await Usuario.create({
         nombre: p.nombre,
         email: p.email,
         contrasena: await bcrypt.hash(p.clave, saltRounds),
       });
+      usuarios.push(usuario);
       console.log(`👤 Usuario creado: ${usuario.nombre} (${usuario.email})`);
+    }
 
-      // --- CADA USUARIO TIENE SU PROPIO TABLERO ---
-      let tituloTablero = `Gestión de ${usuario.nombre}`;
-      let descTablero = "Tablero oficial de monitoreo de procesos.";
+    // --- CREAR MÚLTIPLES TABLEROS PERSONALES ---
+    const tablerosPersonales = [
+      {
+        titulo: "Optimización Línea de Producción N°3",
+        descripcion: "Foco en reducción de desperdicios y mejora de OEE.",
+        usuario: usuarios[0], // Carolina
+      },
+      {
+        titulo: "Proyectos Personales",
+        descripcion: "Tareas personales y hobbies.",
+        usuario: usuarios[0],
+      },
+      {
+        titulo: "Rediseño Almacén de Producto Terminado",
+        descripcion: "Gestión de layout y flujo de materiales en bodega principal.",
+        usuario: usuarios[1], // Rodrigo
+      },
+      {
+        titulo: "Estudios y Capacitación",
+        descripcion: "Cursos y certificaciones en progreso.",
+        usuario: usuarios[1],
+      },
+      {
+        titulo: "Invernadero A: Monitoreo Hidropónico",
+        descripcion: "Control de PH, conductividad y nutrientes en tiempo real.",
+        usuario: usuarios[2], // Mariana
+      },
+      {
+        titulo: "Jardinería Urbana",
+        descripcion: "Proyecto personal de cultivo en balcón.",
+        usuario: usuarios[2],
+      },
+      {
+        titulo: "Mantenimiento Preventivo Planta Sur",
+        descripcion: "Gestión de activos industriales y paradas programadas.",
+        usuario: usuarios[3], // Sebastián
+      },
+      {
+        titulo: "Reparaciones del Hogar",
+        descripcion: "Mantenimiento y mejoras en la casa.",
+        usuario: usuarios[3],
+      },
+    ];
 
-      if (p.nombre.includes("Carolina")) {
-        tituloTablero = "Optimización Línea de Producción N°3";
-        descTablero = "Foco en reducción de desperdicios y mejora de OEE.";
-      } else if (p.nombre.includes("Rodrigo")) {
-        tituloTablero = "Rediseño Almacén de Producto Terminado";
-        descTablero =
-          "Gestión de layout y flujo de materiales en bodega principal.";
-      } else if (p.nombre.includes("Mariana")) {
-        tituloTablero = "Invernadero A: Monitoreo Hidropónico";
-        descTablero =
-          "Control de PH, conductividad y nutrientes en tiempo real.";
-      } else if (p.nombre.includes("Sebastián")) {
-        tituloTablero = "Mantenimiento Preventivo Planta Sur";
-        descTablero = "Gestión de activos industriales y paradas programadas.";
-      }
-
+    for (const tp of tablerosPersonales) {
       const tablero = await Tablero.create({
-        titulo: tituloTablero,
-        descripcion: descTablero,
-        usuarioId: usuario.id,
+        titulo: tp.titulo,
+        descripcion: tp.descripcion,
+        owner_id: tp.usuario.id,
       });
-      console.log(`   📋 Tablero creado: "${tablero.titulo}"`);
 
-      // --- CADA TABLERO TIENE 3 LISTAS ---
-      const listas = [
-        { titulo: "Por Hacer" },
-        { titulo: "En Progreso" },
-        { titulo: "Terminado" },
-      ];
+      await BoardMember.create({
+        usuarioId: tp.usuario.id,
+        tableroId: tablero.id,
+        role: "owner",
+      });
 
-      for (const l of listas) {
-        const listaNueva = await Lista.create({
-          titulo: l.titulo,
-          tableroId: tablero.id,
-        });
+      console.log(`   📋 Tablero personal creado: "${tablero.titulo}" para ${tp.usuario.nombre}`);
 
-        // --- AGREGAMOS TAREAS SEGÚN EL ROL ---
-        if (l.titulo === "Por Hacer") {
-          if (p.nombre.includes("Mariana")) {
-            await Tarjeta.create({
-              titulo: "Calibración Sensores NPK",
-              descripcion:
-                "Calibrar los 3 sensores del tanque principal después del cambio de filtro.",
-              listaId: listaNueva.id,
-              prioridad: "Urgente"
-            });
-            await Tarjeta.create({
-              titulo: "Revisión Tasa Transpiración",
-              descripcion:
-                "Monitoreo de humedad relativa en zona de cultivo Vertical.",
-              listaId: listaNueva.id,
-            });
-          } else if (p.nombre.includes("Sebastián")) {
-            await Tarjeta.create({
-              titulo: "Inspección Caldera N°2",
-              descripcion:
-                "Revisar presión de vapor y válvulas de seguridad presostáticas.",
-              listaId: listaNueva.id,
-              prioridad: "Alta"
-            });
-          } else {
-            await Tarjeta.create({
-              titulo: "Reunión de Planificación",
-              descripcion: "Definir KPI del Sprint 3 con el equipo técnico.",
-              listaId: listaNueva.id,
-            });
-          }
-        }
-
-        if (l.titulo === "En Progreso") {
-          if (p.nombre.includes("Carolina")) {
-            await Tarjeta.create({
-              titulo: "Mapeo VSM Línea 3",
-              descripcion:
-                "Identificar cuellos de botella en la fase de empaquetado.",
-              listaId: listaNueva.id,
-            });
-          } else if (p.nombre.includes("Rodrigo")) {
-            await Tarjeta.create({
-              titulo: "Inventario Cíclico Sector B",
-              descripcion: "Conteo físico de materias primas críticas.",
-              listaId: listaNueva.id,
-            });
-          } else {
-            await Tarjeta.create({
-              titulo: "Documentación de Procesos",
-              descripcion: "Actualizar manuales de operación estándar (SOP).",
-              listaId: listaNueva.id,
-            });
-          }
-        }
-
-        if (l.titulo === "Terminado") {
-          await Tarjeta.create({
-            titulo: "Cierre Auditoría Interna",
-            descripcion: "Informe final enviado a gerencia técnica.",
-            listaId: listaNueva.id,
-            prioridad: "Baja"
-          });
-        }
+      // Crear listas por defecto
+      const listas = ["Por Hacer", "En Progreso", "Terminado"];
+      for (const tituloLista of listas) {
+        await Lista.create({ titulo: tituloLista, tableroId: tablero.id });
       }
-      console.log(`   ✅ Listas y Tareas generadas para ${usuario.nombre}\n`);
+    }
+
+    // --- CREAR TABLEROS COMPARTIDOS ---
+    const tablerosCompartidos = [
+      {
+        titulo: "Proyecto Integrado: Optimización Global",
+        descripcion: "Colaboración entre todos los departamentos para mejora continua.",
+        owner: usuarios[0], // Carolina como owner
+        miembros: [
+          { usuario: usuarios[1], role: "editor" }, // Rodrigo editor
+          { usuario: usuarios[2], role: "editor" }, // Mariana editor
+          { usuario: usuarios[3], role: "viewer" }, // Sebastián viewer
+        ],
+      },
+      {
+        titulo: "Mantenimiento Cruzado: Planta Norte-Sur",
+        descripcion: "Coordinación de mantenimientos entre plantas industriales.",
+        owner: usuarios[3], // Sebastián como owner
+        miembros: [
+          { usuario: usuarios[0], role: "editor" }, // Carolina editor
+          { usuario: usuarios[1], role: "viewer" }, // Rodrigo viewer
+        ],
+      },
+    ];
+
+    for (const tc of tablerosCompartidos) {
+      const tablero = await Tablero.create({
+        titulo: tc.titulo,
+        descripcion: tc.descripcion,
+        owner_id: tc.owner.id,
+      });
+
+      // Owner
+      await BoardMember.create({
+        usuarioId: tc.owner.id,
+        tableroId: tablero.id,
+        role: "owner",
+      });
+
+      // Miembros adicionales
+      for (const miembro of tc.miembros) {
+        await BoardMember.create({
+          usuarioId: miembro.usuario.id,
+          tableroId: tablero.id,
+          role: miembro.role,
+        });
+      }
+
+      console.log(`   📋 Tablero compartido creado: "${tablero.titulo}"`);
+
+      // Crear listas por defecto
+      const listas = ["Por Hacer", "En Progreso", "Terminado"];
+      for (const tituloLista of listas) {
+        await Lista.create({ titulo: tituloLista, tableroId: tablero.id });
+      }
+
+      // Agregar algunas tareas de ejemplo a tableros compartidos
+      if (tc.titulo.includes("Optimización Global")) {
+        const listasTablero = await Lista.findAll({ where: { tableroId: tablero.id } });
+        const porHacer = listasTablero.find(l => l.titulo === "Por Hacer");
+        const enProgreso = listasTablero.find(l => l.titulo === "En Progreso");
+
+        await Tarjeta.create({
+          titulo: "Reunión Interdepartamental",
+          descripcion: "Coordinar equipos para alineación de objetivos Q2.",
+          listaId: porHacer.id,
+          prioridad: "Alta"
+        });
+        await Tarjeta.create({
+          titulo: "Análisis de Datos Cruzados",
+          descripcion: "Comparar métricas de producción entre plantas.",
+          listaId: enProgreso.id,
+        });
+      }
     }
 
     console.log("🚀 --- Poblado de Base de Datos finalizado con éxito ---");
