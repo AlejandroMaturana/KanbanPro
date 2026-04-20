@@ -3,6 +3,7 @@ const Tablero = require("./Tablero");
 const Lista = require("./Lista");
 const Tarjeta = require("./Tarjeta");
 const BoardMember = require("./BoardMember");
+const Invitation = require("./Invitation");
 
 // ========================================
 // RELACIONES MANY-TO-MANY (Usuario ↔ Tablero)
@@ -75,4 +76,33 @@ Lista.hasMany(Tarjeta, {
 });
 Tarjeta.belongsTo(Lista, { foreignKey: "listaId", as: "lista" });
 
-module.exports = { Usuario, Tablero, Lista, Tarjeta, BoardMember };
+// ========================================
+// RELACIONES INVITATIONS
+// ========================================
+// Una invitación pertenece a un tablero y un invitador
+Invitation.belongsTo(Tablero, {
+  foreignKey: "boardId",
+  as: "board",
+  onDelete: "CASCADE",
+});
+Invitation.belongsTo(Usuario, {
+  foreignKey: "inviterId",
+  as: "inviter",
+  onDelete: "CASCADE",
+});
+
+// Un tablero puede tener muchas invitaciones
+Tablero.hasMany(Invitation, {
+  foreignKey: "boardId",
+  as: "invitations",
+  onDelete: "CASCADE",
+});
+
+// Un usuario puede enviar muchas invitaciones
+Usuario.hasMany(Invitation, {
+  foreignKey: "inviterId",
+  as: "sentInvitations",
+  onDelete: "CASCADE",
+});
+
+module.exports = { Usuario, Tablero, Lista, Tarjeta, BoardMember, Invitation };
