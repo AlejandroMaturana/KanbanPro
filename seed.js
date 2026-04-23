@@ -5,11 +5,10 @@ const bcrypt = require("bcryptjs");
 
 const seed = async () => {
   try {
-    // Sincronizamos todos los modelos con la BD, force: true recrea las tablas desde cero
-    await sequelize.sync({ force: true });
-    console.log(
-      "🗄️  --- Sistema Reiniciado: Tablas creadas en PostgreSQL ---\n",
-    );
+    // IMPORTANTE: En un sistema basado en migraciones, NO usamos sync() ni force: true.
+    // El esquema debe ser creado con 'pnpm migrate'.
+    console.log("🗄️  --- Iniciando poblado de datos (Seeds) ---");
+    console.log("⚠️  Asegúrate de haber ejecutado 'pnpm migrate' antes.\n");
 
     const saltRounds = 10;
 
