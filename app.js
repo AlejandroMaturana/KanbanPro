@@ -13,11 +13,12 @@ const app = express();
 const JWT_SECRET = process.env.JWT_SECRET || "TuClaveSecretaParaKanban2026!";
 
 // --- INICIALIZACIÓN DE DB ---
-// En Vercel (Serverless), sincronizamos las tablas si no existen al arrancar la función
+// En producción, las migraciones se ejecutan fuera del runtime (CI/CD o CLI).
+// El runtime asume que el esquema ya es correcto.
 sequelize
-  .sync()
-  .then(() => console.log("📡 Base de datos sincronizada"))
-  .catch((err) => console.error("❌ Error sincronizando DB:", err));
+  .authenticate()
+  .then(() => console.log("📡 Conectado a la base de datos"))
+  .catch((err) => console.error("❌ Error de conexión DB:", err));
 
 // --- CONFIGURACIÓN DE HANDLEBARS ---
 app.set("view engine", "hbs");
