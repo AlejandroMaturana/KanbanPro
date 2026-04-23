@@ -37,11 +37,12 @@ if (dbUrl) {
         require: true,
         rejectUnauthorized: false, // Acepta certificados autofirmados (Supabase, Neon, Render)
       },
+      keepAlive: true,
     },
     pool: {
-      max: 5,
+      max: 1, // En serverless, 1 conexión por función suele ser mejor para evitar agotar el pool del DB
       min: 0,
-      acquire: 30000,
+      acquire: 60000, // Aumentamos el tiempo de adquisición para evitar timeouts en el handshake
       idle: 10000,
     },
   });
