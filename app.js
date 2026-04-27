@@ -1032,5 +1032,5 @@ app.delete("/api/invitations/:id", verificarContexto, async (req, res) => {
   }
 });
 
-// EXPORTACIÓN PARA VERCEL
+// EXPORTACIÓN PARA EL SERVIDOR
 module.exports = app;

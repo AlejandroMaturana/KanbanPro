@@ -1,14 +1,14 @@
 require("dotenv").config();
 const { Sequelize } = require("sequelize");
-const pg = require("pg"); // Importación explícita para asegurar que Vercel incluya el paquete
+const pg = require("pg"); // Importación explícita para asegurar que se incluya el paquete
 
-// URL de conexión completa (Prioridad 1: Vercel / Supabase / Render)
+// URL de conexión completa (Prioridad 1: Render / Supabase)
 const rawDbUrl = process.env.DATABASE_URL || process.env.POSTGRES_URL || process.env.DB_URI;
 
 /**
  * Limpia los parámetros SSL de la URL para que pg-connection-string
  * no sobreescriba la configuración SSL de dialectOptions.
- * Esto resuelve el error SELF_SIGNED_CERT_IN_CHAIN en Vercel.
+ * Esto resuelve el error SELF_SIGNED_CERT_IN_CHAIN en despliegues en la nube.
  */
 function stripSslParams(url) {
   try {
@@ -40,7 +40,7 @@ if (dbUrl) {
       keepAlive: true,
     },
     pool: {
-      max: 1, // En serverless, 1 conexión por función suele ser mejor para evitar agotar el pool del DB
+      max: 5, // En Render, podemos tener un pool de conexiones persistente
       min: 0,
       acquire: 60000, // Aumentamos el tiempo de adquisición para evitar timeouts en el handshake
       idle: 10000,

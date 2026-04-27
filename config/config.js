@@ -15,7 +15,7 @@ const config = {
   }
 };
 
-// Si hay una URL disponible, la usamos (Prioridad Vercel/Supabase)
+// Si hay una URL disponible, la usamos (Prioridad Render/Supabase)
 const dbUrl = process.env.DATABASE_URL || process.env.POSTGRES_URL || process.env.DB_URI;
 if (dbUrl) {
   config.url = dbUrl;

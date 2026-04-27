@@ -3,8 +3,7 @@ const app = require('./app');
 const sequelize = require('./config/db');
 
 /**
- * server.js: Punto de entrada para desarrollo LOCAL.
- * Este archivo NO se usa en Vercel, pero permite que 'pnpm run dev' siga funcionando.
+ * server.js: Punto de entrada principal.
  */
 
 const PORT = process.env.PORT || 3000;
