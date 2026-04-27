@@ -1,0 +1,223 @@
+<div class="dashboard-content" style="max-width: 800px; margin: 0 auto; padding-top: 20px;">
+  <div class="dashboard-header" style="justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border-color); padding-bottom: 20px; margin-bottom: 20px;">
+    <h1>Administrar Tableros</h1>
+    <button id="btnNuevoTablero" class="btn-primary" title="Crear nuevo tablero">
+      ➕ Nuevo Tablero
+    </button>
+  </div>
+
+  <div class="tableros-list">
+    {{#if data.tableros.length}}
+      <div style="display: grid; gap: 15px;">
+        {{#each data.tableros}}
+          <div class="tablero-item" style="background: var(--card-bg); padding: 20px; border-radius: var(--border-radius); box-shadow: var(--shadow-sm); display: flex; justify-content: space-between; align-items: center; border: 1px solid var(--border-color);">
+            <div>
+              <h3 style="margin-bottom: 5px;">{{this.titulo}}</h3>
+              {{#if this.descripcion}}
+                <p style="color: var(--text-secondary); margin-bottom: 5px;">{{this.descripcion}}</p>
+              {{/if}}
+              <small style="color: var(--text-muted);">
+                Rol: {{#if this.esOwner}}Propietario{{else}}Miembro{{/if}}
+              </small>
+            </div>
+            <div style="display: flex; gap: 10px;">
+              <a href="/dashboard" class="btn-secondary" style="text-decoration: none; display: inline-flex; align-items: center;">
+                Ver Tablero
+              </a>
+              {{#if this.esOwner}}
+                <button onclick="eliminarTablero('{{this.id}}')" class="btn-delete" title="Eliminar tablero" style="padding: 8px 12px;">
+                  🗑️ Eliminar
+                </button>
+              {{/if}}
+            </div>
+          </div>
+        {{/each}}
+      </div>
+    {{else}}
+      <div style="text-align: center; padding: 40px; background: var(--card-bg); border-radius: var(--border-radius);">
+        <p style="color: var(--text-secondary); margin-bottom: 20px;">No tienes tableros actualmente.</p>
+        <button onclick="document.getElementById('btnNuevoTablero').click()" class="btn-primary">
+          Crea tu primer tablero
+        </button>
+      </div>
+    {{/if}}
+  </div>
+</div>
+
+<!-- Modal para crear nuevo tablero -->
+<div id="modalTablero" class="modal-overlay" role="dialog" aria-labelledby="modal-nuevo-tablero-title" aria-modal="true" style="display: none;">
+  <div class="modal-content">
+    <div class="modal-header">
+      <h2 id="modal-nuevo-tablero-title">➕ Crear Nuevo Tablero</h2>
+      <button id="btnCerrarModalTablero" class="close-modal" aria-label="Cerrar modal">&times;</button>
+    </div>
+
+    <form id="formNuevoTablero">
+      <div class="form-group">
+        <label for="tituloTablero">Título *</label>
+        <input
+          type="text"
+          id="tituloTablero"
+          name="titulo"
+          class="form-control"
+          required
+          placeholder="Nombre del tablero"
+        />
+      </div>
+
+      <div class="form-group">
+        <label for="descripcionTablero">Descripción</label>
+        <textarea
+          id="descripcionTablero"
+          name="descripcion"
+          class="form-control"
+          rows="3"
+          placeholder="Descripción opcional..."
+        ></textarea>
+      </div>
+
+      <div class="modal-actions">
+        <button type="button" id="btnCancelarTablero" class="btn-cancel" aria-label="Cancelar creación">Cancelar</button>
+        <button type="submit" class="btn-primary" aria-label="Confirmar crear tablero">Crear Tablero</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<script>
+// ─── Utilidades locales (kanban.js no se carga aquí) ───────────────────────
+if (typeof window.showToast !== 'function') {
+  window.showToast = (message, type = 'info') => {
+    const container = document.getElementById('toast-container');
+    if (!container) return;
+    const toast = document.createElement('div');
+    toast.className = `toast toast-${type}`;
+    const icon = type === 'success' ? '✅' : type === 'error' ? '❌' : 'ℹ️';
+    toast.innerHTML = `<span>${icon}</span> <span>${message}</span>`;
+    container.appendChild(toast);
+    toast.offsetHeight;
+    toast.classList.add('show');
+    setTimeout(() => { toast.classList.remove('show'); setTimeout(() => toast.remove(), 300); }, 3500);
+  };
+}
+
+if (typeof window.customConfirm !== 'function') {
+  window.customConfirm = (message, title = 'Confirmar Acción') => {
+    return new Promise((resolve) => {
+      const overlay = document.getElementById('custom-confirm');
+      if (!overlay) { resolve(confirm(message)); return; }
+      document.getElementById('confirm-header').textContent = title;
+      document.getElementById('confirm-body').textContent = message;
+      overlay.classList.add('show');
+      document.body.style.overflow = 'hidden';
+      const cleanup = () => {
+        overlay.classList.remove('show');
+        document.body.style.overflow = 'auto';
+        btnCancel.removeEventListener('click', onCancel);
+        btnOk.removeEventListener('click', onOk);
+      };
+      const btnCancel = document.getElementById('confirm-cancel');
+      const btnOk    = document.getElementById('confirm-ok');
+      const onCancel = () => { cleanup(); resolve(false); };
+      const onOk     = () => { cleanup(); resolve(true); };
+      btnCancel.addEventListener('click', onCancel);
+      btnOk.addEventListener('click', onOk);
+    });
+  };
+}
+// ───────────────────────────────────────────────────────────────────────────
+
+document.addEventListener('DOMContentLoaded', () => {
+  // Modal handling
+  const modalTablero = document.getElementById('modalTablero');
+  const btnNuevoTablero = document.getElementById('btnNuevoTablero');
+  const btnCerrarModalTablero = document.getElementById('btnCerrarModalTablero');
+  const btnCancelarTablero = document.getElementById('btnCancelarTablero');
+
+  const abrirModal = () => {
+    modalTablero.style.display = 'flex';
+    document.body.style.overflow = 'hidden';
+  };
+
+  const cerrarModal = () => {
+    modalTablero.style.display = 'none';
+    document.body.style.overflow = 'auto';
+  };
+
+  if (btnNuevoTablero) btnNuevoTablero.addEventListener('click', abrirModal);
+  if (btnCerrarModalTablero) btnCerrarModalTablero.addEventListener('click', cerrarModal);
+  if (btnCancelarTablero) btnCancelarTablero.addEventListener('click', cerrarModal);
+
+  modalTablero.addEventListener('click', (e) => {
+    if (e.target === modalTablero) cerrarModal();
+  });
+
+  // Create board form handling
+  const formNuevoTablero = document.getElementById('formNuevoTablero');
+  if (formNuevoTablero) {
+    formNuevoTablero.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      
+      const submitBtn = formNuevoTablero.querySelector('button[type="submit"]');
+      if (submitBtn) submitBtn.classList.add('btn-loading');
+
+      const titulo = document.getElementById('tituloTablero').value.trim();
+      const descripcion = document.getElementById('descripcionTablero').value.trim();
+
+      if (!titulo) {
+        window.showToast('❌ El título es obligatorio', 'error');
+        if (submitBtn) submitBtn.classList.remove('btn-loading');
+        return;
+      }
+
+      try {
+        const response = await fetch('/api/tableros', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ titulo, descripcion })
+        });
+
+        if (!response.ok) {
+          const error = await response.json();
+          throw new Error(error.error || 'Error al crear tablero');
+        }
+
+        formNuevoTablero.reset();
+        cerrarModal();
+        window.showToast('✅ Tablero creado exitosamente. La página se recargará...', 'success');
+        setTimeout(() => window.location.reload(), 1500);
+      } catch (error) {
+        console.error('Error:', error);
+        window.showToast(`❌ Error: ${error.message}`, 'error');
+      } finally {
+        if (submitBtn) submitBtn.classList.remove('btn-loading');
+      }
+    });
+  }
+
+  // Delete board handling
+  window.eliminarTablero = async (tableroId) => {
+    if (!tableroId) return;
+
+    const isConfirmed = await window.customConfirm('¿Estás seguro de que deseas eliminar este tablero? Esta acción no se puede deshacer.', 'Eliminar Tablero');
+    if (!isConfirmed) return;
+
+    try {
+      const response = await fetch(`/api/tableros/${tableroId}`, {
+        method: 'DELETE'
+      });
+
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.error || 'Error al eliminar tablero');
+      }
+
+      window.showToast('✅ Tablero eliminado. La página se recargará...', 'success');
+      setTimeout(() => window.location.reload(), 1500);
+    } catch (error) {
+      console.error('Error:', error);
+      window.showToast(`❌ Error: ${error.message}`, 'error');
+    }
+  };
+});
+</script>

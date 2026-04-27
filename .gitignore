@@ -2,3 +2,7 @@
 node_modules/
 .env
 *.txt
+
+// Suite E2E
+/playwright-report
+/tests

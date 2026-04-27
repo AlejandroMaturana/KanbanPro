@@ -44,6 +44,8 @@
             <li><a href="/">Inicio</a></li>
             {{#if isAutenticado}}
               <li><a href="/dashboard">Dashboard</a></li>
+              <li><a href="/tableros">Tableros</a></li>
+              <li><a href="/invitations">Invitaciones</a></li>
               <li><a href="/logout">Cerrar Sesión</a></li>
             {{else}}
               <li><a href="/register">Registro</a></li>
@@ -105,24 +107,37 @@
       </div>
     </div>
 
-    <!-- Global UI Scripts -->
     <script>
-      // Toast and UI utilities window.showToast = (message, type = 'info') => {
-      const container = document.getElementById('toast-container'); if
-      (!container) return; const toast = document.createElement('div');
-      toast.className = `toast toast-${type}`; let icon = 'ℹ️'; if (type ===
-      'success') icon = '✅'; if (type === 'error') icon = '❌'; toast.innerHTML
-      = `<span>${icon}</span> <span>${message}</span>`;
-      container.appendChild(toast); toast.offsetHeight; // trigger reflow
-      toast.classList.add('show'); setTimeout(() => {
-      toast.classList.remove('show'); setTimeout(() => toast.remove(), 300); },
-      3000); }; document.addEventListener('DOMContentLoaded', () => { const
-      mobileMenuBtn = document.getElementById('mobile-menu-btn'); const navLinks
-      = document.getElementById('main-nav-links'); if (mobileMenuBtn &&
-      navLinks) { mobileMenuBtn.addEventListener('click', () => { const
-      isExpanded = mobileMenuBtn.getAttribute('aria-expanded') === 'true';
-      mobileMenuBtn.setAttribute('aria-expanded', !isExpanded);
-      navLinks.classList.toggle('active'); }); } });
+      // Toast and UI utilities
+      window.showToast = (message, type = 'info') => {
+        const container = document.getElementById('toast-container');
+        if (!container) return;
+        const toast = document.createElement('div');
+        toast.className = `toast toast-${type}`;
+        let icon = 'ℹ️';
+        if (type === 'success') icon = '✅';
+        if (type === 'error') icon = '❌';
+        toast.innerHTML = `<span>${icon}</span> <span>${message}</span>`;
+        container.appendChild(toast);
+        toast.offsetHeight; // trigger reflow
+        toast.classList.add('show');
+        setTimeout(() => {
+          toast.classList.remove('show');
+          setTimeout(() => toast.remove(), 300);
+        }, 3000);
+      };
+
+      document.addEventListener('DOMContentLoaded', () => {
+        const mobileMenuBtn = document.getElementById('mobile-menu-btn');
+        const navLinks = document.getElementById('main-nav-links');
+        if (mobileMenuBtn && navLinks) {
+          mobileMenuBtn.addEventListener('click', () => {
+            const isExpanded = mobileMenuBtn.getAttribute('aria-expanded') === 'true';
+            mobileMenuBtn.setAttribute('aria-expanded', !isExpanded);
+            navLinks.classList.toggle('active');
+          });
+        }
+      });
     </script>
     {{{_scripts}}}
   </body>

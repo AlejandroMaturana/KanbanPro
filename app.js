@@ -7,17 +7,18 @@ const bcrypt = require("bcryptjs");
 const cookieParser = require("cookie-parser");
 
 const sequelize = require("./config/db");
-const { Usuario, Tablero, Lista, Tarjeta, BoardMember } = require("./models");
+const { Usuario, Tablero, Lista, Tarjeta, BoardMember, Invitation } = require("./models");
 
 const app = express();
 const JWT_SECRET = process.env.JWT_SECRET || "TuClaveSecretaParaKanban2026!";
 
 // --- INICIALIZACIÓN DE DB ---
-// En Vercel (Serverless), sincronizamos las tablas si no existen al arrancar la función
+// En producción, las migraciones se ejecutan fuera del runtime (CI/CD o CLI).
+// El runtime asume que el esquema ya es correcto.
 sequelize
-  .sync()
-  .then(() => console.log("📡 Base de datos sincronizada"))
-  .catch((err) => console.error("❌ Error sincronizando DB:", err));
+  .authenticate()
+  .then(() => console.log("📡 Conectado a la base de datos"))
+  .catch((err) => console.error("❌ Error de conexión DB:", err));
 
 // --- CONFIGURACIÓN DE HANDLEBARS ---
 app.set("view engine", "hbs");
@@ -85,6 +86,48 @@ const verificarContexto = (req, res, next) => {
   }
 };
 
+// Middleware de permisos por tablero
+const verificarPermisosTablero = (rolesPermitidos = ["owner", "editor", "viewer"]) => {
+  return async (req, res, next) => {
+    try {
+      const tableroId = req.params.id || req.body.tableroId || req.params.tableroId;
+      if (!tableroId) {
+        return res.status(400).json({ error: "ID de tablero requerido." });
+      }
+
+      const usuario = await Usuario.findByPk(req.usuarioId);
+      if (!usuario) {
+        return res.status(401).json({ error: "Usuario no autenticado." });
+      }
+
+      // Buscar membresía del usuario en el tablero
+      const membresia = await BoardMember.findOne({
+        where: {
+          usuarioId: req.usuarioId,
+          tableroId: tableroId,
+        },
+      });
+
+      if (!membresia) {
+        return res.status(403).json({ error: "No tienes acceso a este tablero." });
+      }
+
+      if (!rolesPermitidos.includes(membresia.role)) {
+        return res.status(403).json({
+          error: `Rol insuficiente. Se requiere: ${rolesPermitidos.join(" o ")}. Tu rol: ${membresia.role}`,
+        });
+      }
+
+      req.userRole = membresia.role;
+      req.boardMember = membresia;
+      next();
+    } catch (error) {
+      console.error("Error en middleware de permisos:", error);
+      res.status(500).json({ error: "Error verificando permisos." });
+    }
+  };
+};
+
 // ==========================================
 // 🔐 RUTAS DE AUTENTICACIÓN
 // ==========================================
@@ -109,7 +152,14 @@ app.post("/api/auth/register", async (req, res) => {
     const tablero = await Tablero.create({
       titulo: `Tablero de ${nuevoUsuario.nombre}`,
       descripcion: "Tu primer tablero de tareas.",
+      owner_id: nuevoUsuario.id,
+    });
+
+    // Agregar usuario como miembro owner en board_members
+    await BoardMember.create({
       usuarioId: nuevoUsuario.id,
+      tableroId: tablero.id,
+      role: "owner",
     });
 
     const listasPrincipales = ["Por Hacer", "En Progreso", "Terminado"];
@@ -169,12 +219,49 @@ app.get("/logout", (req, res) => {
 app.get("/", (req, res) => res.render("home"));
 app.get("/register", (req, res) => res.render("register"));
 app.get("/login", (req, res) => res.render("login"));
+app.get("/invitations", verificarContexto, async (req, res) => {
+  try {
+    res.render("invitations", { title: "Invitaciones" });
+  } catch (error) {
+    console.error("Error cargando invitaciones:", error);
+    res.status(500).send("Error cargando invitaciones.");
+  }
+});
 app.get("/cookie-policy", (req, res) =>
   res.render("cookie-policy", { title: "Política de Cookies" }),
 );
 app.get("/privacy-policy", (req, res) =>
   res.render("privacy-policy", { title: "Política de Privacidad" }),
 );
+
+app.get("/tableros", verificarContexto, async (req, res) => {
+  try {
+    const usuario = await Usuario.findByPk(req.usuarioId);
+    if (!usuario) {
+      return res.redirect("/login");
+    }
+
+    const tableros = await usuario.getMiembro_tableros({
+      attributes: ["id", "titulo", "descripcion", "owner_id", "createdAt"],
+    });
+
+    res.render("tableros", { 
+      title: "Administrar Tableros",
+      data: {
+        tableros: tableros.map(t => ({
+          id: t.id,
+          titulo: t.titulo,
+          descripcion: t.descripcion,
+          esOwner: t.owner_id === req.usuarioId,
+          createdAt: t.createdAt
+        }))
+      }
+    });
+  } catch (error) {
+    console.error("Error cargando tableros:", error);
+    res.status(500).send("Error cargando administración de tableros.");
+  }
+});
 
 app.get("/dashboard", async (req, res) => {
   try {
@@ -418,7 +505,7 @@ app.get("/api/tableros/:id", verificarContexto, async (req, res) => {
 });
 
 // PATCH /api/tableros/:id - Editar tablero (solo owner)
-app.patch("/api/tableros/:id", verificarContexto, async (req, res) => {
+app.patch("/api/tableros/:id", verificarContexto, verificarPermisosTablero(["owner"]), async (req, res) => {
   try {
     const { id } = req.params;
     const { titulo, descripcion } = req.body;
@@ -428,12 +515,7 @@ app.patch("/api/tableros/:id", verificarContexto, async (req, res) => {
       return res.status(404).json({ error: "Tablero no encontrado." });
     }
 
-    // Verificar que es el owner
-    if (tablero.owner_id !== req.usuarioId) {
-      return res.status(403).json({ error: "Solo el owner puede editar." });
-    }
-
-    // Actualizar campos
+    // Actualizar campos (permisos ya verificados por middleware)
     if (titulo && titulo.trim() !== "") {
       tablero.titulo = titulo.trim();
     }
@@ -458,18 +540,13 @@ app.patch("/api/tableros/:id", verificarContexto, async (req, res) => {
 });
 
 // DELETE /api/tableros/:id - Eliminar tablero (solo owner)
-app.delete("/api/tableros/:id", verificarContexto, async (req, res) => {
+app.delete("/api/tableros/:id", verificarContexto, verificarPermisosTablero(["owner"]), async (req, res) => {
   try {
     const { id } = req.params;
 
     const tablero = await Tablero.findByPk(id);
     if (!tablero) {
       return res.status(404).json({ error: "Tablero no encontrado." });
-    }
-
-    // Verificar que es el owner
-    if (tablero.owner_id !== req.usuarioId) {
-      return res.status(403).json({ error: "Solo el owner puede eliminar." });
     }
 
     await tablero.destroy();
@@ -489,7 +566,7 @@ app.delete("/api/tableros/:id", verificarContexto, async (req, res) => {
 
 app.post("/nueva-tarjeta", verificarContexto, async (req, res) => {
   try {
-    const { titulo, descripcion, lista, prioridad } = req.body;
+    const { titulo, descripcion, lista, prioridad, tableroId } = req.body;
     let nombreListaBuscada = "Por Hacer";
     if (lista === "in-progress") nombreListaBuscada = "En Progreso";
     if (lista === "done") nombreListaBuscada = "Terminado";
@@ -497,36 +574,42 @@ app.post("/nueva-tarjeta", verificarContexto, async (req, res) => {
     // Obtener tableros del usuario vía many-to-many
     const usuario = await Usuario.findByPk(req.usuarioId);
     if (!usuario) return res.status(401).send("Usuario no autenticado");
-    
+
     const tablerosUsuario = await usuario.getMiembro_tableros();
     const tableroIds = tablerosUsuario.map((t) => t.id);
 
+    // Validar que el tableroId enviado pertenece al usuario
+    let tableroIdObjetivo = null;
+    if (tableroId && tableroIds.includes(parseInt(tableroId))) {
+      tableroIdObjetivo = parseInt(tableroId);
+    } else if (tableroIds.length > 0) {
+      // Fallback: primer tablero disponible
+      tableroIdObjetivo = tableroIds[0];
+    } else {
+      return res.status(400).send("No se tiene un tablero configurado para añadir tareas.");
+    }
+
+    // Buscar la lista destino SOLO en el tablero seleccionado
     const listaEncontrada = await Lista.findOne({
       where: {
         titulo: nombreListaBuscada,
-        tableroId: tableroIds,
+        tableroId: tableroIdObjetivo,
       },
     });
 
     let nuevaTarjeta;
     if (!listaEncontrada) {
-      // Si por alguna razón no se encuentra la lista, intentamos crearla en el primer tablero
-      if (tableroIds.length > 0) {
-        const nuevaLista = await Lista.create({
-          titulo: nombreListaBuscada,
-          tableroId: tableroIds[0],
-        });
-        nuevaTarjeta = await Tarjeta.create({
-          titulo,
-          descripcion,
-          listaId: nuevaLista.id,
-          prioridad: prioridad || "Media",
-        });
-      } else {
-        return res
-          .status(400)
-          .send("No se tiene un tablero configurado para añadir tareas.");
-      }
+      // Si no existe esa lista en el tablero, crearla
+      const nuevaLista = await Lista.create({
+        titulo: nombreListaBuscada,
+        tableroId: tableroIdObjetivo,
+      });
+      nuevaTarjeta = await Tarjeta.create({
+        titulo,
+        descripcion,
+        listaId: nuevaLista.id,
+        prioridad: prioridad || "Media",
+      });
     } else {
       nuevaTarjeta = await Tarjeta.create({
         titulo,
@@ -580,6 +663,18 @@ app.patch("/api/tarjetas/:id", verificarContexto, async (req, res) => {
       return res.status(403).json({ error: "Sin permiso." });
     }
 
+    // Verificar rol: solo owner y editor pueden editar
+    const membresia = await BoardMember.findOne({
+      where: {
+        usuarioId: req.usuarioId,
+        tableroId: tarjeta.lista.tablero.id,
+      },
+    });
+
+    if (!membresia || !["owner", "editor"].includes(membresia.role)) {
+      return res.status(403).json({ error: "Rol insuficiente para editar tarjetas." });
+    }
+
     await tarjeta.update(req.body);
     res.json({ mensaje: "Tarjeta actualizada.", tarjeta });
   } catch (error) {
@@ -613,6 +708,18 @@ app.delete("/api/tarjetas/:id", verificarContexto, async (req, res) => {
       return res.status(403).json({ error: "Sin permiso." });
     }
 
+    // Verificar rol: solo owner y editor pueden eliminar
+    const membresia = await BoardMember.findOne({
+      where: {
+        usuarioId: req.usuarioId,
+        tableroId: tarjeta.lista.tablero.id,
+      },
+    });
+
+    if (!membresia || !["owner", "editor"].includes(membresia.role)) {
+      return res.status(403).json({ error: "Rol insuficiente para eliminar tarjetas." });
+    }
+
     await tarjeta.destroy();
     res.json({ mensaje: "Tarjeta eliminada." });
   } catch (error) {
@@ -621,5 +728,309 @@ app.delete("/api/tarjetas/:id", verificarContexto, async (req, res) => {
   }
 });
 
-// EXPORTACIÓN PARA VERCEL
+// ==========================================
+// 📨 API INVITACIONES
+// ==========================================
+
+// GET /api/usuarios/buscar - Buscar usuarios por nombre o email
+app.get("/api/usuarios/buscar", verificarContexto, async (req, res) => {
+  try {
+    const { q } = req.query;
+    if (!q || q.trim().length < 2) {
+      return res.json({ usuarios: [] });
+    }
+
+    const { Op } = require("sequelize");
+    const usuarios = await Usuario.findAll({
+      where: {
+        [Op.and]: [
+          {
+            [Op.or]: [
+              { nombre: { [Op.iLike]: `%${q.trim()}%` } },
+              { email: { [Op.iLike]: `%${q.trim()}%` } },
+            ],
+          },
+          // Excluir al usuario que hace la búsqueda
+          { id: { [Op.ne]: req.usuarioId } },
+        ],
+      },
+      attributes: ["id", "nombre", "email"],
+      limit: 8,
+    });
+
+    res.json({
+      usuarios: usuarios.map((u) => ({
+        id: u.id,
+        nombre: u.nombre,
+        email: u.email,
+      })),
+    });
+  } catch (error) {
+    console.error("❌ Error en búsqueda de usuarios:", error);
+    res.status(500).json({ error: "Error al buscar usuarios." });
+  }
+});
+
+// POST /api/invitations - Enviar invitación
+
+app.post("/api/invitations", verificarContexto, async (req, res) => {
+  try {
+    const { boardId, inviteeEmail, role } = req.body;
+
+    if (!boardId || !inviteeEmail || !role) {
+      return res.status(400).json({ error: "Faltan datos: boardId, inviteeEmail, role." });
+    }
+
+    if (!["viewer", "editor", "owner"].includes(role)) {
+      return res.status(400).json({ error: "Rol inválido. Debe ser viewer, editor u owner." });
+    }
+
+    // Verificar que el usuario tiene permisos para invitar (owner o editor)
+    const membresiaInvitador = await BoardMember.findOne({
+      where: {
+        usuarioId: req.usuarioId,
+        tableroId: boardId,
+      },
+    });
+
+    if (!membresiaInvitador || !["owner", "editor"].includes(membresiaInvitador.role)) {
+      return res.status(403).json({ error: "No tienes permisos para invitar a este tablero." });
+    }
+
+    // Verificar que el tablero existe
+    const tablero = await Tablero.findByPk(boardId);
+    if (!tablero) {
+      return res.status(404).json({ error: "Tablero no encontrado." });
+    }
+
+    // Verificar que no hay invitación pendiente para este email en este tablero
+    const invitacionExistente = await Invitation.findOne({
+      where: {
+        boardId,
+        inviteeEmail,
+        status: "pending",
+      },
+    });
+
+    if (invitacionExistente) {
+      return res.status(409).json({ error: "Ya existe una invitación pendiente para este email." });
+    }
+
+    // Verificar que el email no es ya miembro
+    const usuarioExistente = await Usuario.findOne({ where: { email: inviteeEmail } });
+    if (usuarioExistente) {
+      const yaMiembro = await BoardMember.findOne({
+        where: {
+          usuarioId: usuarioExistente.id,
+          tableroId: boardId,
+        },
+      });
+      if (yaMiembro) {
+        return res.status(409).json({ error: "Este usuario ya es miembro del tablero." });
+      }
+    }
+
+    // Crear invitación
+    const invitacion = await Invitation.create({
+      boardId,
+      inviterId: req.usuarioId,
+      inviteeEmail,
+      role,
+    });
+
+    res.status(201).json({
+      mensaje: "Invitación enviada exitosamente.",
+      invitacion: {
+        id: invitacion.id,
+        boardId: invitacion.boardId,
+        inviteeEmail: invitacion.inviteeEmail,
+        role: invitacion.role,
+        status: invitacion.status,
+        expiresAt: invitacion.expiresAt,
+      },
+    });
+  } catch (error) {
+    console.error("❌ Error en POST invitaciones:", error);
+    res.status(500).json({ error: "Error al enviar invitación." });
+  }
+});
+
+// GET /api/invitations - Obtener invitaciones del usuario
+app.get("/api/invitations", verificarContexto, async (req, res) => {
+  try {
+    const usuario = await Usuario.findByPk(req.usuarioId);
+
+    // Invitaciones enviadas
+    const enviadas = await Invitation.findAll({
+      where: { inviterId: req.usuarioId },
+      include: [
+        {
+          model: Tablero,
+          as: "board",
+          attributes: ["id", "titulo"],
+        },
+      ],
+      order: [["createdAt", "DESC"]],
+    });
+
+    // Invitaciones recibidas (buscar por email)
+    const recibidas = await Invitation.findAll({
+      where: { inviteeEmail: usuario.email },
+      include: [
+        {
+          model: Tablero,
+          as: "board",
+          attributes: ["id", "titulo"],
+        },
+        {
+          model: Usuario,
+          as: "inviter",
+          attributes: ["id", "nombre"],
+        },
+      ],
+      order: [["createdAt", "DESC"]],
+    });
+
+    res.json({
+      mensaje: "Invitaciones obtenidas.",
+      enviadas: enviadas.map(i => ({
+        id: i.id,
+        board: i.board,
+        inviteeEmail: i.inviteeEmail,
+        role: i.role,
+        status: i.status,
+        expiresAt: i.expiresAt,
+        createdAt: i.createdAt,
+      })),
+      recibidas: recibidas.map(i => ({
+        id: i.id,
+        board: i.board,
+        inviter: i.inviter,
+        role: i.role,
+        status: i.status,
+        expiresAt: i.expiresAt,
+        createdAt: i.createdAt,
+      })),
+    });
+  } catch (error) {
+    console.error("❌ Error en GET invitaciones:", error);
+    res.status(500).json({ error: "Error al obtener invitaciones." });
+  }
+});
+
+// PATCH /api/invitations/:id/accept - Aceptar invitación
+app.patch("/api/invitations/:id/accept", verificarContexto, async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const invitacion = await Invitation.findByPk(id, {
+      include: [{ model: Tablero, as: "board" }],
+    });
+
+    if (!invitacion) {
+      return res.status(404).json({ error: "Invitación no encontrada." });
+    }
+
+    if (invitacion.status !== "pending") {
+      return res.status(400).json({ error: "La invitación ya no está pendiente." });
+    }
+
+    // Verificar que el usuario actual es el destinatario
+    const usuario = await Usuario.findByPk(req.usuarioId);
+    if (invitacion.inviteeEmail !== usuario.email) {
+      return res.status(403).json({ error: "No tienes permiso para aceptar esta invitación." });
+    }
+
+    // Verificar que no está expirada
+    if (new Date() > new Date(invitacion.expiresAt)) {
+      invitacion.status = "expired";
+      await invitacion.save();
+      return res.status(400).json({ error: "La invitación ha expirado." });
+    }
+
+    // Agregar usuario al tablero
+    await BoardMember.create({
+      usuarioId: req.usuarioId,
+      tableroId: invitacion.boardId,
+      role: invitacion.role,
+    });
+
+    // Actualizar invitación
+    invitacion.status = "accepted";
+    await invitacion.save();
+
+    res.json({
+      mensaje: "Invitación aceptada. Ahora eres miembro del tablero.",
+      tablero: {
+        id: invitacion.board.id,
+        titulo: invitacion.board.titulo,
+      },
+    });
+  } catch (error) {
+    console.error("❌ Error en PATCH accept invitación:", error);
+    res.status(500).json({ error: "Error al aceptar invitación." });
+  }
+});
+
+// PATCH /api/invitations/:id/reject - Rechazar invitación
+app.patch("/api/invitations/:id/reject", verificarContexto, async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const invitacion = await Invitation.findByPk(id);
+
+    if (!invitacion) {
+      return res.status(404).json({ error: "Invitación no encontrada." });
+    }
+
+    if (invitacion.status !== "pending") {
+      return res.status(400).json({ error: "La invitación ya no está pendiente." });
+    }
+
+    // Verificar que el usuario actual es el destinatario
+    const usuario = await Usuario.findByPk(req.usuarioId);
+    if (invitacion.inviteeEmail !== usuario.email) {
+      return res.status(403).json({ error: "No tienes permiso para rechazar esta invitación." });
+    }
+
+    invitacion.status = "rejected";
+    await invitacion.save();
+
+    res.json({ mensaje: "Invitación rechazada." });
+  } catch (error) {
+    console.error("❌ Error en PATCH reject invitación:", error);
+    res.status(500).json({ error: "Error al rechazar invitación." });
+  }
+});
+
+// DELETE /api/invitations/:id - Cancelar invitación (enviador)
+app.delete("/api/invitations/:id", verificarContexto, async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const invitacion = await Invitation.findByPk(id);
+
+    if (!invitacion) {
+      return res.status(404).json({ error: "Invitación no encontrada." });
+    }
+
+    // Verificar que el usuario es el enviador
+    if (invitacion.inviterId !== req.usuarioId) {
+      return res.status(403).json({ error: "Solo el enviador puede cancelar la invitación." });
+    }
+
+    if (invitacion.status !== "pending") {
+      return res.status(400).json({ error: "Solo se pueden cancelar invitaciones pendientes." });
+    }
+
+    await invitacion.destroy();
+
+    res.json({ mensaje: "Invitación cancelada." });
+  } catch (error) {
+    console.error("❌ Error en DELETE invitación:", error);
+    res.status(500).json({ error: "Error al cancelar invitación." });
+  }
+});
+
+// EXPORTACIÓN PARA EL SERVIDOR
 module.exports = app;
