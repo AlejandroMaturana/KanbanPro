@@ -133,31 +133,6 @@ document.addEventListener('DOMContentLoaded', () => {
     restaurarEstadoDemo();
   }
 
-  // --- Lógica del Tema Oscuro ---
-  const themeToggleLabel = document.getElementById('theme-toggle');
-  const body = document.body;
-  const savedTheme = localStorage.getItem('theme');
-
-  if (savedTheme === 'dark') {
-    body.classList.add('dark-theme');
-    if (themeToggleLabel) themeToggleLabel.textContent = '☀️';
-  } else if (savedTheme === 'light') {
-    body.classList.remove('dark-theme');
-  } else if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
-    // Si no hay preferencia, usar el del sistema
-    body.classList.add('dark-theme');
-    if (themeToggleLabel) themeToggleLabel.textContent = '☀️';
-  }
-
-  if (themeToggleLabel) {
-    themeToggleLabel.addEventListener('click', () => {
-      body.classList.toggle('dark-theme');
-      const isDark = body.classList.contains('dark-theme');
-      localStorage.setItem('theme', isDark ? 'dark' : 'light');
-      themeToggleLabel.textContent = isDark ? '☀️' : '🌙';
-    });
-  }
-
   const containers = document.querySelectorAll('.tarjetas');
 
   containers.forEach(container => {
