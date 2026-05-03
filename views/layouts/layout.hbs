@@ -108,6 +108,27 @@
     </div>
 
     <script>
+      // --- Lógica del Tema ---
+      (function() {
+        var savedTheme = localStorage.getItem('theme');
+        var isDark = savedTheme === 'dark';
+        if (isDark) document.body.classList.add('dark-theme');
+
+        document.addEventListener('DOMContentLoaded', function() {
+          var btn = document.getElementById('theme-toggle');
+          if (!btn) return;
+          var body = document.body;
+          var nowDark = body.classList.contains('dark-theme');
+          btn.textContent = nowDark ? '☀️' : '🌙';
+          btn.addEventListener('click', function() {
+            body.classList.toggle('dark-theme');
+            nowDark = body.classList.contains('dark-theme');
+            localStorage.setItem('theme', nowDark ? 'dark' : 'light');
+            btn.textContent = nowDark ? '☀️' : '🌙';
+          });
+        });
+      })();
+
       // Toast and UI utilities
       window.showToast = (message, type = 'info') => {
         const container = document.getElementById('toast-container');
