@@ -34,13 +34,15 @@ const seed = async () => {
 
     const usuarios = [];
     for (const p of personas) {
-      const usuario = await Usuario.create({
-        nombre: p.nombre,
-        email: p.email,
-        contrasena: await bcrypt.hash(p.clave, saltRounds),
+      const [usuario, created] = await Usuario.findOrCreate({
+        where: { email: p.email },
+        defaults: {
+          nombre: p.nombre,
+          contrasena: await bcrypt.hash(p.clave, saltRounds),
+        }
       });
       usuarios.push(usuario);
-      console.log(`👤 Usuario creado: ${usuario.nombre} (${usuario.email})`);
+      console.log(`👤 Usuario ${created ? 'creado' : 'existente'}: ${usuario.nombre} (${usuario.email})`);
     }
 
     // --- CREAR MÚLTIPLES TABLEROS PERSONALES ---
@@ -88,24 +90,26 @@ const seed = async () => {
     ];
 
     for (const tp of tablerosPersonales) {
-      const tablero = await Tablero.create({
-        titulo: tp.titulo,
-        descripcion: tp.descripcion,
-        owner_id: tp.usuario.id,
+      const [tablero, tCreated] = await Tablero.findOrCreate({
+        where: { titulo: tp.titulo, owner_id: tp.usuario.id },
+        defaults: { descripcion: tp.descripcion }
       });
 
-      await BoardMember.create({
-        usuarioId: tp.usuario.id,
-        tableroId: tablero.id,
-        role: "owner",
+      await BoardMember.findOrCreate({
+        where: { usuarioId: tp.usuario.id, tableroId: tablero.id },
+        defaults: { role: "owner" }
       });
 
-      console.log(`   📋 Tablero personal creado: "${tablero.titulo}" para ${tp.usuario.nombre}`);
+      if (tCreated) {
+        console.log(`   📋 Tablero personal creado: "${tablero.titulo}" para ${tp.usuario.nombre}`);
+      }
 
       // Crear listas por defecto
       const listas = ["Por Hacer", "En Progreso", "Terminado"];
       for (const tituloLista of listas) {
-        await Lista.create({ titulo: tituloLista, tableroId: tablero.id });
+        await Lista.findOrCreate({
+          where: { titulo: tituloLista, tableroId: tablero.id }
+        });
       }
     }
 
@@ -133,34 +137,35 @@ const seed = async () => {
     ];
 
     for (const tc of tablerosCompartidos) {
-      const tablero = await Tablero.create({
-        titulo: tc.titulo,
-        descripcion: tc.descripcion,
-        owner_id: tc.owner.id,
+      const [tablero, tCreated] = await Tablero.findOrCreate({
+        where: { titulo: tc.titulo, owner_id: tc.owner.id },
+        defaults: { descripcion: tc.descripcion }
       });
 
       // Owner
-      await BoardMember.create({
-        usuarioId: tc.owner.id,
-        tableroId: tablero.id,
-        role: "owner",
+      await BoardMember.findOrCreate({
+        where: { usuarioId: tc.owner.id, tableroId: tablero.id },
+        defaults: { role: "owner" }
       });
 
       // Miembros adicionales
       for (const miembro of tc.miembros) {
-        await BoardMember.create({
-          usuarioId: miembro.usuario.id,
-          tableroId: tablero.id,
-          role: miembro.role,
+        await BoardMember.findOrCreate({
+          where: { usuarioId: miembro.usuario.id, tableroId: tablero.id },
+          defaults: { role: miembro.role }
         });
       }
 
-      console.log(`   📋 Tablero compartido creado: "${tablero.titulo}"`);
+      if (tCreated) {
+        console.log(`   📋 Tablero compartido creado: "${tablero.titulo}"`);
+      }
 
       // Crear listas por defecto
       const listas = ["Por Hacer", "En Progreso", "Terminado"];
       for (const tituloLista of listas) {
-        await Lista.create({ titulo: tituloLista, tableroId: tablero.id });
+        await Lista.findOrCreate({
+          where: { titulo: tituloLista, tableroId: tablero.id }
+        });
       }
 
       // Agregar algunas tareas de ejemplo a tableros compartidos
@@ -169,17 +174,24 @@ const seed = async () => {
         const porHacer = listasTablero.find(l => l.titulo === "Por Hacer");
         const enProgreso = listasTablero.find(l => l.titulo === "En Progreso");
 
-        await Tarjeta.create({
-          titulo: "Reunión Interdepartamental",
-          descripcion: "Coordinar equipos para alineación de objetivos Q2.",
-          listaId: porHacer.id,
-          prioridad: "Alta"
-        });
-        await Tarjeta.create({
-          titulo: "Análisis de Datos Cruzados",
-          descripcion: "Comparar métricas de producción entre plantas.",
-          listaId: enProgreso.id,
-        });
+        if (porHacer) {
+          await Tarjeta.findOrCreate({
+            where: { titulo: "Reunión Interdepartamental", listaId: porHacer.id },
+            defaults: {
+              descripcion: "Coordinar equipos para alineación de objetivos Q2.",
+              prioridad: "Alta"
+            }
+          });
+        }
+        
+        if (enProgreso) {
+          await Tarjeta.findOrCreate({
+            where: { titulo: "Análisis de Datos Cruzados", listaId: enProgreso.id },
+            defaults: {
+              descripcion: "Comparar métricas de producción entre plantas."
+            }
+          });
+        }
       }
     }
 
