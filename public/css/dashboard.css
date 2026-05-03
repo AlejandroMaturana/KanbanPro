@@ -515,6 +515,8 @@ textarea.form-control {
   /* Kanban Mobile - Focus Layout 15/70/15 */
   .kanban-board {
     scroll-snap-type: x mandatory;
+    width: 100vw;
+    margin-left: calc(-50vw + 50%);
     padding: 0 15vw; /* Mantiene 15vw a cada lado */
     gap: 12px; /* Espacio mínimo para dejarlas 'más pegadas' */
     scroll-behavior: smooth;
@@ -798,7 +800,7 @@ textarea.form-control {
 
 
 /* ==========================================
-   INVITATIONS v2 � ESTILOS MEJORADOS
+   INVITATIONS v2 � ESTILOS MEJORADOS
    ========================================== */
 
 .invitations-header {
