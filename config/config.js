@@ -1,27 +1,30 @@
 require('dotenv').config();
 
-const config = {
-  username: process.env.DB_USER,
-  password: process.env.DB_PASSWORD,
-  database: process.env.DB_NAME,
-  host: process.env.DB_HOST,
-  port: process.env.DB_PORT,
-  dialect: 'postgres',
-  dialectOptions: {
-    ssl: {
-      require: true,
-      rejectUnauthorized: false
+module.exports = {
+  development: {
+    username: process.env.DB_USER || 'postgres',
+    password: process.env.DB_PASSWORD || null,
+    database: process.env.DB_NAME || 'KanbanProyect',
+    host: process.env.DB_HOST || '127.0.0.1',
+    port: process.env.DB_PORT || 5432,
+    dialect: 'postgres'
+  },
+  test: {
+    username: process.env.DB_USER || 'postgres',
+    password: process.env.DB_PASSWORD || null,
+    database: process.env.DB_NAME_TEST || 'database_test',
+    host: process.env.DB_HOST || '127.0.0.1',
+    port: process.env.DB_PORT || 5432,
+    dialect: 'postgres'
+  },
+  production: {
+    use_env_variable: 'DATABASE_URL',
+    dialect: 'postgres',
+    dialectOptions: {
+      ssl: {
+        require: true,
+        rejectUnauthorized: false
+      }
     }
   }
-};
-
-// Si hay una URL disponible, la usamos (Prioridad Render/Supabase)
-const dbUrl = process.env.DATABASE_URL || process.env.POSTGRES_URL || process.env.DB_URI;
-if (dbUrl) {
-  config.url = dbUrl;
-}
-
-module.exports = {
-  development: { ...config, dialectOptions: { ssl: false } }, // SSL off for local dev usually
-  production: config
 };
