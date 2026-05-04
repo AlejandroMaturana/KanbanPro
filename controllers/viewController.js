@@ -1,8 +1,8 @@
 const { Usuario, Tablero, Lista, Tarjeta, BoardMember } = require("../models");
 
-const renderHome = (req, res) => res.render("home");
-const renderRegister = (req, res) => res.render("register");
-const renderLogin = (req, res) => res.render("login");
+const renderHome = (req, res) => res.render("home", { layout: "layouts/layout-auth", title: "Inicio" });
+const renderRegister = (req, res) => res.render("register", { layout: "layouts/layout-auth", title: "Registro" });
+const renderLogin = (req, res) => res.render("login", { layout: "layouts/layout-auth", title: "Iniciar Sesión" });
 
 const renderInvitations = async (req, res) => {
   try {

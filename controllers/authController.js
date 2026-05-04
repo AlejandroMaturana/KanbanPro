@@ -7,8 +7,9 @@ const JWT_SECRET = process.env.JWT_SECRET || "TuClaveSecretaParaKanban2026!";
 const register = async (req, res) => {
   const { nombre, email, contrasena } = req.body;
   try {
-    if (!nombre || !email || !contrasena)
+    if (!nombre || !email || !contrasena) {
       return res.status(400).json({ error: "Faltan datos." });
+    }
     const existe = await Usuario.findOne({ where: { email } });
     if (existe) return res.status(409).json({ error: "Email ya en uso." });
 

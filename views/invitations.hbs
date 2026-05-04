@@ -1,81 +1,132 @@
-<div class="invitations-content">
-  <div class="invitations-header">
-    <h1>📨 Invitaciones</h1>
-    <button id="btn-enviar-invitacion" class="btn-primary" title="Enviar nueva invitación">
-      ➕ Nueva Invitación
+<div class="dashboard-content" style="max-width: 1000px; margin: 0 auto;">
+  <div class="dashboard-header" style="justify-content: space-between; align-items: center; margin-bottom: 32px;">
+    <div>
+      <h1 style="font-size: 28px; margin-bottom: 8px;">📨 Invitaciones</h1>
+      <p style="color: var(--kp-on-surface-variant); font-size: 15px;">Gestiona el acceso de otros usuarios a tus proyectos.</p>
+    </div>
+    <button id="btn-enviar-invitacion" class="btn btn-primary">
+      <span class="material-symbols-outlined">person_add</span>
+      Nueva Invitación
     </button>
   </div>
 
-  <div class="invitations-tabs">
-    <button id="tab-enviadas" class="tab-btn active" aria-selected="true">
-      📤 Enviadas <span id="badge-enviadas" class="tab-badge"></span>
+  <div class="kp-tabs-container" style="margin-bottom: 24px; border-bottom: 1px solid var(--kp-outline-variant); display: flex; gap: 32px;">
+    <button id="tab-enviadas" class="kp-tab active" style="padding: 12px 4px; border: none; background: none; color: var(--kp-primary); border-bottom: 2px solid var(--kp-primary); cursor: pointer; font-weight: 600; display: flex; align-items: center; gap: 8px;">
+      <span class="material-symbols-outlined" style="font-size: 20px;">send</span>
+      Enviadas
+      <span id="badge-enviadas" class="kp-col-badge" style="background: var(--kp-primary-container); color: var(--kp-primary); display: none;">0</span>
     </button>
-    <button id="tab-recibidas" class="tab-btn" aria-selected="false">
-      📥 Recibidas <span id="badge-recibidas" class="tab-badge"></span>
+    <button id="tab-recibidas" class="kp-tab" style="padding: 12px 4px; border: none; background: none; color: var(--kp-on-surface-variant); cursor: pointer; font-weight: 500; display: flex; align-items: center; gap: 8px;">
+      <span class="material-symbols-outlined" style="font-size: 20px;">inbox</span>
+      Recibidas
+      <span id="badge-recibidas" class="kp-col-badge" style="background: var(--kp-surface-hover); color: var(--kp-on-surface-variant); display: none;">0</span>
     </button>
   </div>
 
-  <div id="enviadas-section" class="invitations-section active">
-    <div id="enviadas-list" class="invitations-list">
-      <div class="loading-state">Cargando invitaciones...</div>
+  <div id="enviadas-section" class="invitations-section">
+    <div id="enviadas-list" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 24px;">
+      <div class="loading-state" style="grid-column: 1/-1; text-align: center; padding: 48px; color: var(--kp-on-surface-muted);">Cargando invitaciones...</div>
     </div>
   </div>
 
-  <div id="recibidas-section" class="invitations-section">
-    <div id="recibidas-list" class="invitations-list">
-      <div class="loading-state">Cargando invitaciones...</div>
+  <div id="recibidas-section" class="invitations-section" style="display: none;">
+    <div id="recibidas-list" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 24px;">
+      <div class="loading-state" style="grid-column: 1/-1; text-align: center; padding: 48px; color: var(--kp-on-surface-muted);">Cargando invitaciones...</div>
     </div>
   </div>
 </div>
 
 <!-- Modal para enviar invitación -->
-<div id="modal-enviar-invitacion" class="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="modal-inv-title" style="display:none;">
+<div id="modal-enviar-invitacion" class="modal-overlay" role="dialog" aria-modal="true" style="display:none;">
   <div class="modal-content">
     <div class="modal-header">
-      <h2 id="modal-inv-title">➕ Enviar Invitación</h2>
-      <button class="close-modal" id="close-modal" aria-label="Cerrar">&times;</button>
+      <h2>Enviar Invitación</h2>
+      <button class="close-modal" id="close-modal">&times;</button>
     </div>
 
     <form id="form-enviar-invitacion" autocomplete="off">
       <div class="form-group">
-        <label for="board-select">Tablero *</label>
-        <select id="board-select" class="form-control" required>
+        <label for="board-select" class="form-label">Seleccionar Tablero *</label>
+        <select id="board-select" class="form-input" required>
           <option value="">-- Selecciona un tablero --</option>
         </select>
       </div>
 
-      <div class="form-group">
-        <label for="user-search">Buscar usuario *</label>
-        <div class="search-wrapper">
+      <div class="form-group" style="position: relative;">
+        <label for="user-search" class="form-label">Buscar Usuario *</label>
+        <div class="input-with-icon">
+          <span class="material-symbols-outlined">person_search</span>
           <input
             type="text"
             id="user-search"
-            class="form-control"
-            placeholder="Nombre de usuario o correo electrónico..."
+            class="form-input"
+            placeholder="Nombre o correo electrónico..."
             autocomplete="off"
+            required
           />
-          <div id="user-suggestions" class="suggestions-dropdown" style="display:none;"></div>
         </div>
+        <div id="user-suggestions" class="kp-card" style="position: absolute; width: 100%; top: 100%; left: 0; z-index: 100; margin-top: 4px; padding: 8px; display: none; max-height: 200px; overflow-y: auto;"></div>
         <input type="hidden" id="invitee-email" />
-        <p id="user-selected-info" class="user-selected-info" style="display:none;"></p>
+        <p id="user-selected-info" style="font-size: 13px; margin-top: 8px; color: var(--kp-primary); display: none;"></p>
       </div>
 
       <div class="form-group">
-        <label for="invitee-role">Rol *</label>
-        <select id="invitee-role" class="form-control" required>
-          <option value="viewer">👁️ Viewer — solo lectura</option>
-          <option value="editor" selected>✏️ Editor — puede editar tareas</option>
-          <option value="owner">👑 Owner — control total</option>
+        <label for="invitee-role" class="form-label">Rol del Invitado *</label>
+        <select id="invitee-role" class="form-input" required>
+          <option value="viewer">👁️ Viewer — Solo lectura</option>
+          <option value="editor" selected>✏️ Editor — Puede editar tareas</option>
+          <option value="owner">👑 Owner — Control total</option>
         </select>
       </div>
 
       <div class="modal-actions">
-        <button type="button" class="btn-cancel" id="cancel-modal">Cancelar</button>
-        <button type="submit" class="btn-primary" id="submit-invitation">Enviar Invitación</button>
+        <button type="button" class="btn btn-secondary" id="cancel-modal">Cancelar</button>
+        <button type="submit" class="btn btn-primary" id="submit-invitation">Enviar Invitación</button>
       </div>
     </form>
   </div>
 </div>
+
+<style>
+  .invitation-card {
+    background: var(--kp-surface);
+    border: 1px solid var(--kp-outline-variant);
+    border-radius: var(--kp-radius-xl);
+    padding: 24px;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    transition: transform 0.2s, box-shadow 0.2s;
+  }
+  .invitation-card:hover {
+    transform: translateY(-4px);
+    box-shadow: var(--kp-shadow-lg);
+  }
+  .inv-status {
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    padding: 4px 8px;
+    border-radius: 4px;
+    letter-spacing: 0.5px;
+  }
+  .status-pending { background: var(--kp-warning-container); color: var(--kp-warning); }
+  .status-accepted { background: var(--kp-success-container); color: var(--kp-success); }
+  .status-rejected { background: var(--kp-error-container); color: var(--kp-error); }
+  .status-expired { background: var(--kp-surface-hover); color: var(--kp-on-surface-muted); }
+  
+  .suggestion-item {
+    padding: 10px 12px;
+    border-radius: 8px;
+    cursor: pointer;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  }
+  .suggestion-item:hover { background: var(--kp-surface-hover); }
+  .suggestion-nombre { font-weight: 600; font-size: 14px; }
+  .suggestion-email { font-size: 12px; color: var(--kp-on-surface-variant); }
+</style>
 
 <script>
 (function () {
@@ -86,9 +137,6 @@
   let searchTimeout = null;
   let usuarioSeleccionado = null;
 
-  // =========================================
-  // INICIALIZACIÓN
-  // =========================================
   document.addEventListener('DOMContentLoaded', () => {
     cargarInvitaciones();
     cargarTableros();
@@ -97,93 +145,86 @@
     initBuscadorUsuarios();
   });
 
-  // =========================================
-  // TABS
-  // =========================================
   function initTabs() {
-    document.getElementById('tab-enviadas').addEventListener('click', () => mostrarSeccion('enviadas'));
-    document.getElementById('tab-recibidas').addEventListener('click', () => mostrarSeccion('recibidas'));
-  }
+    const tabE = document.getElementById('tab-enviadas');
+    const tabR = document.getElementById('tab-recibidas');
+    const secE = document.getElementById('enviadas-section');
+    const secR = document.getElementById('recibidas-section');
 
-  function mostrarSeccion(seccion) {
-    document.querySelectorAll('.tab-btn').forEach(btn => {
-      btn.classList.remove('active');
-      btn.setAttribute('aria-selected', 'false');
+    tabE.addEventListener('click', () => {
+      tabE.classList.add('active');
+      tabE.style.color = 'var(--kp-primary)';
+      tabE.style.borderBottom = '2px solid var(--kp-primary)';
+      tabR.classList.remove('active');
+      tabR.style.color = 'var(--kp-on-surface-variant)';
+      tabR.style.borderBottom = 'none';
+      secE.style.display = 'block';
+      secR.style.display = 'none';
     });
-    document.querySelectorAll('.invitations-section').forEach(sec => sec.classList.remove('active'));
-    document.getElementById(`tab-${seccion}`).classList.add('active');
-    document.getElementById(`tab-${seccion}`).setAttribute('aria-selected', 'true');
-    document.getElementById(`${seccion}-section`).classList.add('active');
+
+    tabR.addEventListener('click', () => {
+      tabR.classList.add('active');
+      tabR.style.color = 'var(--kp-primary)';
+      tabR.style.borderBottom = '2px solid var(--kp-primary)';
+      tabE.classList.remove('active');
+      tabE.style.color = 'var(--kp-on-surface-variant)';
+      tabE.style.borderBottom = 'none';
+      secR.style.display = 'block';
+      secE.style.display = 'none';
+    });
   }
 
-  // =========================================
-  // MODAL
-  // =========================================
   function initModal() {
     const modal = document.getElementById('modal-enviar-invitacion');
     const btnAbrir = document.getElementById('btn-enviar-invitacion');
     const btnCerrar = document.getElementById('close-modal');
     const btnCancelar = document.getElementById('cancel-modal');
 
-    btnAbrir.addEventListener('click', () => abrirModal());
-    btnCerrar.addEventListener('click', () => cerrarModal());
-    btnCancelar.addEventListener('click', () => cerrarModal());
-    modal.addEventListener('click', (e) => { if (e.target === modal) cerrarModal(); });
+    btnAbrir.addEventListener('click', () => {
+      modal.style.display = 'flex';
+      setTimeout(() => modal.classList.add('show'), 10);
+      document.body.style.overflow = 'hidden';
+    });
+    
+    const cerrar = () => {
+      modal.classList.remove('show');
+      setTimeout(() => {
+        modal.style.display = 'none';
+        document.body.style.overflow = 'auto';
+        resetFormulario();
+      }, 200);
+    };
+
+    btnCerrar.addEventListener('click', cerrar);
+    btnCancelar.addEventListener('click', cerrar);
+    modal.addEventListener('click', (e) => { if (e.target === modal) cerrar(); });
 
     document.getElementById('form-enviar-invitacion').addEventListener('submit', enviarInvitacion);
   }
 
-  function abrirModal() {
-    document.getElementById('modal-enviar-invitacion').style.display = 'flex';
-    document.body.style.overflow = 'hidden';
-  }
-
-  function cerrarModal() {
-    document.getElementById('modal-enviar-invitacion').style.display = 'none';
-    document.body.style.overflow = 'auto';
-    resetFormulario();
-  }
-
   function resetFormulario() {
     document.getElementById('form-enviar-invitacion').reset();
-    document.getElementById('user-search').value = '';
-    document.getElementById('invitee-email').value = '';
     document.getElementById('user-suggestions').style.display = 'none';
     document.getElementById('user-selected-info').style.display = 'none';
     usuarioSeleccionado = null;
   }
 
-  // =========================================
-  // BUSCADOR DE USUARIOS (nombre o email)
-  // =========================================
   function initBuscadorUsuarios() {
     const input = document.getElementById('user-search');
     const dropdown = document.getElementById('user-suggestions');
 
     input.addEventListener('input', () => {
       const q = input.value.trim();
-
-      // Si borra la selección previa, resetear
-      if (usuarioSeleccionado && input.value !== `${usuarioSeleccionado.nombre} (${usuarioSeleccionado.email})`) {
-        usuarioSeleccionado = null;
-        document.getElementById('invitee-email').value = '';
-        document.getElementById('user-selected-info').style.display = 'none';
-      }
-
       clearTimeout(searchTimeout);
       if (q.length < 2) {
         dropdown.style.display = 'none';
         return;
       }
-
       searchTimeout = setTimeout(() => buscarUsuarios(q), 300);
     });
 
-    // Cerrar dropdown al hacer clic afuera
     document.addEventListener('click', (e) => {
-      if (!e.target.closest('.search-wrapper')) {
-        dropdown.style.display = 'none';
-      }
+      if (!e.target.closest('.form-group')) dropdown.style.display = 'none';
     });
   }
 
@@ -194,66 +235,48 @@
       const data = await res.json();
 
       if (!data.usuarios || data.usuarios.length === 0) {
-        dropdown.innerHTML = '<div class="suggestion-empty">No se encontraron usuarios</div>';
+        dropdown.innerHTML = '<div style="padding: 12px; font-size: 13px; color: var(--kp-on-surface-muted);">No se encontraron usuarios</div>';
         dropdown.style.display = 'block';
         return;
       }
 
       dropdown.innerHTML = data.usuarios.map(u => `
         <div class="suggestion-item" data-id="${u.id}" data-nombre="${u.nombre}" data-email="${u.email}">
-          <span class="suggestion-nombre">👤 ${u.nombre}</span>
+          <span class="suggestion-nombre">${u.nombre}</span>
           <span class="suggestion-email">${u.email}</span>
         </div>
       `).join('');
 
       dropdown.querySelectorAll('.suggestion-item').forEach(item => {
-        item.addEventListener('click', () => seleccionarUsuario({
-          id: item.dataset.id,
-          nombre: item.dataset.nombre,
-          email: item.dataset.email,
-        }));
+        item.addEventListener('click', () => {
+          usuarioSeleccionado = { id: item.dataset.id, nombre: item.dataset.nombre, email: item.dataset.email };
+          input.value = usuarioSeleccionado.nombre;
+          document.getElementById('invitee-email').value = usuarioSeleccionado.email;
+          dropdown.style.display = 'none';
+          const info = document.getElementById('user-selected-info');
+          info.innerHTML = `✅ <strong>${usuarioSeleccionado.nombre}</strong> — ${usuarioSeleccionado.email}`;
+          info.style.display = 'block';
+        });
       });
-
       dropdown.style.display = 'block';
-    } catch (err) {
-      console.error('Error buscando usuarios:', err);
-    }
+    } catch (err) { console.error(err); }
   }
 
-  function seleccionarUsuario(usuario) {
-    usuarioSeleccionado = usuario;
-    document.getElementById('user-search').value = `${usuario.nombre}`;
-    document.getElementById('invitee-email').value = usuario.email;
-    document.getElementById('user-suggestions').style.display = 'none';
-
-    const info = document.getElementById('user-selected-info');
-    info.innerHTML = `✅ <strong>${usuario.nombre}</strong> &mdash; ${usuario.email}`;
-    info.style.display = 'block';
-  }
-
-  // =========================================
-  // CARGA DE TABLEROS
-  // =========================================
   async function cargarTableros() {
     try {
       const res = await fetch('/api/tableros');
       const data = await res.json();
       if (!res.ok) return;
       const select = document.getElementById('board-select');
-      data.tableros.forEach(t => {
+      data.tableros.filter(t => t.esOwner).forEach(t => {
         const opt = document.createElement('option');
         opt.value = t.id;
         opt.textContent = t.titulo;
         select.appendChild(opt);
       });
-    } catch (err) {
-      console.error('Error cargando tableros:', err);
-    }
+    } catch (err) { console.error(err); }
   }
 
-  // =========================================
-  // CARGAR & RENDERIZAR INVITACIONES
-  // =========================================
   async function cargarInvitaciones() {
     try {
       const res = await fetch('/api/invitations');
@@ -265,44 +288,41 @@
         renderizarRecibidas();
         actualizarBadges();
       }
-    } catch (err) {
-      console.error('Error cargando invitaciones:', err);
-    }
+    } catch (err) { console.error(err); }
   }
 
   function actualizarBadges() {
-    const pendEnviadas = invitacionesEnviadas.filter(i => i.status === 'pending').length;
-    const pendRecibidas = invitacionesRecibidas.filter(i => i.status === 'pending').length;
-    const badgeE = document.getElementById('badge-enviadas');
-    const badgeR = document.getElementById('badge-recibidas');
-    badgeE.textContent = pendEnviadas || '';
-    badgeR.textContent = pendRecibidas || '';
-    badgeE.style.display = pendEnviadas ? 'inline-flex' : 'none';
-    badgeR.style.display = pendRecibidas ? 'inline-flex' : 'none';
+    const pendE = invitacionesEnviadas.filter(i => i.status === 'pending').length;
+    const pendR = invitacionesRecibidas.filter(i => i.status === 'pending').length;
+    const bE = document.getElementById('badge-enviadas');
+    const bR = document.getElementById('badge-recibidas');
+    if (pendE) { bE.textContent = pendE; bE.style.display = 'inline-flex'; } else bE.style.display = 'none';
+    if (pendR) { bR.textContent = pendR; bR.style.display = 'inline-flex'; } else bR.style.display = 'none';
   }
 
   function renderizarEnviadas() {
     const container = document.getElementById('enviadas-list');
     if (invitacionesEnviadas.length === 0) {
-      container.innerHTML = `<div class="empty-state"><span>📭</span><p>No has enviado invitaciones aún.</p><button onclick="document.getElementById('btn-enviar-invitacion').click()" class="btn-primary">Enviar primera invitación</button></div>`;
+      container.innerHTML = '<div style="grid-column: 1/-1; text-align: center; padding: 64px; background: var(--kp-surface-hover); border-radius: 16px; border: 1px dashed var(--kp-outline);">No has enviado invitaciones aún.</div>';
       return;
     }
     container.innerHTML = invitacionesEnviadas.map(inv => `
-      <div class="invitation-card" data-id="${inv.id}">
-        <div class="invitation-card-top">
-          <div class="inv-board-name">📋 ${inv.board.titulo}</div>
+      <div class="invitation-card">
+        <div style="display: flex; justify-content: space-between; align-items: flex-start;">
+          <div style="font-weight: 700; color: var(--kp-primary);">📋 ${inv.board.titulo}</div>
           <span class="inv-status status-${inv.status}">${getStatusLabel(inv.status)}</span>
         </div>
-        <div class="invitation-card-body">
-          <div class="inv-detail"><span class="inv-label">Destinatario</span><span class="inv-value">✉️ ${inv.inviteeEmail}</span></div>
-          <div class="inv-detail"><span class="inv-label">Rol</span><span class="inv-value inv-role role-${inv.role}">${getRoleLabel(inv.role)}</span></div>
-          <div class="inv-detail"><span class="inv-label">Enviada</span><span class="inv-value">${formatDate(inv.createdAt)}</span></div>
-          ${inv.status === 'pending' ? `<div class="inv-detail"><span class="inv-label">Expira</span><span class="inv-value">${formatDate(inv.expiresAt)}</span></div>` : ''}
+        <div style="font-size: 14px; color: var(--kp-on-surface-variant); display: flex; flex-direction: column; gap: 8px;">
+          <div><strong style="color: var(--kp-on-surface);">Destinatario:</strong> ${inv.inviteeEmail}</div>
+          <div><strong style="color: var(--kp-on-surface);">Rol:</strong> ${getRoleLabel(inv.role)}</div>
+          <div><strong style="color: var(--kp-on-surface);">Fecha:</strong> ${formatDate(inv.createdAt)}</div>
         </div>
         ${inv.status === 'pending' ? `
-        <div class="invitation-card-actions">
-          <button onclick="cancelarInvitacion(${inv.id})" class="btn-danger-sm">🗑️ Cancelar</button>
-        </div>` : ''}
+          <button onclick="cancelarInvitacion(${inv.id})" class="btn btn-secondary" style="color: var(--kp-error); width: 100%; margin-top: 8px;">
+            <span class="material-symbols-outlined" style="font-size: 18px;">delete</span>
+            Cancelar
+          </button>
+        ` : ''}
       </div>
     `).join('');
   }
@@ -310,58 +330,44 @@
   function renderizarRecibidas() {
     const container = document.getElementById('recibidas-list');
     if (invitacionesRecibidas.length === 0) {
-      container.innerHTML = `<div class="empty-state"><span>📬</span><p>No tienes invitaciones pendientes.</p></div>`;
+      container.innerHTML = '<div style="grid-column: 1/-1; text-align: center; padding: 64px; background: var(--kp-surface-hover); border-radius: 16px; border: 1px dashed var(--kp-outline);">No tienes invitaciones recibidas.</div>';
       return;
     }
     container.innerHTML = invitacionesRecibidas.map(inv => `
-      <div class="invitation-card" data-id="${inv.id}">
-        <div class="invitation-card-top">
-          <div class="inv-board-name">📋 ${inv.board.titulo}</div>
+      <div class="invitation-card">
+        <div style="display: flex; justify-content: space-between; align-items: flex-start;">
+          <div style="font-weight: 700; color: var(--kp-primary);">📋 ${inv.board.titulo}</div>
           <span class="inv-status status-${inv.status}">${getStatusLabel(inv.status)}</span>
         </div>
-        <div class="invitation-card-body">
-          <div class="inv-detail"><span class="inv-label">Invitado por</span><span class="inv-value">👤 ${inv.inviter.nombre}</span></div>
-          <div class="inv-detail"><span class="inv-label">Rol asignado</span><span class="inv-value inv-role role-${inv.role}">${getRoleLabel(inv.role)}</span></div>
-          <div class="inv-detail"><span class="inv-label">Recibida</span><span class="inv-value">${formatDate(inv.createdAt)}</span></div>
-          ${inv.status === 'pending' ? `<div class="inv-detail"><span class="inv-label">Expira</span><span class="inv-value">${formatDate(inv.expiresAt)}</span></div>` : ''}
+        <div style="font-size: 14px; color: var(--kp-on-surface-variant); display: flex; flex-direction: column; gap: 8px;">
+          <div><strong style="color: var(--kp-on-surface);">Invitado por:</strong> ${inv.inviter.nombre}</div>
+          <div><strong style="color: var(--kp-on-surface);">Rol asignado:</strong> ${getRoleLabel(inv.role)}</div>
+          <div><strong style="color: var(--kp-on-surface);">Fecha:</strong> ${formatDate(inv.createdAt)}</div>
         </div>
         ${inv.status === 'pending' ? `
-        <div class="invitation-card-actions">
-          <button onclick="aceptarInvitacion(${inv.id})" class="btn-success-sm">✅ Aceptar</button>
-          <button onclick="rechazarInvitacion(${inv.id})" class="btn-danger-sm">❌ Rechazar</button>
-        </div>` : ''}
+          <div style="display: flex; gap: 8px; margin-top: 8px;">
+            <button onclick="aceptarInvitacion(${inv.id})" class="btn btn-primary" style="flex: 1;">Aceptar</button>
+            <button onclick="rechazarInvitacion(${inv.id})" class="btn btn-secondary" style="flex: 1; color: var(--kp-error);">Rechazar</button>
+          </div>
+        ` : ''}
       </div>
     `).join('');
   }
 
-  // =========================================
-  // HELPERS
-  // =========================================
-  function getRoleLabel(role) {
-    return { owner: '👑 Propietario', editor: '✏️ Editor', viewer: '👁️ Viewer' }[role] || role;
-  }
-  function getStatusLabel(status) {
-    return { pending: 'Pendiente', accepted: 'Aceptada', rejected: 'Rechazada', expired: 'Expirada' }[status] || status;
-  }
-  function formatDate(dateStr) {
-    if (!dateStr) return '—';
-    return new Date(dateStr).toLocaleDateString('es-ES', { day: '2-digit', month: 'short', year: 'numeric' });
-  }
+  function getRoleLabel(role) { return { owner: '👑 Propietario', editor: '✏️ Editor', viewer: '👁️ Viewer' }[role] || role; }
+  function getStatusLabel(status) { return { pending: 'Pendiente', accepted: 'Aceptada', rejected: 'Rechazada', expired: 'Expirada' }[status] || status; }
+  function formatDate(d) { return new Date(d).toLocaleDateString('es-ES', { day: '2-digit', month: 'short' }); }
 
-  // =========================================
-  // ACCIONES
-  // =========================================
   async function enviarInvitacion(e) {
     e.preventDefault();
     const boardId = document.getElementById('board-select').value;
     const inviteeEmail = document.getElementById('invitee-email').value;
     const role = document.getElementById('invitee-role').value;
-
-    if (!boardId) { window.showToast('❌ Selecciona un tablero', 'error'); return; }
-    if (!inviteeEmail) { window.showToast('❌ Selecciona un usuario de la lista', 'error'); return; }
-
+    if (!boardId || !inviteeEmail) { window.showToast('Completa los campos obligatorios', 'error'); return; }
+    
     const btn = document.getElementById('submit-invitation');
-    btn.classList.add('btn-loading');
+    btn.disabled = true;
+    btn.textContent = 'Enviando...';
 
     try {
       const res = await fetch('/api/invitations', {
@@ -369,52 +375,37 @@
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ boardId, inviteeEmail, role }),
       });
-      const data = await res.json();
       if (res.ok) {
-        window.showToast('✅ Invitación enviada exitosamente', 'success');
-        cerrarModal();
+        window.showToast('Invitación enviada', 'success');
+        document.getElementById('close-modal').click();
         cargarInvitaciones();
       } else {
-        window.showToast(`❌ ${data.error}`, 'error');
+        const d = await res.json();
+        window.showToast(d.error || 'Error al enviar', 'error');
       }
-    } catch (err) {
-      window.showToast('❌ Error de red al enviar la invitación', 'error');
-    } finally {
-      btn.classList.remove('btn-loading');
-    }
+    } catch (err) { window.showToast('Error de conexión', 'error'); }
+    finally { btn.disabled = false; btn.textContent = 'Enviar Invitación'; }
   }
 
   window.aceptarInvitacion = async (id) => {
-    const ok = await window.customConfirm('¿Aceptar esta invitación y unirte al tablero?', 'Aceptar Invitación');
-    if (!ok) return;
-    try {
+    if (await window.customConfirm('¿Aceptar invitación?', 'Invitación')) {
       const res = await fetch(`/api/invitations/${id}/accept`, { method: 'PATCH' });
-      const data = await res.json();
-      if (res.ok) { window.showToast('✅ Invitación aceptada. ¡Ya eres miembro!', 'success'); cargarInvitaciones(); }
-      else window.showToast(`❌ ${data.error}`, 'error');
-    } catch (err) { window.showToast('❌ Error de red', 'error'); }
+      if (res.ok) { window.showToast('Invitación aceptada', 'success'); cargarInvitaciones(); }
+    }
   };
 
   window.rechazarInvitacion = async (id) => {
-    const ok = await window.customConfirm('¿Rechazar esta invitación?', 'Rechazar Invitación');
-    if (!ok) return;
-    try {
+    if (await window.customConfirm('¿Rechazar invitación?', 'Invitación')) {
       const res = await fetch(`/api/invitations/${id}/reject`, { method: 'PATCH' });
-      const data = await res.json();
-      if (res.ok) { window.showToast('Invitación rechazada.', 'info'); cargarInvitaciones(); }
-      else window.showToast(`❌ ${data.error}`, 'error');
-    } catch (err) { window.showToast('❌ Error de red', 'error'); }
+      if (res.ok) { window.showToast('Invitación rechazada', 'info'); cargarInvitaciones(); }
+    }
   };
 
   window.cancelarInvitacion = async (id) => {
-    const ok = await window.customConfirm('¿Cancelar esta invitación pendiente?', 'Cancelar Invitación');
-    if (!ok) return;
-    try {
+    if (await window.customConfirm('¿Cancelar invitación?', 'Invitación')) {
       const res = await fetch(`/api/invitations/${id}`, { method: 'DELETE' });
-      const data = await res.json();
-      if (res.ok) { window.showToast('Invitación cancelada.', 'info'); cargarInvitaciones(); }
-      else window.showToast(`❌ ${data.error}`, 'error');
-    } catch (err) { window.showToast('❌ Error de red', 'error'); }
+      if (res.ok) { window.showToast('Invitación cancelada', 'info'); cargarInvitaciones(); }
+    }
   };
 
 })();

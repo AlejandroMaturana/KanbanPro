@@ -1,33 +1,145 @@
-<div class="home-card animation-fade-in">
-  <h1>Bienvenido a KanbanPro</h1>
-  <p class="text-muted">
-    Sistema de gestión de tareas tipo Kanban para organizar tus proyectos de
-    manera eficiente.
-  </p>
+<style>
+  .landing-wrapper {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 60px 24px;
+    text-align: center;
+    color: var(--kp-on-surface);
+  }
+  
+  .landing-hero {
+    margin-bottom: 80px;
+    animation: fadeIn 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+  
+  .landing-title {
+    font-size: 56px;
+    font-weight: 700;
+    line-height: 1.1;
+    margin-bottom: 24px;
+    color: var(--kp-on-surface);
+    letter-spacing: -1px;
+  }
+  
+  .landing-title span {
+    color: var(--kp-primary);
+  }
+  
+  .landing-subtitle {
+    font-size: 20px;
+    color: var(--kp-on-surface-variant);
+    max-width: 600px;
+    margin: 0 auto 40px;
+    line-height: 1.5;
+  }
+  
+  .landing-cta {
+    display: flex;
+    justify-content: center;
+    gap: 16px;
+  }
+  
+  .btn-hero {
+    padding: 16px 32px;
+    font-size: 18px;
+    font-weight: 600;
+  }
+  
+  .features-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 32px;
+    text-align: left;
+  }
+  
+  .feature-card {
+    background: var(--kp-surface);
+    padding: 32px;
+    border-radius: var(--kp-radius-xl);
+    border: 1px solid var(--kp-outline-variant);
+    box-shadow: var(--kp-shadow-sm);
+    transition: transform 0.3s;
+  }
+  
+  .feature-card:hover {
+    transform: translateY(-4px);
+    box-shadow: var(--kp-shadow-lg);
+  }
+  
+  .feature-icon {
+    width: 48px;
+    height: 48px;
+    background: var(--kp-primary-container);
+    color: var(--kp-primary);
+    border-radius: var(--kp-radius-lg);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 24px;
+  }
+  
+  .feature-icon .material-symbols-outlined {
+    font-size: 28px;
+  }
+  
+  .feature-title {
+    font-size: 20px;
+    font-weight: 700;
+    margin-bottom: 12px;
+  }
+  
+  .feature-desc {
+    color: var(--kp-on-surface-variant);
+    line-height: 1.6;
+  }
+  
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+</style>
 
-  <div class="mt-4">
-    <h2>¿Qué es KanbanPro?</h2>
-    <p>
-      KanbanPro es una herramienta Kanban orientada a la gestión de proyectos de
-      planta: implementación de 5S, estudios de métodos, análisis de causa raíz,
-      proyectos ISO y optimización de líneas de producción. Organiza tus tareas
-      en columnas (Por Hacer, En Progreso, Terminado) y mantén el control de
-      cada iniciativa.
+<div class="landing-wrapper">
+  <div class="landing-hero">
+    <h1 class="landing-title">Gestiona proyectos con <span>KanbanPro</span></h1>
+    <p class="landing-subtitle">
+      Optimiza tus flujos de trabajo, visualiza el progreso y colabora en tiempo real con la herramienta Kanban diseñada para la excelencia operativa.
     </p>
+    <div class="landing-cta">
+      <a href="/register" class="btn btn-primary btn-hero">Comenzar Gratis</a>
+      <a href="/dashboard" class="btn btn-secondary btn-hero">Ver Demo</a>
+    </div>
   </div>
 
-  <div class="mt-4">
-    <h2>Comienza ahora</h2>
-    <div class="btn-group mt-4">
-      <a href="/register" class="btn-primary-large" style="width: auto;">
-        Crear Cuenta
-      </a>
-      <a href="/login" class="btn-secondary-large">
-        Iniciar Sesión
-      </a>
-      <a href="/dashboard" class="btn-secondary-large btn-accent">
-        Ver Dashboard
-      </a>
+  <div class="features-grid">
+    <div class="feature-card">
+      <div class="feature-icon">
+        <span class="material-symbols-outlined">drag_indicator</span>
+      </div>
+      <h3 class="feature-title">Drag & Drop Intuitivo</h3>
+      <p class="feature-desc">
+        Mueve tareas entre columnas fácilmente. Organiza tu trabajo visualmente para que todo el equipo sepa qué hacer y cuándo.
+      </p>
+    </div>
+    
+    <div class="feature-card">
+      <div class="feature-icon">
+        <span class="material-symbols-outlined">flag</span>
+      </div>
+      <h3 class="feature-title">Gestión de Prioridades</h3>
+      <p class="feature-desc">
+        Clasifica tareas por urgencia e importancia. Asegúrate de que tu equipo siempre esté enfocado en lo que aporta mayor valor.
+      </p>
+    </div>
+    
+    <div class="feature-card">
+      <div class="feature-icon">
+        <span class="material-symbols-outlined">group</span>
+      </div>
+      <h3 class="feature-title">Colaboración Eficaz</h3>
+      <p class="feature-desc">
+        Invita a otros miembros a tus tableros, asigna roles de visualizador, editor o administrador y mantén la sincronización total.
+      </p>
     </div>
   </div>
 </div>

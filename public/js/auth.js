@@ -37,9 +37,9 @@ document.addEventListener('DOMContentLoaded', () => {
             const data = Object.fromEntries(formData.entries());
             console.log('Payload:', { ...data, contrasena: '********' });
             
-            // Determinar si es login o register (basado en el h1 o en el texto del botón)
-            const h1Text = document.querySelector('h1')?.innerText || "";
-            const isLogin = h1Text.includes('Sesión') || h1Text.includes('Login');
+            // Determinar si es login o register basado en el atributo action del form
+            const actionPath = form.getAttribute('action') || '';
+            const isLogin = actionPath.includes('login');
             const endpoint = isLogin ? '/api/auth/login' : '/api/auth/register';
             
             try {

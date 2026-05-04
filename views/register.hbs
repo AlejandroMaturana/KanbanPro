@@ -1,37 +1,49 @@
 <div class="auth-card">
-  <h1 class="text-center">Crear Cuenta</h1>
-  <p class="text-center text-muted">
-    Regístrate para comenzar a usar KanbanPro
+  <div class="auth-logo">
+    <span class="material-symbols-outlined" style="font-size: 32px;">view_kanban</span>
+    KanbanPro
+  </div>
+  
+  <h1 class="auth-title">Crear Cuenta</h1>
+  <p class="auth-subtitle">
+    Únete y comienza a organizar tus tareas eficientemente.
   </p>
 
-  <form>
+  <form method="POST" action="/api/register">
     <div class="form-group">
       <label for="nombre" class="form-label">Nombre completo</label>
-      <input
-        type="text"
-        id="nombre"
-        name="nombre"
-        class="form-input"
-        placeholder="Tu nombre completo"
-        required
-      />
+      <div class="input-with-icon">
+        <span class="material-symbols-outlined">person</span>
+        <input
+          type="text"
+          id="nombre"
+          name="nombre"
+          class="form-input"
+          placeholder="Tu nombre completo"
+          required
+        />
+      </div>
     </div>
 
     <div class="form-group">
-      <label for="email" class="form-label">Email</label>
-      <input
-        type="email"
-        id="email"
-        name="email"
-        class="form-input"
-        placeholder="ejemplo@correo.com"
-        required
-      />
+      <label for="email" class="form-label">Correo electrónico</label>
+      <div class="input-with-icon">
+        <span class="material-symbols-outlined">mail</span>
+        <input
+          type="email"
+          id="email"
+          name="email"
+          class="form-input"
+          placeholder="ejemplo@correo.com"
+          required
+        />
+      </div>
     </div>
 
     <div class="form-group">
       <label for="password" class="form-label">Contraseña</label>
-      <div style="position: relative;">
+      <div class="input-with-icon" style="position: relative;">
+        <span class="material-symbols-outlined">lock</span>
         <input
           type="password"
           id="password"
@@ -40,21 +52,26 @@
           placeholder="Crea una contraseña segura"
           required
         />
-        <button type="button" class="toggle-password" style="position: absolute; right: 10px; top: 50%; transform: translateY(-50%); background: none; border: none; cursor: pointer; font-size: 18px; color: var(--text-secondary);" aria-label="Mostrar contraseña">
-           👁️
+        <button
+          type="button"
+          class="toggle-password btn-icon"
+          style="position: absolute; right: 8px; top: 50%; transform: translateY(-50%); width: 32px; height: 32px; z-index: 10;"
+          aria-label="Mostrar contraseña"
+        >
+          <span class="material-symbols-outlined" style="font-size: 18px;">visibility</span>
         </button>
       </div>
     </div>
 
-    <button type="submit" class="btn-primary-large mt-4">
+    <button type="submit" class="btn btn-primary btn-auth-submit">
       Registrarse
     </button>
   </form>
 
-  <p class="text-center mt-4 text-muted">
+  <div class="auth-links">
     ¿Ya tienes una cuenta?
-    <a href="/login" class="text-primary-link">Inicia sesión aquí</a>
-  </p>
+    <a href="/login">Inicia sesión aquí</a>
+  </div>
 </div>
 
 <script src="/js/auth.js"></script>
