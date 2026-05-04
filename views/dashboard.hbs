@@ -1,68 +1,63 @@
 <div class="dashboard-content">
   {{#if isDemo}}
   <div class="demo-banner">
-    ⚠️ <strong>Modo Demo:</strong> Todo sucede en tu navegador. Si deseas guardar tus cambios en la nube, <a href="/register">regístrate gratis</a>.
+    <span class="material-symbols-outlined">warning</span>
+    <div>
+      <strong>Modo Demo:</strong> Todo sucede en tu navegador. Si deseas guardar tus cambios en la nube, <a href="/register">regístrate gratis</a>.
+    </div>
   </div>
   <script>window.IS_DEMO = true;</script>
   {{/if}}
 
   <div class="dashboard-header">
-    <div class="dashboard-top">
-      <h1>Dashboard - KanbanPro</h1>
-      <div class="tablero-controls">
-        <select id="selectTablero" aria-label="Seleccionar tablero">
-          <option value="">-- Selecciona un tablero --</option>
-          {{#each data.tableros}}
-            <option value="{{this.id}}">{{this.titulo}}</option>
-          {{/each}}
-        </select>
-        <a href="/tableros" class="btn-secondary" title="Administrar Tableros" style="text-decoration: none; display: inline-flex; align-items: center; justify-content: center; padding: 8px 16px;">
-          ⚙️ Administrar Tableros
-        </a>
+    <div class="dashboard-actions">
+      <select id="selectTablero" class="kp-select" aria-label="Seleccionar tablero">
+        <option value="">-- Selecciona un tablero --</option>
+        {{#each data.tableros}}
+          <option value="{{this.id}}">{{this.titulo}}</option>
+        {{/each}}
+      </select>
     </div>
-    <button id="btnAbrirModal" aria-label="Abrir modal para nueva tarea">
-      <span aria-hidden="true">+</span> Nueva Tarea
-    </button>
+    <div class="dashboard-actions">
+      <button id="btnAbrirModal" class="btn btn-primary">
+        <span class="material-symbols-outlined">add</span>
+        Nueva Tarea
+      </button>
+    </div>
   </div>
 
   {{#each data.tableros}}
-    <div class="tablero" data-tablero-id="{{this.id}}">
-      <h2 class="tablero-title">{{this.titulo}}</h2>
-
-      <div class="kanban-board">
+    <div class="tablero" data-tablero-id="{{this.id}}" style="display: none;">
+      <div class="kanban-board kp-board-canvas">
         {{#each this.listas}}
-          <div class="lista" data-id="{{this.id}}" role="region" aria-label="Lista de tareas: {{this.titulo}}">
-            <h3 class="lista-header">{{this.titulo}}</h3>
+          <div class="lista kp-kanban-col" data-id="{{this.id}}" role="region" aria-label="Lista: {{this.titulo}}">
+            <div class="kp-col-header">
+              <div class="kp-col-title">
+                {{this.titulo}}
+              </div>
+              <div class="kp-col-badge">{{this.tarjetas.length}}</div>
+            </div>
 
             <div class="tarjetas" id="lista-{{this.id}}">
               {{#each this.tarjetas}}
-                <div class="tarjeta" data-id="{{this.id}}" tabindex="0" role="article" aria-label="Tarea: {{this.titulo}}">
-                  <div class="tarjeta-header">
-                    <h4>{{this.titulo}}</h4>
-                    <div class="tarjeta-actions">
-                      <button
-                        onclick="abrirModalEditar('{{this.id}}', '{{this.titulo}}', '{{this.descripcion}}', '{{this.prioridad}}')"
-                        class="btn-edit"
-                        title="Editar tarea"
-                        aria-label="Editar la tarea {{this.titulo}}"
-                      >✏️</button>
-                      <button
-                        onclick="eliminarTarjeta('{{this.id}}')"
-                        class="btn-delete"
-                        title="Eliminar tarea"
-                        aria-label="Eliminar la tarea {{this.titulo}}"
-                      >🗑️</button>
-                    </div>
+                <div class="tarjeta kp-task-card" data-id="{{this.id}}" data-priority="{{this.prioridad}}" tabindex="0">
+                  <div class="kp-priority-badge kp-priority-{{this.prioridad}}">
+                    {{this.prioridad}}
+                  </div>
+                  
+                  <div class="kp-card-actions">
+                    <button onclick="abrirModalEditar('{{this.id}}', '{{this.titulo}}', '{{this.descripcion}}', '{{this.prioridad}}')" title="Editar">
+                      <span class="material-symbols-outlined" style="font-size: 16px;">edit</span>
+                    </button>
+                    <button onclick="eliminarTarjeta('{{this.id}}')" title="Eliminar" style="color: var(--kp-error);">
+                      <span class="material-symbols-outlined" style="font-size: 16px;">delete</span>
+                    </button>
                   </div>
 
-                  <div class="prioridad-wrapper">
-                    <span class="prioridad-tag prioridad-{{this.prioridad}}">
-                      {{this.prioridad}}
-                    </span>
-                  </div>
-
+                  <h4 class="kp-card-title mt-4">{{this.titulo}}</h4>
+                  
                   {{#if this.descripcion}}
-                    <p class="tarjeta-desc">{{this.descripcion}}</p>
+                    <p class="kp-card-desc">{{this.descripcion}}</p>
                   {{/if}}
                 </div>
               {{/each}}
@@ -74,33 +69,26 @@
   {{/each}}
 </div>
 
-<!-- Modal para añadir nueva tarjeta -->
-<div id="modalTarea" class="modal-overlay" role="dialog" aria-labelledby="modal-nueva-tarea-title" aria-modal="true">
+<!-- Modal Nueva Tarea -->
+<div id="modalTarea" class="modal-overlay" role="dialog" aria-modal="true">
   <div class="modal-content">
     <div class="modal-header">
-      <h2 id="modal-nueva-tarea-title">➕ Crear Nueva Tarea</h2>
-      <button id="btnCerrarModal" class="close-modal" aria-label="Cerrar modal">&times;</button>
+      <h2>Nueva Tarea</h2>
+      <button id="btnCerrarModal" class="close-modal">&times;</button>
     </div>
 
     <form method="POST" action="/nueva-tarjeta">
-      <!-- Se rellena por JS con el tablero activo en selectTablero -->
       <input type="hidden" id="formTableroId" name="tableroId" value="" />
-      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+      
+      <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 16px;">
         <div class="form-group">
-          <label for="titulo">Título *</label>
-          <input
-            type="text"
-            id="titulo"
-            name="titulo"
-            class="form-control"
-            required
-            placeholder="Título de la tarea"
-          />
+          <label for="titulo" class="form-label">Título *</label>
+          <input type="text" id="titulo" name="titulo" class="form-input" required placeholder="Ej: Implementar login" />
         </div>
 
         <div class="form-group">
-          <label for="prioridad">Prioridad</label>
-          <select id="prioridad" name="prioridad" class="form-control">
+          <label for="prioridad" class="form-label">Prioridad</label>
+          <select id="prioridad" name="prioridad" class="form-input">
             <option value="Baja">Baja</option>
             <option value="Media" selected>Media</option>
             <option value="Alta">Alta</option>
@@ -110,19 +98,13 @@
       </div>
 
       <div class="form-group">
-        <label for="descripcion">Descripción</label>
-        <textarea
-          id="descripcion"
-          name="descripcion"
-          class="form-control"
-          rows="3"
-          placeholder="Más detalles..."
-        ></textarea>
+        <label for="descripcion" class="form-label">Descripción</label>
+        <textarea id="descripcion" name="descripcion" class="form-input" rows="3" placeholder="Detalles de la tarea..."></textarea>
       </div>
 
       <div class="form-group">
-        <label for="lista">Lista Destino *</label>
-        <select id="lista" name="lista" required class="form-control">
+        <label for="lista" class="form-label">Lista Destino *</label>
+        <select id="lista" name="lista" required class="form-input">
           <option value="todo">Por Hacer</option>
           <option value="in-progress">En Progreso</option>
           <option value="done">Completado</option>
@@ -130,33 +112,32 @@
       </div>
 
       <div class="modal-actions">
-        <button type="button" id="btnCancelar" class="btn-cancel btn-cancelar-modal" aria-label="Cancelar creación">Cancelar</button>
-        <button type="submit" class="btn-primary" aria-label="Confirmar crear tarea">Crear Tarea</button>
+        <button type="button" id="btnCancelar" class="btn btn-secondary btn-cancelar-modal">Cancelar</button>
+        <button type="submit" class="btn btn-primary">Crear Tarea</button>
       </div>
     </form>
   </div>
 </div>
 
-
-
-<!-- Modal para editar tarjeta -->
-<div id="modalEditarTarea" class="modal-overlay" role="dialog" aria-labelledby="modal-editar-tarea-title" aria-modal="true">
+<!-- Modal Editar Tarea -->
+<div id="modalEditarTarea" class="modal-overlay" role="dialog" aria-modal="true">
   <div class="modal-content">
     <div class="modal-header">
-      <h2 id="modal-editar-tarea-title">✏️ Editar Tarea</h2>
-      <button type="button" class="close-modal btn-cerrar-editar" aria-label="Cerrar modal">&times;</button>
+      <h2>Editar Tarea</h2>
+      <button type="button" class="close-modal btn-cerrar-editar">&times;</button>
     </div>
 
     <form id="formEditarTarea">
       <input type="hidden" id="editTaskId" name="id">
-      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+      
+      <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 16px;">
         <div class="form-group">
-          <label for="editTitulo">Título *</label>
-          <input type="text" id="editTitulo" name="titulo" class="form-control" required />
+          <label for="editTitulo" class="form-label">Título *</label>
+          <input type="text" id="editTitulo" name="titulo" class="form-input" required />
         </div>
         <div class="form-group">
-          <label for="editPrioridad">Prioridad</label>
-          <select id="editPrioridad" name="prioridad" class="form-control">
+          <label for="editPrioridad" class="form-label">Prioridad</label>
+          <select id="editPrioridad" name="prioridad" class="form-input">
             <option value="Baja">Baja</option>
             <option value="Media">Media</option>
             <option value="Alta">Alta</option>
@@ -164,22 +145,20 @@
           </select>
         </div>
       </div>
+      
       <div class="form-group">
-        <label for="editDescripcion">Descripción</label>
-        <textarea id="editDescripcion" name="descripcion" class="form-control" rows="3"></textarea>
+        <label for="editDescripcion" class="form-label">Descripción</label>
+        <textarea id="editDescripcion" name="descripcion" class="form-input" rows="3"></textarea>
       </div>
+      
       <div class="modal-actions">
-        <button type="button" class="btn-cancel btn-cancelar-modal" aria-label="Cancelar edición">Cancelar</button>
-        <button type="submit" class="btn-primary" aria-label="Guardar cambios de la tarea">Guardar Cambios</button>
+        <button type="button" class="btn btn-secondary btn-cancelar-modal">Cancelar</button>
+        <button type="submit" class="btn btn-primary">Guardar Cambios</button>
       </div>
     </form>
   </div>
 </div>
 
-
-
-<!-- Scripts para Drag & Drop y Lógica Kanban -->
-<script
-  src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"
-></script>
+<!-- Scripts -->
+<script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
 <script src="/js/kanban.js"></script>
