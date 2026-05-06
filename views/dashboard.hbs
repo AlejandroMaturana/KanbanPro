@@ -54,7 +54,7 @@
                     </button>
                   </div>
 
-                  <h4 class="kp-card-title mt-4">{{this.titulo}}</h4>
+                  <h4 class="kp-card-title" style="margin-top: 10px;">{{this.titulo}}</h4>
                   
                   {{#if this.descripcion}}
                     <p class="kp-card-desc">{{this.descripcion}}</p>
@@ -80,7 +80,7 @@
     <form method="POST" action="/nueva-tarjeta">
       <input type="hidden" id="formTableroId" name="tableroId" value="" />
       
-      <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 16px;">
+      <div class="kp-form-row">
         <div class="form-group">
           <label for="titulo" class="form-label">Título *</label>
           <input type="text" id="titulo" name="titulo" class="form-input" required placeholder="Ej: Implementar login" />
@@ -130,7 +130,7 @@
     <form id="formEditarTarea">
       <input type="hidden" id="editTaskId" name="id">
       
-      <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 16px;">
+      <div class="kp-form-row">
         <div class="form-group">
           <label for="editTitulo" class="form-label">Título *</label>
           <input type="text" id="editTitulo" name="titulo" class="form-input" required />
