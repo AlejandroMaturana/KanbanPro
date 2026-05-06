@@ -1,72 +1,216 @@
+/* ─────────────────────────────────────────────────────────────
+   dashboard.css — Kanban Board with Mobile-First 15/70/15
+   ───────────────────────────────────────────────────────────── */
+
+/* ── Demo Banner ─────────────────────────────────────────────── */
 .demo-banner {
   background-color: var(--kp-warning);
   color: white;
-  padding: 12px 20px;
+  padding: 12px 16px;
   border-radius: var(--kp-radius-md);
-  margin-bottom: 24px;
+  margin-bottom: 20px;
   font-weight: 500;
   display: flex;
-  align-items: center;
-  gap: 12px;
+  align-items: flex-start;
+  gap: 10px;
+  font-size: 14px;
 }
+
 .demo-banner a {
   color: white;
   text-decoration: underline;
   font-weight: bold;
 }
 
-/* Kanban Board Container */
+@media (min-width: 640px) {
+  .demo-banner {
+    align-items: center;
+    font-size: inherit;
+    margin-bottom: 24px;
+  }
+}
+
+/* ─────────────────────────────────────────────────────────────
+   KANBAN BOARD — MOBILE: 15 / 70 / 15 Carousel
+   DESKTOP: Flex row with horizontal scroll
+   ───────────────────────────────────────────────────────────── */
+
+/* ── Board outer container (tablero) ─────────────────────────── */
+.tablero {
+  width: 100%;
+}
+
+/* ── Board canvas ─────────────────────────────────────────────── */
 .kp-board-canvas {
   display: flex;
-  gap: 24px;
+  gap: 12px;
+  /* Desktop: natural horizontal scroll */
   overflow-x: auto;
-  padding-bottom: 24px;
-  min-height: calc(100vh - 200px);
-  
-  /* Modern Scrollbar */
+  padding: 0 0 24px;
+  min-height: calc(100dvh - 220px);
+  align-items: flex-start;
+
+  /* Custom scrollbar — desktop only */
   scrollbar-width: thin;
   scrollbar-color: var(--kp-outline) transparent;
 }
 
-.kp-board-canvas::-webkit-scrollbar {
-  height: 8px;
-}
-.kp-board-canvas::-webkit-scrollbar-track {
-  background: transparent;
-}
+.kp-board-canvas::-webkit-scrollbar { height: 6px; }
+.kp-board-canvas::-webkit-scrollbar-track { background: transparent; }
 .kp-board-canvas::-webkit-scrollbar-thumb {
-  background-color: var(--kp-outline);
-  border-radius: 4px;
+  background: var(--kp-outline);
+  border-radius: 3px;
 }
 
-/* Columns */
+/* ── MOBILE: 15 / 70 / 15 Snap Carousel ─────────────────────── */
+@media (max-width: 767px) {
+  .kp-board-canvas {
+    /* Show 15% of adjacent columns (peek effect) */
+    padding: 0;
+    padding-bottom: 20px;
+    gap: 0;
+    
+    /* Scroll snap — mandatory snap per column */
+    scroll-snap-type: x mandatory;
+    -webkit-scroll-snap-type: x mandatory;
+    
+    /* Smooth momentum on iOS */
+    -webkit-overflow-scrolling: touch;
+    
+    /* Overscroll contain prevents page scroll fighting */
+    overscroll-behavior-x: contain;
+    
+    /* Hide scrollbar on mobile (snap handles UX) */
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+  }
+
+  .kp-board-canvas::-webkit-scrollbar {
+    display: none;
+  }
+}
+
+/* ── Columns ─────────────────────────────────────────────────── */
 .kp-kanban-col {
-  min-width: 340px;
-  width: 340px;
+  /* Desktop fixed width */
+  min-width: 320px;
+  width: 320px;
+  flex-shrink: 0;
   background: var(--kp-surface-hover);
   border-radius: var(--kp-radius-lg);
   display: flex;
   flex-direction: column;
-  max-height: 100%;
   border: 1px solid var(--kp-outline-variant);
+  
+  /* Smooth transitions for drop zone reactions */
+  transition:
+    transform 0.25s cubic-bezier(0.4, 0, 0.2, 1),
+    border-color 0.2s ease,
+    background-color 0.2s ease,
+    box-shadow 0.2s ease;
 }
 
+/* ── MOBILE: column sizing for 15/70/15 effect ───────────────── */
+@media (max-width: 767px) {
+  .kp-kanban-col {
+    /* Column occupies 70% of viewport
+       The 15% peek is created by the visible overflow on each side */
+    min-width: 70vw;
+    width: 70vw;
+    
+    /* Center-snap alignment */
+    scroll-snap-align: center;
+    scroll-snap-stop: always;
+    
+    /* Add horizontal margin to create the 15% "peek" gutters
+       (15% of viewport on each side) */
+    margin: 0 calc(7.5vw); /* 7.5 + 70 + 7.5 = 85 → but snap centers properly */
+    
+    /* Raise z-index slightly for active column */
+    position: relative;
+  }
+  
+  /* First and last columns need only one-side margin for true 15% peek */
+  .kp-kanban-col:first-child {
+    margin-left: 15vw;
+    scroll-margin-left: 15vw;
+  }
+  
+  .kp-kanban-col:last-child {
+    margin-right: 15vw;
+    scroll-margin-right: 15vw;
+  }
+  
+  /* Active column (centered) — slightly elevated */
+  .kp-kanban-col.active {
+    box-shadow: var(--kp-shadow-lg);
+    border-color: var(--kp-outline);
+  }
+  
+  /* Peek columns — visually de-emphasized */
+  .kp-kanban-col:not(.active) {
+    opacity: 0.72;
+    transform: scale(0.96);
+    filter: saturate(0.7);
+    transition:
+      opacity 0.3s ease,
+      transform 0.3s ease,
+      filter 0.3s ease,
+      border-color 0.2s ease,
+      background-color 0.2s ease;
+  }
+}
+
+/* ── Drop Zone Reactive States ───────────────────────────────── */
+.kp-kanban-col.drag-over {
+  border-color: var(--kp-primary) !important;
+  background-color: var(--kp-primary-container) !important;
+  box-shadow: 0 0 0 2px var(--kp-primary), var(--kp-shadow-lg) !important;
+  opacity: 1 !important;
+  transform: scale(1) !important;
+  filter: none !important;
+}
+
+.kp-kanban-col.drag-over .kp-col-header {
+  background-color: var(--kp-primary-container);
+  border-bottom-color: var(--kp-primary);
+}
+
+.kp-kanban-col.drag-over .kp-col-title {
+  color: var(--kp-primary);
+}
+
+/* Drop zone pulse animation */
+@keyframes dropzonePulse {
+  0%, 100% { box-shadow: 0 0 0 2px var(--kp-primary), var(--kp-shadow-lg); }
+  50% { box-shadow: 0 0 0 4px var(--kp-primary), var(--kp-shadow-xl); }
+}
+
+.kp-kanban-col.drag-over {
+  animation: dropzonePulse 1s ease-in-out infinite;
+}
+
+/* ── Column Header ───────────────────────────────────────────── */
 .kp-col-header {
-  padding: 16px;
+  padding: 14px 16px;
   display: flex;
   align-items: center;
   justify-content: space-between;
   border-bottom: 1px solid var(--kp-outline-variant);
+  border-radius: var(--kp-radius-lg) var(--kp-radius-lg) 0 0;
+  transition: background-color 0.2s, border-color 0.2s;
+  flex-shrink: 0;
 }
 
 .kp-col-title {
   font-family: 'DM Sans', sans-serif;
-  font-size: 16px;
+  font-size: 15px;
   font-weight: 700;
   color: var(--kp-on-surface);
   display: flex;
   align-items: center;
   gap: 8px;
+  transition: color 0.2s;
 }
 
 .kp-col-badge {
@@ -76,37 +220,65 @@
   border-radius: 12px;
   font-size: 12px;
   font-weight: 600;
+  min-width: 24px;
+  text-align: center;
+  flex-shrink: 0;
 }
 
-/* Card Container within Column */
+/* ── Card Drop Zone (inner) ───────────────────────────────────── */
 .tarjetas {
-  padding: 16px;
+  padding: 12px;
   flex-grow: 1;
   overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
   display: flex;
   flex-direction: column;
-  gap: 12px;
-  min-height: 150px;
+  gap: 10px;
+  min-height: 120px;
+  /* Max height to allow column scroll on mobile without overflow issues */
+  max-height: calc(100dvh - 280px);
 }
 
-.tarjetas:empty {
+@media (min-width: 768px) {
+  .tarjetas {
+    padding: 16px;
+    gap: 12px;
+    min-height: 150px;
+    max-height: none;
+  }
+}
+
+/* Empty drop target indicator */
+.tarjetas:empty::after {
+  content: 'Arrastra aquí';
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 80px;
   border: 2px dashed var(--kp-outline);
   border-radius: var(--kp-radius-md);
-  margin: 16px;
-  background: rgba(0,0,0,0.02);
+  color: var(--kp-on-surface-muted);
+  font-size: 13px;
 }
 
-/* Cards */
+/* ── Task Cards ─────────────────────────────────────────────── */
 .kp-task-card {
   background: var(--kp-surface);
   border-radius: var(--kp-radius-md);
-  padding: 16px;
+  padding: 14px;
   box-shadow: var(--kp-shadow-sm);
   border: 1px solid var(--kp-outline-variant);
-  border-left: 4px solid transparent; /* reserved for priority color */
+  border-left: 4px solid transparent;
   cursor: grab;
   transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
   position: relative;
+  
+  /* Prevent text selection during drag */
+  user-select: none;
+  -webkit-user-select: none;
+  
+  /* Touch action: allow vertical pan, delegate horizontal to parent snap */
+  touch-action: pan-y;
 }
 
 .kp-task-card:hover {
@@ -114,90 +286,128 @@
   box-shadow: var(--kp-shadow-md);
 }
 
-.kp-task-card:active {
+/* Mobile: show actions always (no hover on touch) */
+@media (max-width: 767px) {
+  .kp-task-card {
+    padding: 14px 12px;
+    /* Slightly larger for finger-friendliness */
+    min-height: 72px;
+  }
+}
+
+/* Dragging state — visual cue while dragging */
+.kp-task-card.dragging,
+.kp-task-card.sortable-chosen {
+  opacity: 0.55;
+  transform: rotate(2deg) scale(1.03) !important;
+  box-shadow: var(--kp-shadow-xl) !important;
   cursor: grabbing;
+  z-index: 1000;
 }
 
-/* SortableJS Classes */
+/* SortableJS ghost placeholder */
 .sortable-ghost {
-  opacity: 0.4;
-  background: var(--kp-primary-container);
-  border: 2px dashed var(--kp-primary);
+  opacity: 0.35;
+  background: var(--kp-primary-container) !important;
+  border: 2px dashed var(--kp-primary) !important;
+  border-left-color: var(--kp-primary) !important;
+  box-shadow: none !important;
 }
 
+/* SortableJS dragging clone */
 .sortable-drag {
   cursor: grabbing !important;
-  opacity: 1 !important;
-  transform: rotate(3deg) scale(1.02) !important;
+  opacity: 0.9 !important;
+  transform: rotate(2deg) scale(1.03) !important;
   box-shadow: var(--kp-shadow-xl) !important;
 }
 
-/* Card Content */
+/* ── Card Priority borders ────────────────────────────────────── */
+.kp-task-card[data-priority="Baja"]    { border-left-color: var(--kp-success); }
+.kp-task-card[data-priority="Media"]   { border-left-color: var(--kp-info); }
+.kp-task-card[data-priority="Alta"]    { border-left-color: var(--kp-warning); }
+.kp-task-card[data-priority="Urgente"] { border-left-color: var(--kp-error); }
+
+/* ── Card Content ─────────────────────────────────────────────── */
 .kp-card-title {
-  font-size: 15px;
+  font-size: 14px;
   font-weight: 600;
   color: var(--kp-on-surface);
-  margin-bottom: 8px;
+  margin-bottom: 6px;
   line-height: 1.4;
+}
+
+@media (min-width: 768px) {
+  .kp-card-title { font-size: 15px; margin-bottom: 8px; }
 }
 
 .kp-card-desc {
   font-size: 13px;
   color: var(--kp-on-surface-variant);
   line-height: 1.5;
-  margin-bottom: 12px;
+  margin-bottom: 10px;
   display: -webkit-box;
   -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
   overflow: hidden;
 }
 
-/* Priority Badges & Card Borders */
+/* ── Priority Badges ─────────────────────────────────────────── */
 .kp-priority-badge {
   display: inline-block;
-  font-size: 11px;
-  font-weight: 600;
-  padding: 4px 8px;
+  font-size: 10px;
+  font-weight: 700;
+  padding: 3px 7px;
   border-radius: 4px;
   text-transform: uppercase;
   letter-spacing: 0.5px;
+  flex-shrink: 0;
 }
 
-.kp-card[data-priority="Baja"] { border-left-color: var(--kp-success); }
-.kp-card[data-priority="Media"] { border-left-color: var(--kp-info); }
-.kp-card[data-priority="Alta"] { border-left-color: var(--kp-warning); }
-.kp-card[data-priority="Urgente"] { border-left-color: var(--kp-error); }
-
-.kp-priority-Baja { background: #dcfce7; color: #166534; }
-.kp-priority-Media { background: #dbeafe; color: #1e40af; }
-.kp-priority-Alta { background: #fef3c7; color: #92400e; }
+.kp-priority-Baja    { background: #dcfce7; color: #166534; }
+.kp-priority-Media   { background: #dbeafe; color: #1e40af; }
+.kp-priority-Alta    { background: #fef3c7; color: #92400e; }
 .kp-priority-Urgente { background: #fee2e2; color: #991b1b; }
 
-.dark-theme .kp-priority-Baja { background: rgba(22, 101, 52, 0.3); color: #4ade80; }
-.dark-theme .kp-priority-Media { background: rgba(30, 64, 175, 0.3); color: #60a5fa; }
-.dark-theme .kp-priority-Alta { background: rgba(146, 64, 14, 0.3); color: #fbbf24; }
-.dark-theme .kp-priority-Urgente { background: rgba(153, 27, 27, 0.3); color: #f87171; }
+.dark-theme .kp-priority-Baja    { background: rgba(22,101,52,0.3);  color: #4ade80; }
+.dark-theme .kp-priority-Media   { background: rgba(30,64,175,0.3);  color: #60a5fa; }
+.dark-theme .kp-priority-Alta    { background: rgba(146,64,14,0.3);  color: #fbbf24; }
+.dark-theme .kp-priority-Urgente { background: rgba(153,27,27,0.3);  color: #f87171; }
 
-/* Card Actions Hover */
+/* ── Card Actions ────────────────────────────────────────────── */
 .kp-card-actions {
   position: absolute;
-  top: 12px;
-  right: 12px;
+  top: 10px;
+  right: 10px;
   display: flex;
   gap: 4px;
+  /* Desktop: hidden until hover */
   opacity: 0;
   transition: opacity 0.2s;
 }
 
+/* Desktop: show on hover */
 .kp-task-card:hover .kp-card-actions {
   opacity: 1;
+}
+
+/* Mobile: ALWAYS visible (no hover on touch screens) */
+@media (max-width: 767px) {
+  .kp-card-actions {
+    opacity: 1;
+    position: static;
+    margin-top: 10px;
+    justify-content: flex-end;
+  }
 }
 
 .kp-card-actions button {
   background: var(--kp-surface);
   border: 1px solid var(--kp-outline-variant);
-  border-radius: 4px;
-  padding: 4px;
+  border-radius: 6px;
+  /* 36×36 minimum for card context (44px overkill inside card) */
+  width: 36px;
+  height: 36px;
   cursor: pointer;
   color: var(--kp-on-surface-variant);
   transition: all 0.2s;
@@ -205,74 +415,79 @@
   align-items: center;
   justify-content: center;
   box-shadow: var(--kp-shadow-sm);
+  flex-shrink: 0;
 }
 
-.kp-card-actions button:hover {
+.kp-card-actions button:hover,
+.kp-card-actions button:active {
   background: var(--kp-surface-hover);
   color: var(--kp-on-surface);
+  transform: scale(0.95);
 }
 
-/* ---------------------------------------------------
-   Dashboard Header Controls
-   --------------------------------------------------- */
-.dashboard-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 32px;
-  flex-wrap: wrap;
-  gap: 16px;
+/* ── Mobile Column Nav Indicators ────────────────────────────── */
+/* Dots below the board indicating current column */
+.kp-carousel-dots {
+  display: none;
+  justify-content: center;
+  gap: 6px;
+  padding: 12px 0 4px;
 }
 
-.dashboard-actions {
-  display: flex;
-  align-items: center;
-  gap: 16px;
+@media (max-width: 767px) {
+  .kp-carousel-dots {
+    display: flex;
+  }
 }
 
-.kp-select {
-  padding: 10px 16px;
-  border: 1px solid var(--kp-outline);
-  border-radius: var(--kp-radius-md);
-  background: var(--kp-surface);
-  color: var(--kp-on-surface);
-  font-family: inherit;
-  font-size: 14px;
+.kp-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--kp-outline);
+  transition: all 0.3s;
   cursor: pointer;
-  min-width: 200px;
 }
 
-.kp-select:focus {
-  outline: none;
-  border-color: var(--kp-primary);
-  box-shadow: 0 0 0 3px var(--kp-primary-container);
+.kp-dot.active {
+  background: var(--kp-primary);
+  width: 20px;
+  border-radius: 3px;
 }
 
-/* Invitations View */
+/* ── Invitations ─────────────────────────────────────────────── */
 .invitations-list {
   display: flex;
   flex-direction: column;
   gap: 16px;
-  max-width: 800px;
 }
 
 .invitation-item {
   display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 20px;
+  flex-direction: column;
+  gap: 12px;
+  padding: 16px;
   background: var(--kp-surface);
   border: 1px solid var(--kp-outline-variant);
   border-radius: var(--kp-radius-lg);
   box-shadow: var(--kp-shadow-sm);
 }
 
-/* Animations */
-@keyframes fadeIn {
-  from { opacity: 0; transform: translateY(10px); }
-  to { opacity: 1; transform: translateY(0); }
+@media (min-width: 640px) {
+  .invitation-item {
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+    padding: 20px;
+  }
 }
 
-.dashboard-content {
-  animation: fadeIn 0.4s ease-out;
+/* ── Animations ───────────────────────────────────────────────── */
+@keyframes cardEnter {
+  from { opacity: 0; transform: translateY(8px) scale(0.97); }
+  to   { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+.tarjeta-anim-enter {
+  animation: cardEnter 0.25s ease-out both;
 }
