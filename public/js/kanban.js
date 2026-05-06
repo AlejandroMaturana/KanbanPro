@@ -133,17 +133,209 @@ document.addEventListener('DOMContentLoaded', () => {
     restaurarEstadoDemo();
   }
 
+  // ============================================================
+  // SIDEBAR BACKDROP (Mobile — tap outside to close)
+  // ============================================================
+  const sidebar = document.getElementById('sidebar');
+  let backdrop = document.querySelector('.kp-sidebar-backdrop');
+  if (!backdrop && sidebar) {
+    backdrop = document.createElement('div');
+    backdrop.className = 'kp-sidebar-backdrop';
+    document.body.appendChild(backdrop);
+  }
+
+  const menuToggle = document.getElementById('menu-toggle');
+  if (menuToggle && sidebar && backdrop) {
+    menuToggle.addEventListener('click', () => {
+      const isOpen = sidebar.classList.contains('active');
+      sidebar.classList.toggle('active');
+      backdrop.classList.toggle('active', !isOpen);
+      document.body.style.overflow = isOpen ? '' : 'hidden';
+    });
+    backdrop.addEventListener('click', () => {
+      sidebar.classList.remove('active');
+      backdrop.classList.remove('active');
+      document.body.style.overflow = '';
+    });
+  }
+
+  // ============================================================
+  // 15 / 70 / 15 CAROUSEL ENGINE
+  // ============================================================
+  const listas = document.querySelectorAll('.lista');
+  const kanbanBoard = document.querySelector('.kp-board-canvas');
+  const isMobile = () => window.matchMedia('(max-width: 767px)').matches;
+
+  // --- Carousel Dot Indicators ---
+  let dotsContainer = null;
+  if (listas.length > 0 && kanbanBoard) {
+    dotsContainer = document.createElement('div');
+    dotsContainer.className = 'kp-carousel-dots';
+    listas.forEach((_, i) => {
+      const dot = document.createElement('button');
+      dot.className = 'kp-dot';
+      dot.setAttribute('aria-label', `Ir a columna ${i + 1}`);
+      dot.addEventListener('click', () => snapToColumn(i));
+      dotsContainer.appendChild(dot);
+    });
+    // Insert dots after the board canvas
+    kanbanBoard.parentNode.insertBefore(dotsContainer, kanbanBoard.nextSibling);
+  }
+
+  function snapToColumn(index) {
+    if (!listas[index] || !kanbanBoard) return;
+    listas[index].scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' });
+  }
+
+  function updateActiveDot(index) {
+    if (!dotsContainer) return;
+    dotsContainer.querySelectorAll('.kp-dot').forEach((d, i) => {
+      d.classList.toggle('active', i === index);
+    });
+  }
+
+  function updateActiveColumn(activeIndex) {
+    listas.forEach((l, i) => {
+      l.classList.toggle('active', i === activeIndex);
+    });
+    updateActiveDot(activeIndex);
+    localStorage.setItem('kanbanFocusIndex', activeIndex);
+  }
+
+  // --- IntersectionObserver: track which column is centered ---
+  let activeColumnIndex = 0;
+  if (listas.length > 0 && kanbanBoard) {
+    const colObserver = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting && entry.intersectionRatio >= 0.5) {
+          const idx = Array.from(listas).indexOf(entry.target);
+          if (idx !== -1 && idx !== activeColumnIndex) {
+            activeColumnIndex = idx;
+            updateActiveColumn(idx);
+          }
+        }
+      });
+    }, {
+      root: kanbanBoard,
+      threshold: 0.5
+    });
+
+    listas.forEach(lista => colObserver.observe(lista));
+
+    // Restore last viewed column
+    const saved = parseInt(localStorage.getItem('kanbanFocusIndex') || '0', 10);
+    const initIndex = Number.isFinite(saved) && saved < listas.length ? saved : 0;
+    updateActiveColumn(initIndex);
+    setTimeout(() => snapToColumn(initIndex), 80);
+  }
+
+  // ============================================================
+  // DRAG & DROP — Touch-aware SortableJS
+  // ============================================================
+  let isDragging = false;
+  let scrollLockTimer = null;
+
+  /**
+   * Lock vertical page scroll when a drag starts on mobile.
+   * This prevents the "dancing screen" effect.
+   */
+  function lockVerticalScroll() {
+    if (!isMobile()) return;
+    document.documentElement.style.overflowY = 'hidden';
+    document.body.style.overflowY = 'hidden';
+  }
+
+  function unlockVerticalScroll() {
+    document.documentElement.style.overflowY = '';
+    document.body.style.overflowY = '';
+  }
+
+  /**
+   * Highlight a column as an active drop zone.
+   */
+  function setDropZone(col, active) {
+    if (!col) return;
+    col.classList.toggle('drag-over', active);
+  }
+
+  /**
+   * Auto-scroll the board canvas toward a side column when
+   * dragging hovers over the 15% peek zones.
+   */
+  function maybeAutoScroll(pointerX) {
+    if (!kanbanBoard || !isMobile()) return;
+    const rect = kanbanBoard.getBoundingClientRect();
+    const leftZone  = rect.left + rect.width * 0.20;   // 20% from left
+    const rightZone = rect.right - rect.width * 0.20;  // 20% from right
+
+    const scrollSpeed = 8;
+
+    if (pointerX < leftZone && activeColumnIndex > 0) {
+      // Dragging toward left peek column
+      kanbanBoard.scrollLeft -= scrollSpeed;
+    } else if (pointerX > rightZone && activeColumnIndex < listas.length - 1) {
+      // Dragging toward right peek column
+      kanbanBoard.scrollLeft += scrollSpeed;
+    }
+  }
+
   const containers = document.querySelectorAll('.tarjetas');
 
   containers.forEach(container => {
     new Sortable(container, {
-      group: 'kanban', // Permite mover entre listas
-      animation: 150,
+      group: 'kanban',
+      animation: 200,
       ghostClass: 'sortable-ghost',
-      delay: 150, // Retraso para drag en touch
-      delayOnTouchOnly: true, // Aplicar delay solo en táctil
-      fallbackTolerance: 5, // Evita conflictos con el scroll de navegación (15/70/15)
+      chosenClass: 'sortable-chosen',
+      dragClass: 'sortable-drag',
+      // Touch-optimized settings
+      delay: 120,            // small delay prevents accidental drag
+      delayOnTouchOnly: true,
+      fallbackTolerance: 8,  // px of movement before drag starts
+      fallbackOnBody: true,
+      swapThreshold: 0.65,
+      // Enable fallback for iOS scroll conflict resolution
+      forceFallback: false,
+
+      onStart: (evt) => {
+        isDragging = true;
+        lockVerticalScroll();
+        evt.item.classList.add('dragging');
+      },
+
+      onMove: (evt, originalEvent) => {
+        // Detect which column the drag is hovering over
+        const targetCol = evt.to.closest('.lista');
+        document.querySelectorAll('.lista').forEach(col => {
+          setDropZone(col, col === targetCol);
+        });
+
+        // Auto-scroll toward peeked column
+        const clientX = originalEvent?.changedTouches?.[0]?.clientX
+                      ?? originalEvent?.clientX
+                      ?? 0;
+        maybeAutoScroll(clientX);
+      },
+
       onEnd: async (evt) => {
+        isDragging = false;
+        unlockVerticalScroll();
+
+        evt.item.classList.remove('dragging');
+        // Clear all drop zone highlights
+        document.querySelectorAll('.lista').forEach(col => setDropZone(col, false));
+
+        // After drop, snap to the target column
+        if (isMobile()) {
+          const targetCol = evt.to.closest('.lista');
+          if (targetCol) {
+            setTimeout(() => {
+              const idx = Array.from(listas).indexOf(targetCol);
+              if (idx !== -1) snapToColumn(idx);
+            }, 120);
+          }
+        }
+
         const taskId = evt.item.getAttribute('data-id');
         const newListId = evt.to.closest('.lista').getAttribute('data-id');
         
@@ -152,64 +344,28 @@ document.addEventListener('DOMContentLoaded', () => {
           return;
         }
 
-        console.log(`Moviendo tarea ${taskId} a lista ${newListId}`);
-
         try {
           const response = await fetch(`/api/tarjetas/${taskId}`, {
             method: 'PATCH',
-            headers: {
-              'Content-Type': 'application/json'
-            },
+            headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ listaId: newListId })
           });
-
-          if (!response.ok) {
-            throw new Error('Error al actualizar el estado en el servidor');
-          }
-
-          const data = await response.json();
-          // window.showToast(data.mensaje || 'Posición actualizada', 'success'); // Opcional, podría ser ruidoso
+          if (!response.ok) throw new Error('Error al actualizar el estado en el servidor');
         } catch (error) {
           console.error('Error:', error);
-          window.showToast('No se pudo guardar el cambio de posición. La página se recargará.', 'error');
-          // Revertir el cambio en el DOM si es crítico
-          setTimeout(() => window.location.reload(), 2000); 
+          window.showToast('No se pudo guardar el cambio de posición.', 'error');
+          setTimeout(() => window.location.reload(), 2000);
         }
       }
     });
   });
 
-  // --- Lógica del Scroll-Snap 15/70/15 para Mobile ---
-  const listas = document.querySelectorAll('.lista');
-  const kanbanBoard = document.querySelector('.kanban-board');
-
-  if (listas.length > 0 && kanbanBoard) {
-    const savedListIndex = localStorage.getItem('kanbanFocusIndex') || 0;
-    
-    // Observer para la clase .active y 15/70/15 scale focus
-    const observer = new IntersectionObserver((entries) => {
-      entries.forEach(entry => {
-        if (entry.isIntersecting) {
-          listas.forEach(l => l.classList.remove('active'));
-          entry.target.classList.add('active');
-          const index = Array.from(listas).indexOf(entry.target);
-          localStorage.setItem('kanbanFocusIndex', index);
-        }
-      });
-    }, {
-      root: kanbanBoard,
-      threshold: 0.55 // Activa cuando pasa del centro visual
-    });
-
-    listas.forEach(lista => observer.observe(lista));
-
-    // Scroll inicial a la columna guardada
-    if (savedListIndex > 0 && listas[savedListIndex]) {
-      setTimeout(() => {
-        listas[savedListIndex].scrollIntoView({ behavior: 'auto', inline: 'center', block: 'nearest' });
-      }, 50);
+  // --- Additional touch: prevent page vertical scroll while dragging ---
+  document.addEventListener('touchmove', (e) => {
+    if (isDragging) {
+      e.preventDefault();
     }
-  }
+  }, { passive: false });
 
   // --- Lógica del Modal ---
   const modal = document.getElementById('modalTarea');
