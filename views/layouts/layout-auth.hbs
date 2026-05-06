@@ -14,26 +14,44 @@
   <link rel="stylesheet" href="/css/main.css" />
   
   <style>
-    /* Kinetic background for auth pages */
+    /* Auth pages — kinetic background */
     .kp-auth-wrapper {
-      min-height: 100vh;
+      min-height: 100dvh;
       display: flex;
       align-items: center;
       justify-content: center;
       background: radial-gradient(circle at 50% 0%, var(--kp-primary-container) 0%, var(--kp-bg-body) 60%);
-      padding: 24px;
+      /* Mobile: small padding to avoid edge-to-edge card */
+      padding: 20px 16px;
+      /* Safe-area padding for notch devices */
+      padding-top: max(20px, env(safe-area-inset-top));
+      padding-bottom: max(20px, env(safe-area-inset-bottom));
     }
     
     .auth-card {
       background: var(--kp-surface);
       width: 100%;
       max-width: 440px;
-      padding: 48px 40px;
+      /* Mobile: compact padding */
+      padding: 32px 24px;
       border-radius: var(--kp-radius-xl);
       box-shadow: var(--kp-shadow-xl);
       border: 1px solid var(--kp-outline-variant);
       position: relative;
       overflow: hidden;
+    }
+
+    /* Desktop: restore comfortable padding */
+    @media (min-width: 480px) {
+      .auth-card {
+        padding: 40px 36px;
+      }
+    }
+
+    @media (min-width: 640px) {
+      .auth-card {
+        padding: 48px 40px;
+      }
     }
     
     /* Decorative top accent */
@@ -41,7 +59,7 @@
       content: '';
       position: absolute;
       top: 0; left: 0; right: 0;
-      height: 6px;
+      height: 4px;
       background: var(--kp-primary);
     }
     
@@ -49,60 +67,104 @@
       display: flex;
       align-items: center;
       justify-content: center;
-      gap: 12px;
-      font-size: 28px;
+      gap: 10px;
+      font-size: 24px;
       font-weight: 700;
       color: var(--kp-primary);
-      margin-bottom: 32px;
+      margin-bottom: 24px;
       font-family: 'DM Sans', sans-serif;
+      text-decoration: none;
+    }
+
+    @media (min-width: 640px) {
+      .auth-logo { font-size: 28px; margin-bottom: 32px; }
     }
     
     .auth-title {
       text-align: center;
-      font-size: 24px;
+      font-size: 22px;
       margin-bottom: 8px;
       color: var(--kp-on-surface);
+    }
+
+    @media (min-width: 640px) {
+      .auth-title { font-size: 24px; }
     }
     
     .auth-subtitle {
       text-align: center;
       color: var(--kp-on-surface-variant);
-      margin-bottom: 32px;
-      font-size: 15px;
+      margin-bottom: 24px;
+      font-size: 14px;
+      line-height: 1.5;
+    }
+
+    @media (min-width: 640px) {
+      .auth-subtitle { font-size: 15px; margin-bottom: 32px; }
     }
     
     .input-with-icon {
       position: relative;
+      display: flex;
+      align-items: center;
     }
     
     .input-with-icon .material-symbols-outlined {
       position: absolute;
-      left: 16px;
-      top: 50%;
-      transform: translateY(-50%);
+      left: 14px;
       color: var(--kp-on-surface-muted);
+      font-size: 20px;
+      pointer-events: none;
+      z-index: 1;
     }
     
     .input-with-icon .form-input {
-      padding-left: 48px;
+      padding-left: 44px;
     }
     
     .btn-auth-submit {
       width: 100%;
+      /* Generous touch target */
       padding: 14px;
       font-size: 16px;
-      margin-top: 16px;
+      margin-top: 12px;
     }
     
     .auth-links {
       text-align: center;
-      margin-top: 32px;
+      margin-top: 24px;
       color: var(--kp-on-surface-variant);
       font-size: 14px;
+      line-height: 1.6;
+    }
+
+    @media (min-width: 640px) {
+      .auth-links { margin-top: 32px; }
     }
     
     .auth-links a {
       font-weight: 600;
+    }
+
+    /* Password toggle button */
+    .password-toggle {
+      position: absolute;
+      right: 12px;
+      background: none;
+      border: none;
+      cursor: pointer;
+      color: var(--kp-on-surface-muted);
+      padding: 4px;
+      display: flex;
+      align-items: center;
+      min-height: 44px;
+      min-width: 44px;
+      justify-content: center;
+      border-radius: var(--kp-radius-sm);
+    }
+
+    .password-toggle:hover {
+      color: var(--kp-on-surface);
     }
   </style>
 </head>
