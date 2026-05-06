@@ -154,15 +154,6 @@
           if(icon) icon.textContent = nowDark ? 'light_mode' : 'dark_mode';
         });
         
-        // Mobile menu toggle
-        var menuBtn = document.getElementById('menu-toggle');
-        var sidebar = document.getElementById('sidebar');
-        if(menuBtn && sidebar) {
-          menuBtn.addEventListener('click', function() {
-            sidebar.classList.toggle('active');
-          });
-        }
-        
         // Active link highlighting based on URL
         const currentPath = window.location.pathname;
         const navItems = document.querySelectorAll('.kp-nav-item');
