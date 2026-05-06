@@ -841,6 +841,20 @@ textarea.form-input {
   box-shadow: 0 0 0 3px var(--kp-primary-container);
 }
 
+/* Responsive form row: stacks on mobile, side-by-side on desktop */
+.kp-form-row {
+  display: grid;
+  grid-template-columns: 1fr; /* mobile: full width */
+  gap: 0;
+}
+
+@media (min-width: 480px) {
+  .kp-form-row {
+    grid-template-columns: 2fr 1fr;
+    gap: 16px;
+  }
+}
+
 /* ─── Animations ─────────────────────────────────────────────── */
 @keyframes fadeInUp {
   from { opacity: 0; transform: translateY(12px); }
