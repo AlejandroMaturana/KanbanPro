@@ -122,15 +122,15 @@
     scroll-snap-align: center;
     scroll-snap-stop: always;
     
-    /* Add horizontal margin to create the 15% "peek" gutters
-       (15% of viewport on each side) */
-    margin: 0 calc(7.5vw); /* 7.5 + 70 + 7.5 = 85 → but snap centers properly */
+    /* Small horizontal margin ensures adjacent columns are visible
+       in the 15vw space left and right of the centered column */
+    margin: 0 2vw;
     
     /* Raise z-index slightly for active column */
     position: relative;
   }
   
-  /* First and last columns need only one-side margin for true 15% peek */
+  /* First and last columns need extra margin to be able to snap to center */
   .kp-kanban-col:first-child {
     margin-left: 15vw;
     scroll-margin-left: 15vw;

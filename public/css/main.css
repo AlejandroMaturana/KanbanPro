@@ -158,8 +158,8 @@ a:hover {
   padding-top: env(safe-area-inset-top);
 }
 
-/* Mobile: sidebar hidden off-canvas by default */
-@media (max-width: 767px) {
+/* Mobile & Tablet Portrait: sidebar hidden off-canvas by default */
+@media (max-width: 1023px) {
   .kp-sidebar {
     transform: translateX(-100%);
     width: min(280px, 80vw);
@@ -268,7 +268,7 @@ a:hover {
   transition: margin-left 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-@media (max-width: 767px) {
+@media (max-width: 1023px) {
   .kp-main-wrapper {
     margin-left: 0;
   }
@@ -333,7 +333,7 @@ a:hover {
   background: var(--kp-surface-hover);
 }
 
-@media (max-width: 767px) {
+@media (max-width: 1023px) {
   .kp-menu-toggle {
     display: flex;
   }
