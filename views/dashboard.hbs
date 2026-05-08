@@ -46,7 +46,7 @@
                   </div>
                   
                   <div class="kp-card-actions">
-                    <button onclick="abrirModalEditar('{{this.id}}', '{{this.titulo}}', '{{this.descripcion}}', '{{this.prioridad}}')" title="Editar">
+                    <button class="btn-edit-task" data-id="{{this.id}}" data-titulo="{{this.titulo}}" data-descripcion="{{this.descripcion}}" data-prioridad="{{this.prioridad}}" title="Editar">
                       <span class="material-symbols-outlined" style="font-size: 16px;">edit</span>
                     </button>
                     <button onclick="eliminarTarjeta('{{this.id}}')" title="Eliminar" style="color: var(--kp-error);">
