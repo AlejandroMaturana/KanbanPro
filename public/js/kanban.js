@@ -74,8 +74,8 @@ document.addEventListener('DOMContentLoaded', () => {
           tarjetas.push({
              id: t.getAttribute('data-id'),
              titulo: t.querySelector('h4').textContent,
-             descripcion: t.querySelector('.tarjeta-desc') ? t.querySelector('.tarjeta-desc').textContent : '',
-             prioridad: t.querySelector('.prioridad-tag').textContent.trim()
+             descripcion: t.querySelector('.kp-card-desc') ? t.querySelector('.kp-card-desc').textContent : '',
+             prioridad: t.querySelector('.kp-priority-badge').textContent.trim()
           });
        });
        estado[listaId] = tarjetas;
@@ -94,36 +94,29 @@ document.addEventListener('DOMContentLoaded', () => {
           container.innerHTML = '';
           estado[listaId].forEach(tarjeta => {
              const tarjetaHtml = `
-              <div
-                class="tarjeta"
-                data-id="${tarjeta.id}"
-                tabindex="0"
-                role="article"
-                aria-label="Tarea: ${tarjeta.titulo}"
-              >
-                <div class="tarjeta-header">
-                  <h4>${tarjeta.titulo}</h4>
-                  <div class="tarjeta-actions">
-                    <button 
-                    onclick="abrirModalEditar('${tarjeta.id}', '${tarjeta.titulo.replace(/'/g, "\\'")}', '${tarjeta.descripcion ? tarjeta.descripcion.replace(/'/g, "\\'") : ''}', '${tarjeta.prioridad}')"
-                    class="btn-edit"
-                    title="Editar tarea">✏️</button>
-                    <button 
-                      onclick="eliminarTarjeta('${tarjeta.id}')"
-                      class="btn-delete"
-                      title="Eliminar tarea"
-                    >🗑️</button>
-                  </div>
+              <div class="tarjeta kp-task-card" data-id="${tarjeta.id}" data-priority="${tarjeta.prioridad}" tabindex="0">
+                <div class="kp-priority-badge kp-priority-${tarjeta.prioridad}">
+                  ${tarjeta.prioridad}
                 </div>
-                <div class="prioridad-wrapper">
-                  <span class="prioridad-tag prioridad-${tarjeta.prioridad}">
-                    ${tarjeta.prioridad}
-                  </span>
+                <div class="kp-card-actions">
+                  <button class="btn-edit-task" data-id="${tarjeta.id}" data-titulo="${tarjeta.titulo}" data-descripcion="${tarjeta.descripcion}" data-prioridad="${tarjeta.prioridad}" title="Editar">
+                    <span class="material-symbols-outlined" style="font-size: 16px;">edit</span>
+                  </button>
+                  <button onclick="eliminarTarjeta('${tarjeta.id}')" title="Eliminar" style="color: var(--kp-error);">
+                    <span class="material-symbols-outlined" style="font-size: 16px;">delete</span>
+                  </button>
                 </div>
-                ${tarjeta.descripcion ? `<p class="tarjeta-desc">${tarjeta.descripcion}</p>` : ''}
+                <h4 class="kp-card-title" style="margin-top: 10px;">${tarjeta.titulo}</h4>
+                ${tarjeta.descripcion ? `<p class="kp-card-desc">${tarjeta.descripcion}</p>` : ''}
               </div>
             `;
             container.insertAdjacentHTML('beforeend', tarjetaHtml);
+          });
+          // Re-attach edit listeners for restored cards
+          container.querySelectorAll('.btn-edit-task').forEach(btn => {
+            btn.addEventListener('click', () => {
+              abrirModalEditar(btn.dataset.id, btn.dataset.titulo, btn.dataset.descripcion || '', btn.dataset.prioridad);
+            });
           });
        });
     }
@@ -374,24 +367,22 @@ document.addEventListener('DOMContentLoaded', () => {
   const btnCancelar = document.getElementById('btnCancelar');
 
   const abrirModal = () => {
-    // Sincronizar el tableroId activo en el campo oculto del formulario
     const tableroActivo = document.getElementById('selectTablero')?.value || '';
     const campoTableroId = document.getElementById('formTableroId');
     if (campoTableroId) campoTableroId.value = tableroActivo;
-
-    modal.style.display = 'flex';
+    modal.classList.add('show');
     document.body.style.overflow = 'hidden';
   };
 
   const cerrarModal = () => {
-    modal.style.display = 'none';
+    modal.classList.remove('show');
     const modalEdit = document.getElementById('modalEditarTarea');
-    if (modalEdit) modalEdit.style.display = 'none';
+    if (modalEdit) modalEdit.classList.remove('show');
     document.body.style.overflow = 'auto';
   };
 
-  if (btnAbrir) btnAbrir.onclick = abrirModal;
-  if (btnCerrar) btnCerrar.onclick = cerrarModal;
+  if (btnAbrir) btnAbrir.addEventListener('click', abrirModal);
+  if (btnCerrar) btnCerrar.addEventListener('click', cerrarModal);
 
   // Botones genéricos de cancelar
   document.querySelectorAll('.btn-cancelar-modal, .btn-cerrar-editar').forEach(btn => {
@@ -410,10 +401,21 @@ document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('editTitulo').value = titulo;
     document.getElementById('editDescripcion').value = descripcion;
     document.getElementById('editPrioridad').value = prioridad;
-    
-    modalEdit.style.display = 'flex';
+    modalEdit.classList.add('show');
     document.body.style.overflow = 'hidden';
   };
+
+  // Botones editar con data-attributes (seguro contra quotes)
+  document.querySelectorAll('.btn-edit-task').forEach(btn => {
+    btn.addEventListener('click', () => {
+      abrirModalEditar(
+        btn.dataset.id,
+        btn.dataset.titulo,
+        btn.dataset.descripcion || '',
+        btn.dataset.prioridad
+      );
+    });
+  });
 
   const formEditar = document.getElementById('formEditarTarea');
   if (formEditar) {
@@ -434,22 +436,18 @@ document.addEventListener('DOMContentLoaded', () => {
         const tarjeta = document.querySelector(`.tarjeta[data-id="${id}"]`);
         if (tarjeta) {
           tarjeta.querySelector('h4').textContent = payload.titulo;
-          const p = tarjeta.querySelector('p, .tarjeta-desc');
+          const p = tarjeta.querySelector('.kp-card-desc');
           if (p) p.textContent = payload.descripcion;
           else if (payload.descripcion) {
             const newP = document.createElement('p');
-            newP.className = "tarjeta-desc";
+            newP.className = "kp-card-desc";
             newP.textContent = payload.descripcion;
             tarjeta.appendChild(newP);
           }
-          const badge = tarjeta.querySelector('.prioridad-tag');
+          const badge = tarjeta.querySelector('.kp-priority-badge');
           if (badge) {
-            badge.className = `prioridad-tag prioridad-${payload.prioridad}`;
+            badge.className = `kp-priority-badge kp-priority-${payload.prioridad}`;
             badge.textContent = payload.prioridad;
-          }
-          const btnEditar = tarjeta.querySelector('button[title="Editar tarea"]');
-          if (btnEditar) {
-            btnEditar.setAttribute('onclick', `abrirModalEditar('${id}', '${payload.titulo.replace(/'/g, "\\'")}', '${payload.descripcion.replace(/'/g, "\\'")}', '${payload.prioridad}')`);
           }
         }
         window.guardarEstadoDemo();
@@ -468,30 +466,21 @@ document.addEventListener('DOMContentLoaded', () => {
 
         if (!response.ok) throw new Error('Error al actualizar');
 
-        // Actualizar el DOM
         const tarjeta = document.querySelector(`.tarjeta[data-id="${id}"]`);
         if (tarjeta) {
           tarjeta.querySelector('h4').textContent = payload.titulo;
-          const p = tarjeta.querySelector('p, .tarjeta-desc');
+          const p = tarjeta.querySelector('.kp-card-desc');
           if (p) p.textContent = payload.descripcion;
           else if (payload.descripcion) {
             const newP = document.createElement('p');
-            newP.className = "tarjeta-desc";
+            newP.className = "kp-card-desc";
             newP.textContent = payload.descripcion;
             tarjeta.appendChild(newP);
           }
-          
-          const badge = tarjeta.querySelector('.prioridad-tag');
+          const badge = tarjeta.querySelector('.kp-priority-badge');
           if (badge) {
-            badge.className = `prioridad-tag prioridad-${payload.prioridad}`;
+            badge.className = `kp-priority-badge kp-priority-${payload.prioridad}`;
             badge.textContent = payload.prioridad;
-          }
-
-          // Actualizar el botón de editar con los nuevos valores para la siguiente edición
-          const btnEditar = tarjeta.querySelector('button[title="Editar tarea"]');
-          console.log('Botón Editar encontrado:', btnEditar);
-          if (btnEditar) {
-            btnEditar.setAttribute('onclick', `abrirModalEditar('${id}', '${payload.titulo.replace(/'/g, "\\'")}', '${payload.descripcion.replace(/'/g, "\\'")}', '${payload.prioridad}')`);
           }
         }
 
@@ -534,36 +523,24 @@ document.addEventListener('DOMContentLoaded', () => {
         const container = document.getElementById(`lista-${tarjeta.listaId}`);
         if (container) {
           const tarjetaHtml = `
-            <div
-              class="tarjeta tarjeta-anim-enter"
-              data-id="${tarjeta.id}"
-              tabindex="0"
-              role="article"
-              aria-label="Tarea: ${tarjeta.titulo}"
-            >
-              <div class="tarjeta-header">
-                <h4>${tarjeta.titulo}</h4>
-                <div class="tarjeta-actions">
-                  <button 
-                  onclick="abrirModalEditar('${tarjeta.id}', '${tarjeta.titulo.replace(/'/g, "\\'")}', '${tarjeta.descripcion ? tarjeta.descripcion.replace(/'/g, "\\'") : ''}', '${tarjeta.prioridad}')"
-                  class="btn-edit"
-                  title="Editar tarea">✏️</button>
-                  <button 
-                    onclick="eliminarTarjeta('${tarjeta.id}')"
-                    class="btn-delete"
-                    title="Eliminar tarea"
-                  >🗑️</button>
-                </div>
+            <div class="tarjeta kp-task-card tarjeta-anim-enter" data-id="${tarjeta.id}" data-priority="${tarjeta.prioridad}" tabindex="0">
+              <div class="kp-priority-badge kp-priority-${tarjeta.prioridad}">${tarjeta.prioridad}</div>
+              <div class="kp-card-actions">
+                <button class="btn-edit-task" data-id="${tarjeta.id}" data-titulo="${tarjeta.titulo}" data-descripcion="${tarjeta.descripcion}" data-prioridad="${tarjeta.prioridad}" title="Editar">
+                  <span class="material-symbols-outlined" style="font-size: 16px;">edit</span>
+                </button>
+                <button onclick="eliminarTarjeta('${tarjeta.id}')" title="Eliminar" style="color: var(--kp-error);">
+                  <span class="material-symbols-outlined" style="font-size: 16px;">delete</span>
+                </button>
               </div>
-              <div class="prioridad-wrapper">
-                <span class="prioridad-tag prioridad-${tarjeta.prioridad}">
-                  ${tarjeta.prioridad}
-                </span>
-              </div>
-              ${tarjeta.descripcion ? `<p class="tarjeta-desc">${tarjeta.descripcion}</p>` : ''}
+              <h4 class="kp-card-title" style="margin-top: 10px;">${tarjeta.titulo}</h4>
+              ${tarjeta.descripcion ? `<p class="kp-card-desc">${tarjeta.descripcion}</p>` : ''}
             </div>
           `;
           container.insertAdjacentHTML('beforeend', tarjetaHtml);
+          container.querySelector(`.btn-edit-task[data-id="${tarjeta.id}"]`).addEventListener('click', () => {
+            abrirModalEditar(tarjeta.id, tarjeta.titulo, tarjeta.descripcion, tarjeta.prioridad);
+          });
           nuevoForm.reset();
           cerrarModal();
           window.guardarEstadoDemo();
@@ -591,37 +568,25 @@ document.addEventListener('DOMContentLoaded', () => {
         const container = document.getElementById(`lista-${tarjeta.listaId}`);
         if (container) {
           const tarjetaHtml = `
-            <div
-              class="tarjeta tarjeta-anim-enter"
-              data-id="${tarjeta.id}"
-              tabindex="0"
-              role="article"
-              aria-label="Tarea: ${tarjeta.titulo}"
-            >
-              <div class="tarjeta-header">
-                <h4>${tarjeta.titulo}</h4>
-                <div class="tarjeta-actions">
-                  <button 
-                  onclick="abrirModalEditar('${tarjeta.id}', '${tarjeta.titulo.replace(/'/g, "\\'")}', '${tarjeta.descripcion ? tarjeta.descripcion.replace(/'/g, "\\'") : ''}', '${tarjeta.prioridad}')"
-                  class="btn-edit"
-                  title="Editar tarea">✏️</button>
-                  <button 
-                    onclick="eliminarTarjeta('${tarjeta.id}')"
-                    class="btn-delete"
-                    title="Eliminar tarea"
-                  >🗑️</button>
-                </div>
+            <div class="tarjeta kp-task-card tarjeta-anim-enter" data-id="${tarjeta.id}" data-priority="${tarjeta.prioridad}" tabindex="0">
+              <div class="kp-priority-badge kp-priority-${tarjeta.prioridad}">${tarjeta.prioridad}</div>
+              <div class="kp-card-actions">
+                <button class="btn-edit-task" data-id="${tarjeta.id}" data-titulo="${tarjeta.titulo}" data-descripcion="${tarjeta.descripcion}" data-prioridad="${tarjeta.prioridad}" title="Editar">
+                  <span class="material-symbols-outlined" style="font-size: 16px;">edit</span>
+                </button>
+                <button onclick="eliminarTarjeta('${tarjeta.id}')" title="Eliminar" style="color: var(--kp-error);">
+                  <span class="material-symbols-outlined" style="font-size: 16px;">delete</span>
+                </button>
               </div>
-              <div class="prioridad-wrapper">
-                <span class="prioridad-tag prioridad-${tarjeta.prioridad}">
-                  ${tarjeta.prioridad}
-                </span>
-              </div>
-              ${tarjeta.descripcion ? `<p class="tarjeta-desc">${tarjeta.descripcion}</p>` : ''}
+              <h4 class="kp-card-title" style="margin-top: 10px;">${tarjeta.titulo}</h4>
+              ${tarjeta.descripcion ? `<p class="kp-card-desc">${tarjeta.descripcion}</p>` : ''}
             </div>
           `;
           
           container.insertAdjacentHTML('beforeend', tarjetaHtml);
+          container.querySelector(`.btn-edit-task[data-id="${tarjeta.id}"]`).addEventListener('click', () => {
+            abrirModalEditar(tarjeta.id, tarjeta.titulo, tarjeta.descripcion, tarjeta.prioridad);
+          });
           
           // Limpiar formulario y cerrar modal
           nuevoForm.reset();
